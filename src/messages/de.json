@@ -1,0 +1,67 @@
+{
+  "common": {
+    "appName": "MAE",
+    "tagline": "Make Appointments Easier",
+    "login": "Anmelden",
+    "register": "Registrieren",
+    "logout": "Abmelden",
+    "search": "Suchen",
+    "book": "Buchen",
+    "cancel": "Abbrechen",
+    "save": "Speichern",
+    "edit": "Bearbeiten",
+    "delete": "Löschen",
+    "back": "Zurück",
+    "next": "Weiter",
+    "loading": "Laden...",
+    "error": "Ein Fehler ist aufgetreten",
+    "noResults": "Keine Ergebnisse gefunden"
+  },
+  "home": {
+    "hero": {
+      "title": "Termine buchen, einfach gemacht",
+      "subtitle": "Finde freie Termine bei Dienstleistern in deiner Nähe – passend zu deinem Kalender.",
+      "cta": "Jetzt Termin finden"
+    }
+  },
+  "search": {
+    "placeholder": "Was suchst du? (z.B. Friseur, Nagelstudio...)",
+    "location": "Standort",
+    "filters": "Filter",
+    "sortBy": "Sortieren nach",
+    "rating": "Bewertung",
+    "price": "Preis",
+    "distance": "Entfernung",
+    "availability": "Verfügbarkeit"
+  },
+  "booking": {
+    "selectTime": "Wähle einen Termin",
+    "selectService": "Wähle eine Dienstleistung",
+    "confirm": "Termin bestätigen",
+    "success": "Dein Termin wurde erfolgreich gebucht!",
+    "cancelled": "Termin wurde abgesagt"
+  },
+  "provider": {
+    "dashboard": "Dashboard",
+    "calendar": "Kalender",
+    "services": "Dienstleistungen",
+    "employees": "Mitarbeiter",
+    "settings": "Einstellungen",
+    "reviews": "Bewertungen",
+    "newAppointment": "Neuer Termin",
+    "noAppointments": "Keine Termine für diesen Tag"
+  },
+  "auth": {
+    "email": "E-Mail",
+    "password": "Passwort",
+    "confirmPassword": "Passwort bestätigen",
+    "fullName": "Vollständiger Name",
+    "loginTitle": "Bei MAE anmelden",
+    "registerTitle": "Konto erstellen",
+    "forgotPassword": "Passwort vergessen?",
+    "noAccount": "Noch kein Konto?",
+    "hasAccount": "Bereits ein Konto?",
+    "registerAsProvider": "Als Dienstleister registrieren",
+    "registerAsUser": "Als Nutzer registrieren"
+  }
+}

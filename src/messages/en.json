@@ -1,0 +1,67 @@
+{
+  "common": {
+    "appName": "MAE",
+    "tagline": "Make Appointments Easier",
+    "login": "Login",
+    "register": "Register",
+    "logout": "Logout",
+    "search": "Search",
+    "book": "Book",
+    "cancel": "Cancel",
+    "save": "Save",
+    "edit": "Edit",
+    "delete": "Delete",
+    "back": "Back",
+    "next": "Next",
+    "loading": "Loading...",
+    "error": "An error occurred",
+    "noResults": "No results found"
+  },
+  "home": {
+    "hero": {
+      "title": "Book appointments, made easy",
+      "subtitle": "Find available appointments with service providers near you – matching your schedule.",
+      "cta": "Find an appointment"
+    }
+  },
+  "search": {
+    "placeholder": "What are you looking for? (e.g., barber, nail studio...)",
+    "location": "Location",
+    "filters": "Filters",
+    "sortBy": "Sort by",
+    "rating": "Rating",
+    "price": "Price",
+    "distance": "Distance",
+    "availability": "Availability"
+  },
+  "booking": {
+    "selectTime": "Select a time",
+    "selectService": "Select a service",
+    "confirm": "Confirm appointment",
+    "success": "Your appointment has been booked successfully!",
+    "cancelled": "Appointment has been cancelled"
+  },
+  "provider": {
+    "dashboard": "Dashboard",
+    "calendar": "Calendar",
+    "services": "Services",
+    "employees": "Employees",
+    "settings": "Settings",
+    "reviews": "Reviews",
+    "newAppointment": "New appointment",
+    "noAppointments": "No appointments for this day"
+  },
+  "auth": {
+    "email": "Email",
+    "password": "Password",
+    "confirmPassword": "Confirm password",
+    "fullName": "Full name",
+    "loginTitle": "Sign in to MAE",
+    "registerTitle": "Create an account",
+    "forgotPassword": "Forgot password?",
+    "noAccount": "Don't have an account?",
+    "hasAccount": "Already have an account?",
+    "registerAsProvider": "Register as provider",
+    "registerAsUser": "Register as user"
+  }
+}
