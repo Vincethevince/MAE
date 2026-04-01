@@ -51,6 +51,91 @@
     "newAppointment": "New appointment",
     "noAppointments": "No appointments for this day"
   },
+  "dashboard": {
+    "nav": {
+      "dashboard": "Dashboard",
+      "calendar": "Calendar",
+      "services": "Services",
+      "settings": "Settings"
+    },
+    "overview": {
+      "title": "Overview",
+      "services": "Services",
+      "upcomingAppointments": "Upcoming Appointments",
+      "rating": "Rating",
+      "noRating": "None"
+    },
+    "services": {
+      "title": "Services",
+      "servicesCount": "services",
+      "addService": "Add Service",
+      "newService": "New Service",
+      "editService": "Edit Service",
+      "noServices": "No services yet",
+      "fields": {
+        "name": "Name",
+        "category": "Category",
+        "durationMinutes": "Duration (minutes)",
+        "priceCents": "Price (cents)",
+        "priceHint": "e.g. 4500 = €45.00",
+        "description": "Description"
+      },
+      "errors": {
+        "validationError": "Please check your input",
+        "unauthorized": "Not authorized",
+        "saveFailed": "Failed to save",
+        "deleteFailed": "Failed to delete",
+        "providerNotFound": "Provider not found"
+      }
+    }
+  },
+  "onboarding": {
+    "title": "Welcome to MAE",
+    "subtitle": "Set up your provider profile to start accepting appointments",
+    "completeOnboarding": "Complete setup",
+    "step1": {
+      "title": "Business Profile",
+      "description": "Enter your basic business information"
+    },
+    "step2": {
+      "title": "First Service",
+      "description": "Add your first service"
+    },
+    "step3": {
+      "title": "Availability",
+      "description": "Set your opening hours",
+      "hint": "Leave fields empty if you are not available on a specific day"
+    },
+    "fields": {
+      "businessName": "Business name",
+      "category": "Category",
+      "categoryPlaceholder": "e.g. Barber, Nail Studio",
+      "address": "Address",
+      "postalCode": "Postal code",
+      "city": "City",
+      "phone": "Phone (optional)",
+      "description": "Description (optional)",
+      "serviceName": "Service name",
+      "durationMinutes": "Duration (minutes)",
+      "priceEur": "Price (cents)",
+      "priceHint": "e.g. 4500 = €45.00"
+    },
+    "days": {
+      "0": "Sunday",
+      "1": "Monday",
+      "2": "Tuesday",
+      "3": "Wednesday",
+      "4": "Thursday",
+      "5": "Friday",
+      "6": "Saturday"
+    },
+    "errors": {
+      "validationError": "Please check your input",
+      "unauthorized": "Not authorized",
+      "saveFailed": "Failed to save",
+      "providerNotFound": "Provider not found"
+    }
+  },
   "auth": {
     "email": "Email",
     "password": "Password",

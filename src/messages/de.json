@@ -51,6 +51,91 @@
     "newAppointment": "Neuer Termin",
     "noAppointments": "Keine Termine für diesen Tag"
   },
+  "dashboard": {
+    "nav": {
+      "dashboard": "Dashboard",
+      "calendar": "Kalender",
+      "services": "Dienstleistungen",
+      "settings": "Einstellungen"
+    },
+    "overview": {
+      "title": "Übersicht",
+      "services": "Dienstleistungen",
+      "upcomingAppointments": "Bevorstehende Termine",
+      "rating": "Bewertung",
+      "noRating": "Keine"
+    },
+    "services": {
+      "title": "Dienstleistungen",
+      "servicesCount": "Dienstleistungen",
+      "addService": "Dienstleistung hinzufügen",
+      "newService": "Neue Dienstleistung",
+      "editService": "Dienstleistung bearbeiten",
+      "noServices": "Noch keine Dienstleistungen vorhanden",
+      "fields": {
+        "name": "Name",
+        "category": "Kategorie",
+        "durationMinutes": "Dauer (Minuten)",
+        "priceCents": "Preis (Cent)",
+        "priceHint": "z.B. 4500 = 45,00 EUR",
+        "description": "Beschreibung"
+      },
+      "errors": {
+        "validationError": "Bitte überprüfe deine Eingaben",
+        "unauthorized": "Keine Berechtigung",
+        "saveFailed": "Speichern fehlgeschlagen",
+        "deleteFailed": "Löschen fehlgeschlagen",
+        "providerNotFound": "Anbieter nicht gefunden"
+      }
+    }
+  },
+  "onboarding": {
+    "title": "Willkommen bei MAE",
+    "subtitle": "Richte dein Anbieter-Profil ein, um Termine entgegenzunehmen",
+    "completeOnboarding": "Onboarding abschließen",
+    "step1": {
+      "title": "Unternehmensprofil",
+      "description": "Trage die grundlegenden Informationen zu deinem Unternehmen ein"
+    },
+    "step2": {
+      "title": "Erste Dienstleistung",
+      "description": "Füge deine erste Dienstleistung hinzu"
+    },
+    "step3": {
+      "title": "Verfügbarkeit",
+      "description": "Lege deine Öffnungszeiten fest",
+      "hint": "Lass ein Feld leer, wenn du an einem Tag nicht verfügbar bist"
+    },
+    "fields": {
+      "businessName": "Unternehmensname",
+      "category": "Kategorie",
+      "categoryPlaceholder": "z.B. Friseur, Nagelstudio",
+      "address": "Adresse",
+      "postalCode": "PLZ",
+      "city": "Stadt",
+      "phone": "Telefon (optional)",
+      "description": "Beschreibung (optional)",
+      "serviceName": "Name der Dienstleistung",
+      "durationMinutes": "Dauer (Minuten)",
+      "priceEur": "Preis (Cent)",
+      "priceHint": "z.B. 4500 = 45,00 EUR"
+    },
+    "days": {
+      "0": "Sonntag",
+      "1": "Montag",
+      "2": "Dienstag",
+      "3": "Mittwoch",
+      "4": "Donnerstag",
+      "5": "Freitag",
+      "6": "Samstag"
+    },
+    "errors": {
+      "validationError": "Bitte überprüfe deine Eingaben",
+      "unauthorized": "Keine Berechtigung",
+      "saveFailed": "Speichern fehlgeschlagen",
+      "providerNotFound": "Anbieter nicht gefunden"
+    }
+  },
   "auth": {
     "email": "E-Mail",
     "password": "Passwort",
