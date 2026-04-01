@@ -62,6 +62,11 @@
     "noAccount": "Don't have an account?",
     "hasAccount": "Already have an account?",
     "registerAsProvider": "Register as provider",
-    "registerAsUser": "Register as user"
+    "registerAsUser": "Register as user",
+    "role": "Role",
+    "invalidCredentials": "Invalid credentials",
+    "registrationFailed": "Registration failed. Please try again.",
+    "passwordMismatch": "Passwords do not match",
+    "validationError": "Please check your input"
   }
 }
