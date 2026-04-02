@@ -367,3 +367,183 @@ export async function setAvailability(
 export async function completeOnboarding(): Promise<never> {
   redirect("/dashboard");
 }
+
+type AppointmentActionResult = { error: string } | { success: true };
+type AppointmentRow = Database["public"]["Tables"]["appointments"]["Row"];
+
+async function getProviderForAppointment(
+  appointmentId: string
+): Promise<{
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  db: any;
+  provider: ProviderRow | null;
+  appt: Pick<AppointmentRow, "id" | "provider_id" | "status" | "start_time"> | null;
+}> {
+  const supabase = await createClient();
+  const db = await queryDb(supabase);
+
+  const {
+    data: { user },
+    error: authError,
+  } = await supabase.auth.getUser();
+
+  if (authError || !user) {
+    return { db, provider: null, appt: null };
+  }
+
+  const { data: providerData } = await db
+    .from("providers")
+    .select("*")
+    .eq("profile_id", user.id)
+    .single();
+
+  const provider = providerData as ProviderRow | null;
+
+  if (!provider) {
+    return { db, provider: null, appt: null };
+  }
+
+  const { data: apptData } = await db
+    .from("appointments")
+    .select("id, provider_id, status, start_time")
+    .eq("id", appointmentId)
+    .single();
+
+  const appt = apptData as Pick<
+    AppointmentRow,
+    "id" | "provider_id" | "status" | "start_time"
+  > | null;
+
+  return { db, provider, appt };
+}
+
+export async function confirmAppointment(
+  formData: FormData
+): Promise<AppointmentActionResult> {
+  const appointmentId = formData.get("appointmentId")?.toString() ?? "";
+  const locale = formData.get("locale")?.toString() ?? "de";
+
+  if (!appointmentId) {
+    return { error: "notFound" };
+  }
+
+  const { db, provider, appt } = await getProviderForAppointment(appointmentId);
+
+  if (!provider) {
+    return { error: "unauthorized" };
+  }
+
+  if (!appt) {
+    return { error: "notFound" };
+  }
+
+  if (appt.provider_id !== provider.id) {
+    return { error: "unauthorized" };
+  }
+
+  if (appt.status !== "pending") {
+    return { error: "invalidStatus" };
+  }
+
+  const { error: updateError } = await db
+    .from("appointments")
+    .update({ status: "confirmed" })
+    .eq("id", appointmentId);
+
+  if (updateError) {
+    return { error: "actionFailed" };
+  }
+
+  const { revalidatePath } = await import("next/cache");
+  revalidatePath(`/${locale}/dashboard/calendar`);
+  return { success: true };
+}
+
+export async function cancelAppointmentAsProvider(
+  formData: FormData
+): Promise<AppointmentActionResult> {
+  const appointmentId = formData.get("appointmentId")?.toString() ?? "";
+  const locale = formData.get("locale")?.toString() ?? "de";
+
+  if (!appointmentId) {
+    return { error: "notFound" };
+  }
+
+  const { db, provider, appt } = await getProviderForAppointment(appointmentId);
+
+  if (!provider) {
+    return { error: "unauthorized" };
+  }
+
+  if (!appt) {
+    return { error: "notFound" };
+  }
+
+  if (appt.provider_id !== provider.id) {
+    return { error: "unauthorized" };
+  }
+
+  if (appt.status === "cancelled" || appt.status === "completed") {
+    return { error: "invalidStatus" };
+  }
+
+  const { error: updateError } = await db
+    .from("appointments")
+    .update({ status: "cancelled" })
+    .eq("id", appointmentId);
+
+  if (updateError) {
+    return { error: "actionFailed" };
+  }
+
+  const { revalidatePath } = await import("next/cache");
+  revalidatePath(`/${locale}/dashboard/calendar`);
+  return { success: true };
+}
+
+export async function markNoShow(
+  formData: FormData
+): Promise<AppointmentActionResult> {
+  const appointmentId = formData.get("appointmentId")?.toString() ?? "";
+  const locale = formData.get("locale")?.toString() ?? "de";
+
+  if (!appointmentId) {
+    return { error: "notFound" };
+  }
+
+  const { db, provider, appt } = await getProviderForAppointment(appointmentId);
+
+  if (!provider) {
+    return { error: "unauthorized" };
+  }
+
+  if (!appt) {
+    return { error: "notFound" };
+  }
+
+  if (appt.provider_id !== provider.id) {
+    return { error: "unauthorized" };
+  }
+
+  if (appt.status !== "pending" && appt.status !== "confirmed") {
+    return { error: "invalidStatus" };
+  }
+
+  const apptStart = new Date(appt.start_time);
+  if (apptStart > new Date()) {
+    return { error: "invalidStatus" };
+  }
+
+  const { error: updateError } = await db
+    .from("appointments")
+    .update({ status: "no_show" })
+    .eq("id", appointmentId);
+
+  if (updateError) {
+    return { error: "actionFailed" };
+  }
+
+  const { revalidatePath } = await import("next/cache");
+  revalidatePath(`/${locale}/dashboard/calendar`);
+  return { success: true };
+}
