@@ -3,21 +3,11 @@ import { getTranslations } from "next-intl/server";
 
 import { SearchForm } from "@/components/features/SearchForm";
 import { ByTimeSearchForm } from "@/components/features/ByTimeSearchForm";
+import { PROVIDER_CATEGORIES } from "@/lib/validations/provider";
 
 interface HomePageProps {
   params: Promise<{ locale: string }>;
 }
-
-const CATEGORY_SLUGS = [
-  "friseur",
-  "kosmetik",
-  "nagelstudio",
-  "massage",
-  "physiotherapie",
-  "tattoostudio",
-  "barbershop",
-  "waxing",
-] as const;
 
 const CATEGORY_ICONS: Record<string, string> = {
   friseur: "✂️",
@@ -73,7 +63,7 @@ export default async function HomePage({ params }: HomePageProps) {
           </div>
 
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-            {CATEGORY_SLUGS.map((slug) => (
+            {PROVIDER_CATEGORIES.map((slug) => (
               <Link
                 key={slug}
                 href={`/${locale}/search?category=${slug}`}
