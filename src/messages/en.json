@@ -207,6 +207,71 @@
       "providerNotFound": "Provider not found"
     }
   },
+  "appointments": {
+    "title": "My Appointments",
+    "myAppointments": "My Appointments",
+    "upcoming": "Upcoming",
+    "past": "Past",
+    "emptyUpcoming": "You have no upcoming appointments.",
+    "emptyPast": "You have no past appointments yet.",
+    "cancelButton": "Cancel Appointment",
+    "cancelConfirm": "Are you sure you want to cancel this appointment?",
+    "cancelSuccess": "Appointment cancelled successfully.",
+    "cancelFailed": "Failed to cancel. Please try again.",
+    "status": {
+      "pending": "Pending",
+      "confirmed": "Confirmed",
+      "cancelled": "Cancelled",
+      "completed": "Completed",
+      "no_show": "No Show"
+    },
+    "fields": {
+      "provider": "Provider",
+      "service": "Service",
+      "date": "Date",
+      "time": "Time",
+      "duration": "Duration",
+      "price": "Price",
+      "status": "Status",
+      "minutes": "min."
+    },
+    "errors": {
+      "unauthorized": "Not authorized",
+      "notFound": "Appointment not found",
+      "cannotCancel": "This appointment can no longer be cancelled",
+      "cancelFailed": "Failed to cancel appointment"
+    }
+  },
+  "calendar": {
+    "title": "Calendar",
+    "today": "Today",
+    "next7Days": "Next 7 Days",
+    "noAppointments": "No appointments in this period",
+    "confirmButton": "Confirm",
+    "cancelButton": "Cancel",
+    "noShowButton": "No Show",
+    "customerLabel": "Customer",
+    "serviceLabel": "Service",
+    "timeLabel": "Time",
+    "statusLabel": "Status",
+    "confirmSuccess": "Appointment confirmed.",
+    "cancelSuccess": "Appointment cancelled.",
+    "noShowSuccess": "Marked as no show.",
+    "actionFailed": "Action failed.",
+    "status": {
+      "pending": "Pending",
+      "confirmed": "Confirmed",
+      "cancelled": "Cancelled",
+      "completed": "Completed",
+      "no_show": "No Show"
+    },
+    "errors": {
+      "unauthorized": "Not authorized",
+      "notFound": "Appointment not found",
+      "invalidStatus": "Invalid status for this action",
+      "actionFailed": "Action failed"
+    }
+  },
   "auth": {
     "email": "Email",
     "password": "Password",
