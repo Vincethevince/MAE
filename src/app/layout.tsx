@@ -13,9 +13,19 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "MAE - Make Appointments Easier",
+  title: "MAE – Make Appointments Easier",
   description:
     "Finde freie Termine bei Dienstleistern in deiner Nähe – passend zu deinem Kalender.",
+  applicationName: "MAE",
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "default",
+    title: "MAE",
+  },
+  formatDetection: {
+    telephone: false,
+  },
+  themeColor: "#18181b",
 };
 
 export default function RootLayout({
