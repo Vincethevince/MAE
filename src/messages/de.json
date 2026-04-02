@@ -136,6 +136,28 @@
       "rating": "Bewertung",
       "noRating": "Keine"
     },
+    "settings": {
+      "title": "Einstellungen",
+      "businessProfileTitle": "Unternehmensprofil",
+      "businessProfileDescription": "Aktualisiere deine Unternehmensdaten",
+      "categoryNote": "Die Kategorie kann nach der Registrierung nicht mehr geändert werden",
+      "saveSuccess": "Änderungen erfolgreich gespeichert",
+      "fields": {
+        "businessName": "Unternehmensname",
+        "category": "Kategorie",
+        "address": "Adresse",
+        "postalCode": "PLZ",
+        "city": "Stadt",
+        "phone": "Telefon (optional)",
+        "description": "Beschreibung (optional)"
+      },
+      "errors": {
+        "validationError": "Bitte überprüfe deine Eingaben",
+        "unauthorized": "Keine Berechtigung",
+        "saveFailed": "Speichern fehlgeschlagen",
+        "providerNotFound": "Anbieter nicht gefunden"
+      }
+    },
     "services": {
       "title": "Dienstleistungen",
       "servicesCount": "Dienstleistungen",
@@ -287,6 +309,18 @@
       "notFound": "Termin nicht gefunden",
       "invalidStatus": "Ungültiger Status für diese Aktion",
       "actionFailed": "Aktion fehlgeschlagen"
+    }
+  },
+  "profile": {
+    "title": "Mein Profil",
+    "navLabel": "Profil",
+    "emailLabel": "E-Mail",
+    "fullNameLabel": "Name",
+    "saveSuccess": "Profil gespeichert",
+    "errors": {
+      "validationError": "Bitte überprüfe deine Eingaben",
+      "unauthorized": "Nicht angemeldet",
+      "saveFailed": "Speichern fehlgeschlagen"
     }
   },
   "auth": {

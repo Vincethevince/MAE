@@ -115,11 +115,11 @@ export async function createOrUpdateProvider(
 
   const { data: existingRaw } = await db
     .from("providers")
-    .select("id")
+    .select("id, category")
     .eq("profile_id", user.id)
     .single();
 
-  const existing = existingRaw as { id: string } | null;
+  const existing = existingRaw as { id: string; category: string } | null;
 
   if (existing) {
     const { error: updateError } = await db
@@ -130,14 +130,19 @@ export async function createOrUpdateProvider(
         city: parsed.data.city,
         postal_code: parsed.data.postalCode,
         phone: parsed.data.phone ?? null,
-        category: parsed.data.category,
+        // category is immutable after creation — always use the stored value
+        category: existing.category,
         description: parsed.data.description ?? null,
       })
-      .eq("id", existing.id);
+      .eq("id", existing.id)
+      .eq("profile_id", user.id);
 
     if (updateError) {
       return { error: "saveFailed" };
     }
+
+    const { revalidatePath } = await import("next/cache");
+    revalidatePath(`/provider/${existing.id}`);
 
     return { success: true, data: { providerId: existing.id } };
   }

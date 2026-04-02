@@ -136,6 +136,28 @@
       "rating": "Rating",
       "noRating": "None"
     },
+    "settings": {
+      "title": "Settings",
+      "businessProfileTitle": "Business Profile",
+      "businessProfileDescription": "Update your business information",
+      "categoryNote": "The category cannot be changed after registration",
+      "saveSuccess": "Changes saved successfully",
+      "fields": {
+        "businessName": "Business name",
+        "category": "Category",
+        "address": "Address",
+        "postalCode": "Postal code",
+        "city": "City",
+        "phone": "Phone (optional)",
+        "description": "Description (optional)"
+      },
+      "errors": {
+        "validationError": "Please check your input",
+        "unauthorized": "Not authorized",
+        "saveFailed": "Failed to save",
+        "providerNotFound": "Provider not found"
+      }
+    },
     "services": {
       "title": "Services",
       "servicesCount": "services",
@@ -287,6 +309,18 @@
       "notFound": "Appointment not found",
       "invalidStatus": "Invalid status for this action",
       "actionFailed": "Action failed"
+    }
+  },
+  "profile": {
+    "title": "My Profile",
+    "navLabel": "Profile",
+    "emailLabel": "Email",
+    "fullNameLabel": "Name",
+    "saveSuccess": "Profile saved",
+    "errors": {
+      "validationError": "Please check your input",
+      "unauthorized": "Not signed in",
+      "saveFailed": "Failed to save"
     }
   },
   "auth": {
