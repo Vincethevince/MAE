@@ -10,10 +10,12 @@ import {
   Settings,
   Menu,
   X,
+  LogOut,
 } from "lucide-react";
 import { clsx } from "clsx";
 
 import { Button } from "@/components/ui/button";
+import { LogoutButton } from "@/components/features/LogoutButton";
 
 interface NavLabels {
   dashboard: string;
@@ -95,6 +97,13 @@ export function DashboardSidebar({
           );
         })}
       </nav>
+      <div className="px-3 py-4 border-t">
+        <LogoutButton
+          variant="ghost"
+          size="sm"
+          className="w-full justify-start gap-3 text-muted-foreground hover:text-foreground"
+        />
+      </div>
     </div>
   );
 

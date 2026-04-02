@@ -5,6 +5,7 @@ import { getTranslations } from "next-intl/server";
 import { createClient } from "@/lib/supabase/server";
 import { getCurrentProvider } from "@/lib/supabase/queries";
 import { buttonVariants } from "@/components/ui/button";
+import { LogoutButton } from "@/components/features/LogoutButton";
 
 interface PublicLayoutProps {
   children: ReactNode;
@@ -58,6 +59,7 @@ export default async function PublicLayout({ children, params }: PublicLayoutPro
                     Dashboard
                   </Link>
                 )}
+                <LogoutButton />
               </>
             ) : (
               <>
