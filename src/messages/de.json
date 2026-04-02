@@ -311,6 +311,14 @@
       "actionFailed": "Aktion fehlgeschlagen"
     }
   },
+  "errors": {
+    "notFound": "Seite nicht gefunden",
+    "notFoundDescription": "Die von dir gesuchte Seite existiert nicht oder wurde verschoben.",
+    "serverError": "Etwas ist schiefgelaufen",
+    "serverErrorDescription": "Ein unerwarteter Fehler ist aufgetreten. Bitte versuche es erneut.",
+    "backHome": "Zur Startseite",
+    "tryAgain": "Erneut versuchen"
+  },
   "profile": {
     "title": "Mein Profil",
     "navLabel": "Profil",
