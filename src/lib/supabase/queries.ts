@@ -15,6 +15,13 @@ export interface AppointmentWithDetails extends AppointmentRow {
   service: Pick<ServiceRow, "id" | "name" | "duration_minutes" | "price_cents">;
 }
 
+export interface AppointmentWithProviderAndService extends AppointmentRow {
+  providerName: string;
+  serviceName: string;
+  serviceDurationMinutes: number;
+  servicePriceCents: number;
+}
+
 export interface ProviderSearchResult extends ProviderRow {
   min_price_cents: number | null;
 }
@@ -231,6 +238,114 @@ export async function getAppointmentById(
     provider: providerData as Pick<ProviderRow, "id" | "business_name" | "address" | "city">,
     service: serviceData as Pick<ServiceRow, "id" | "name" | "duration_minutes" | "price_cents">,
   };
+}
+
+export async function getUserAppointments(
+  supabase: TypedSupabaseClient,
+  userId: string
+): Promise<AppointmentWithProviderAndService[]> {
+  const { data: appointments } = await db(supabase)
+    .from("appointments")
+    .select("*")
+    .eq("user_id", userId)
+    .order("start_time", { ascending: true });
+
+  if (!appointments || appointments.length === 0) return [];
+
+  const appts = appointments as AppointmentRow[];
+
+  const providerIds = [...new Set(appts.map((a) => a.provider_id))];
+  const serviceIds = [...new Set(appts.map((a) => a.service_id))];
+
+  const [{ data: providers }, { data: services }] = await Promise.all([
+    db(supabase)
+      .from("providers")
+      .select("id, business_name")
+      .in("id", providerIds),
+    db(supabase)
+      .from("services")
+      .select("id, name, duration_minutes, price_cents")
+      .in("id", serviceIds),
+  ]);
+
+  const providerMap = new Map<string, string>();
+  if (providers) {
+    for (const p of providers as Pick<ProviderRow, "id" | "business_name">[]) {
+      providerMap.set(p.id, p.business_name);
+    }
+  }
+
+  type ServiceLookup = Pick<ServiceRow, "id" | "name" | "duration_minutes" | "price_cents">;
+  const serviceMap = new Map<string, ServiceLookup>();
+  if (services) {
+    for (const s of services as ServiceLookup[]) {
+      serviceMap.set(s.id, s);
+    }
+  }
+
+  return appts.map((appt) => ({
+    ...appt,
+    providerName: providerMap.get(appt.provider_id) ?? "",
+    serviceName: serviceMap.get(appt.service_id)?.name ?? "",
+    serviceDurationMinutes: serviceMap.get(appt.service_id)?.duration_minutes ?? 0,
+    servicePriceCents: serviceMap.get(appt.service_id)?.price_cents ?? 0,
+  }));
+}
+
+export async function getProviderAppointmentsRange(
+  supabase: TypedSupabaseClient,
+  providerId: string,
+  from: Date,
+  to: Date
+): Promise<AppointmentWithProviderAndService[]> {
+  const { data: appointments } = await db(supabase)
+    .from("appointments")
+    .select("*")
+    .eq("provider_id", providerId)
+    .gte("start_time", from.toISOString())
+    .lte("start_time", to.toISOString())
+    .order("start_time", { ascending: true });
+
+  if (!appointments || appointments.length === 0) return [];
+
+  const appts = appointments as AppointmentRow[];
+
+  const userIds = [...new Set(appts.map((a) => a.user_id))];
+  const serviceIds = [...new Set(appts.map((a) => a.service_id))];
+
+  const [{ data: profiles }, { data: services }] = await Promise.all([
+    db(supabase)
+      .from("profiles")
+      .select("id, full_name")
+      .in("id", userIds),
+    db(supabase)
+      .from("services")
+      .select("id, name, duration_minutes, price_cents")
+      .in("id", serviceIds),
+  ]);
+
+  const profileMap = new Map<string, string | null>();
+  if (profiles) {
+    for (const p of profiles as Pick<ProfileRow, "id" | "full_name">[]) {
+      profileMap.set(p.id, p.full_name);
+    }
+  }
+
+  type ServiceLookup = Pick<ServiceRow, "id" | "name" | "duration_minutes" | "price_cents">;
+  const serviceMap = new Map<string, ServiceLookup>();
+  if (services) {
+    for (const s of services as ServiceLookup[]) {
+      serviceMap.set(s.id, s);
+    }
+  }
+
+  return appts.map((appt) => ({
+    ...appt,
+    providerName: profileMap.get(appt.user_id) ?? "",
+    serviceName: serviceMap.get(appt.service_id)?.name ?? "",
+    serviceDurationMinutes: serviceMap.get(appt.service_id)?.duration_minutes ?? 0,
+    servicePriceCents: serviceMap.get(appt.service_id)?.price_cents ?? 0,
+  }));
 }
 
 export async function getProviderReviews(
