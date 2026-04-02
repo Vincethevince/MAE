@@ -136,7 +136,14 @@
       "services": "Services",
       "upcomingAppointments": "Upcoming Appointments",
       "rating": "Rating",
-      "noRating": "None"
+      "noRating": "None",
+      "revenue30Days": "Revenue (30 days)",
+      "todaysAppointments": "Today's Appointments",
+      "noAppointmentsToday": "No appointments today",
+      "customerColumn": "Customer",
+      "serviceColumn": "Service",
+      "timeColumn": "Time",
+      "statusColumn": "Status"
     },
     "availability": {
       "title": "Availability",

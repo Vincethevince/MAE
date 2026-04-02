@@ -376,6 +376,29 @@ export async function getProviderAppointmentsRange(
   }));
 }
 
+export async function getProviderRevenue30Days(
+  supabase: TypedSupabaseClient,
+  providerId: string
+): Promise<number> {
+  const thirtyDaysAgo = new Date();
+  thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+  thirtyDaysAgo.setHours(0, 0, 0, 0);
+
+  const { data } = await db(supabase)
+    .from("appointments")
+    .select("price_cents")
+    .eq("provider_id", providerId)
+    .eq("status", "completed")
+    .gte("start_time", thirtyDaysAgo.toISOString());
+
+  if (!data) return 0;
+
+  return (data as { price_cents: number }[]).reduce(
+    (sum, row) => sum + row.price_cents,
+    0
+  );
+}
+
 export async function getProviderReviews(
   supabase: TypedSupabaseClient,
   providerId: string

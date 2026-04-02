@@ -136,7 +136,14 @@
       "services": "Dienstleistungen",
       "upcomingAppointments": "Bevorstehende Termine",
       "rating": "Bewertung",
-      "noRating": "Keine"
+      "noRating": "Keine",
+      "revenue30Days": "Umsatz (30 Tage)",
+      "todaysAppointments": "Heutige Termine",
+      "noAppointmentsToday": "Keine Termine heute",
+      "customerColumn": "Kunde",
+      "serviceColumn": "Dienstleistung",
+      "timeColumn": "Uhrzeit",
+      "statusColumn": "Status"
     },
     "availability": {
       "title": "Verfügbarkeit",
