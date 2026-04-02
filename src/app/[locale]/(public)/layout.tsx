@@ -3,6 +3,7 @@ import Link from "next/link";
 import { getTranslations } from "next-intl/server";
 
 import { createClient } from "@/lib/supabase/server";
+import { getCurrentProvider } from "@/lib/supabase/queries";
 import { buttonVariants } from "@/components/ui/button";
 
 interface PublicLayoutProps {
@@ -17,8 +18,11 @@ export default async function PublicLayout({ children, params }: PublicLayoutPro
     data: { user },
   } = await supabase.auth.getUser();
 
+  const isProvider = user ? !!(await getCurrentProvider(supabase)) : false;
+
   const t = await getTranslations("common");
   const tAppointments = await getTranslations("appointments");
+  const tProfile = await getTranslations("profile");
 
   return (
     <div className="flex min-h-screen flex-col">
@@ -41,11 +45,19 @@ export default async function PublicLayout({ children, params }: PublicLayoutPro
                   {tAppointments("myAppointments")}
                 </Link>
                 <Link
-                  href={`/${locale}/dashboard`}
-                  className={buttonVariants({ variant: "outline", size: "sm" })}
+                  href={`/${locale}/profile`}
+                  className={buttonVariants({ variant: "ghost", size: "sm" })}
                 >
-                  {t("appName")}
+                  {tProfile("navLabel")}
                 </Link>
+                {isProvider && (
+                  <Link
+                    href={`/${locale}/dashboard`}
+                    className={buttonVariants({ variant: "outline", size: "sm" })}
+                  >
+                    Dashboard
+                  </Link>
+                )}
               </>
             ) : (
               <>
