@@ -8,6 +8,12 @@ type ServiceRow = Database["public"]["Tables"]["services"]["Row"];
 type AvailabilityRow = Database["public"]["Tables"]["availability"]["Row"];
 type ReviewRow = Database["public"]["Tables"]["reviews"]["Row"];
 type ProfileRow = Database["public"]["Tables"]["profiles"]["Row"];
+type AppointmentRow = Database["public"]["Tables"]["appointments"]["Row"];
+
+export interface AppointmentWithDetails extends AppointmentRow {
+  provider: Pick<ProviderRow, "id" | "business_name" | "address" | "city">;
+  service: Pick<ServiceRow, "id" | "name" | "duration_minutes" | "price_cents">;
+}
 
 export interface ProviderSearchResult extends ProviderRow {
   min_price_cents: number | null;
@@ -153,6 +159,77 @@ export async function getProviderById(
     ...(provider as ProviderRow),
     services,
     availability,
+  };
+}
+
+export async function getServiceById(
+  supabase: TypedSupabaseClient,
+  serviceId: string
+): Promise<ServiceRow | null> {
+  const { data } = await db(supabase)
+    .from("services")
+    .select("*")
+    .eq("id", serviceId)
+    .eq("is_active", true)
+    .single();
+
+  return (data as ServiceRow | null) ?? null;
+}
+
+export async function getAppointmentsForDate(
+  supabase: TypedSupabaseClient,
+  providerId: string,
+  date: Date
+): Promise<AppointmentRow[]> {
+  const dayStart = new Date(date);
+  dayStart.setHours(0, 0, 0, 0);
+  const dayEnd = new Date(date);
+  dayEnd.setHours(23, 59, 59, 999);
+
+  const { data } = await db(supabase)
+    .from("appointments")
+    .select("*")
+    .eq("provider_id", providerId)
+    .neq("status", "cancelled")
+    .gte("start_time", dayStart.toISOString())
+    .lte("start_time", dayEnd.toISOString());
+
+  return (data as AppointmentRow[] | null) ?? [];
+}
+
+export async function getAppointmentById(
+  supabase: TypedSupabaseClient,
+  appointmentId: string
+): Promise<AppointmentWithDetails | null> {
+  const { data: appt } = await db(supabase)
+    .from("appointments")
+    .select("*")
+    .eq("id", appointmentId)
+    .single();
+
+  if (!appt) return null;
+
+  const appointment = appt as AppointmentRow;
+
+  const [{ data: providerData }, { data: serviceData }] = await Promise.all([
+    db(supabase)
+      .from("providers")
+      .select("id, business_name, address, city")
+      .eq("id", appointment.provider_id)
+      .single(),
+    db(supabase)
+      .from("services")
+      .select("id, name, duration_minutes, price_cents")
+      .eq("id", appointment.service_id)
+      .single(),
+  ]);
+
+  if (!providerData || !serviceData) return null;
+
+  return {
+    ...appointment,
+    provider: providerData as Pick<ProviderRow, "id" | "business_name" | "address" | "city">,
+    service: serviceData as Pick<ServiceRow, "id" | "name" | "duration_minutes" | "price_cents">,
   };
 }
 
