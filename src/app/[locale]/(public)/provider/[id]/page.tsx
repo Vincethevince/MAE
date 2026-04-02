@@ -160,7 +160,7 @@ export default async function ProviderDetailPage({ params }: ProviderDetailPageP
                             {formatPrice(service.price_cents)}
                           </span>
                           <a
-                            href={`/${locale}/book/${provider.id}?service=${service.id}`}
+                            href={`/${locale}/book/${provider.id}/${service.id}`}
                             className={buttonVariants({ size: "sm" })}
                           >
                             {t("bookButton")}
