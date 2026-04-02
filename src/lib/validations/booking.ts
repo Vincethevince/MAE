@@ -21,3 +21,11 @@ export const bookingSchema = z.object({
 });
 
 export type BookingInput = z.infer<typeof bookingSchema>;
+
+export const reviewSchema = z.object({
+  appointmentId: z.string().regex(UUID_REGEX, "Invalid appointment ID"),
+  rating: z.coerce.number().int().min(1).max(5),
+  comment: z.string().max(500).optional().or(z.literal("")),
+});
+
+export type ReviewInput = z.infer<typeof reviewSchema>;

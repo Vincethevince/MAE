@@ -6,7 +6,8 @@ import { getUserAppointments } from "@/lib/supabase/queries";
 import type { AppointmentWithProviderAndService } from "@/lib/supabase/queries";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
+import { ReviewForm } from "@/components/features/ReviewForm";
+import { CancelAppointmentButton } from "@/components/features/CancelAppointmentButton";
 import { cancelAppointment as cancelAppointmentAction } from "./actions";
 
 async function cancelAppointment(formData: FormData): Promise<void> {
@@ -70,9 +71,10 @@ interface AppointmentCardProps {
   durationLabel: string;
   minutesLabel: string;
   priceLabel: string;
-  cancelButtonLabel: string;
-  cancelConfirmLabel: string;
+  onCancel: (formData: FormData) => Promise<void>;
   showCancel: boolean;
+  hasReview: boolean;
+  reviewedLabel: string;
 }
 
 function AppointmentCard({
@@ -82,9 +84,10 @@ function AppointmentCard({
   durationLabel,
   minutesLabel,
   priceLabel,
-  cancelButtonLabel,
-  cancelConfirmLabel,
+  onCancel,
   showCancel,
+  hasReview,
+  reviewedLabel,
 }: AppointmentCardProps) {
   const startDate = new Date(appt.start_time);
   const dateStr = startDate.toLocaleDateString(locale === "de" ? "de-DE" : "en-GB", {
@@ -125,24 +128,19 @@ function AppointmentCard({
         </dl>
 
         {showCancel && (
-          <form action={cancelAppointment} className="mt-4">
-            <input type="hidden" name="appointmentId" value={appt.id} />
-            <input type="hidden" name="locale" value={locale} />
-            <Button
-              type="submit"
-              variant="outline"
-              size="sm"
-              className="text-destructive hover:text-destructive border-destructive/30 hover:bg-destructive/5"
-              onClick={(e) => {
-                if (!confirm(cancelConfirmLabel)) {
-                  e.preventDefault();
-                }
-              }}
-            >
-              {cancelButtonLabel}
-            </Button>
-          </form>
+          <CancelAppointmentButton
+            appointmentId={appt.id}
+            locale={locale}
+            onCancel={onCancel}
+          />
         )}
+
+        {appt.status === "completed" &&
+          (hasReview ? (
+            <p className="mt-3 text-xs text-muted-foreground">{reviewedLabel}</p>
+          ) : (
+            <ReviewForm appointmentId={appt.id} locale={locale} />
+          ))}
       </CardContent>
     </Card>
   );
@@ -160,10 +158,20 @@ export default async function AppointmentsPage({ params }: AppointmentsPageProps
     redirect(`/${locale}/login`);
   }
 
-  const [appointments, t] = await Promise.all([
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const db = supabase as any;
+
+  const [appointments, t, reviewsResult] = await Promise.all([
     getUserAppointments(supabase, user.id),
     getTranslations("appointments"),
+    db.from("reviews").select("appointment_id").eq("user_id", user.id),
   ]);
+
+  const reviewedIds = new Set<string>(
+    ((reviewsResult.data ?? []) as { appointment_id: string }[]).map(
+      (r) => r.appointment_id
+    )
+  );
 
   const upcomingStatuses = new Set(["pending", "confirmed"]);
   const pastStatuses = new Set(["completed", "cancelled", "no_show"]);
@@ -195,9 +203,10 @@ export default async function AppointmentsPage({ params }: AppointmentsPageProps
                 durationLabel={t("fields.duration")}
                 minutesLabel={t("fields.minutes")}
                 priceLabel={t("fields.price")}
-                cancelButtonLabel={t("cancelButton")}
-                cancelConfirmLabel={t("cancelConfirm")}
+                onCancel={cancelAppointment}
                 showCancel={appt.status === "pending" || appt.status === "confirmed"}
+                hasReview={reviewedIds.has(appt.id)}
+                reviewedLabel={t("review.alreadyReviewed")}
               />
             ))}
           </div>
@@ -219,9 +228,10 @@ export default async function AppointmentsPage({ params }: AppointmentsPageProps
                 durationLabel={t("fields.duration")}
                 minutesLabel={t("fields.minutes")}
                 priceLabel={t("fields.price")}
-                cancelButtonLabel={t("cancelButton")}
-                cancelConfirmLabel={t("cancelConfirm")}
+                onCancel={cancelAppointment}
                 showCancel={false}
+                hasReview={reviewedIds.has(appt.id)}
+                reviewedLabel={t("review.alreadyReviewed")}
               />
             ))}
           </div>

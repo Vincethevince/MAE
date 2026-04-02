@@ -240,6 +240,23 @@
       "notFound": "Termin nicht gefunden",
       "cannotCancel": "Dieser Termin kann nicht mehr abgesagt werden",
       "cancelFailed": "Absagen fehlgeschlagen"
+    },
+    "review": {
+      "title": "Bewertung abgeben",
+      "ratingLabel": "Bewertung",
+      "commentLabel": "Kommentar (optional)",
+      "commentPlaceholder": "Wie war dein Erlebnis?",
+      "submitButton": "Bewertung abschicken",
+      "thankYou": "Danke für deine Bewertung!",
+      "alreadyReviewed": "Du hast diesen Termin bereits bewertet.",
+      "errors": {
+        "validationError": "Bitte überprüfe deine Eingaben",
+        "unauthorized": "Keine Berechtigung",
+        "notFound": "Termin nicht gefunden",
+        "notCompleted": "Nur abgeschlossene Termine können bewertet werden",
+        "alreadyReviewed": "Du hast diesen Termin bereits bewertet",
+        "saveFailed": "Speichern fehlgeschlagen"
+      }
     }
   },
   "calendar": {
