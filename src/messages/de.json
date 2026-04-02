@@ -128,6 +128,7 @@
       "calendar": "Kalender",
       "services": "Dienstleistungen",
       "availability": "Verfügbarkeit",
+      "employees": "Mitarbeiter",
       "settings": "Einstellungen"
     },
     "overview": {
@@ -201,6 +202,29 @@
         "saveFailed": "Speichern fehlgeschlagen",
         "deleteFailed": "Löschen fehlgeschlagen",
         "providerNotFound": "Anbieter nicht gefunden"
+      }
+    },
+    "employees": {
+      "title": "Mitarbeiter",
+      "description": "Verwalte deine Mitarbeiter und ihre Arbeitszeiten",
+      "addEmployee": "Mitarbeiter hinzufügen",
+      "noEmployees": "Noch keine Mitarbeiter. Füge deinen ersten Mitarbeiter hinzu.",
+      "deactivate": "Deaktivieren",
+      "deactivateConfirm": "Möchtest du diesen Mitarbeiter wirklich deaktivieren?",
+      "availabilityTitle": "Verfügbarkeit",
+      "saveSuccess": "Erfolgreich gespeichert",
+      "addSuccess": "Mitarbeiter hinzugefügt",
+      "deactivateSuccess": "Mitarbeiter deaktiviert",
+      "fields": {
+        "name": "Name"
+      },
+      "errors": {
+        "validationError": "Bitte überprüfe deine Eingaben",
+        "unauthorized": "Keine Berechtigung",
+        "saveFailed": "Speichern fehlgeschlagen",
+        "deleteFailed": "Deaktivieren fehlgeschlagen",
+        "providerNotFound": "Anbieter nicht gefunden",
+        "employeeNotFound": "Mitarbeiter nicht gefunden"
       }
     }
   },

@@ -6,6 +6,7 @@ type TypedSupabaseClient = SupabaseClient<Database>;
 type ProviderRow = Database["public"]["Tables"]["providers"]["Row"];
 type ServiceRow = Database["public"]["Tables"]["services"]["Row"];
 type AvailabilityRow = Database["public"]["Tables"]["availability"]["Row"];
+type EmployeeRow = Database["public"]["Tables"]["employees"]["Row"];
 type ReviewRow = Database["public"]["Tables"]["reviews"]["Row"];
 type ProfileRow = Database["public"]["Tables"]["profiles"]["Row"];
 type AppointmentRow = Database["public"]["Tables"]["appointments"]["Row"];
@@ -78,6 +79,33 @@ export async function getProviderServices(
     .order("name");
 
   return (data as ServiceRow[] | null) ?? [];
+}
+
+export async function getProviderEmployees(
+  supabase: TypedSupabaseClient,
+  providerId: string
+): Promise<EmployeeRow[]> {
+  const { data } = await db(supabase)
+    .from("employees")
+    .select("*")
+    .eq("provider_id", providerId)
+    .eq("is_active", true)
+    .order("name");
+
+  return (data as EmployeeRow[] | null) ?? [];
+}
+
+export async function getEmployeeAvailability(
+  supabase: TypedSupabaseClient,
+  employeeId: string
+): Promise<AvailabilityRow[]> {
+  const { data } = await db(supabase)
+    .from("availability")
+    .select("*")
+    .eq("employee_id", employeeId)
+    .order("day_of_week");
+
+  return (data as AvailabilityRow[] | null) ?? [];
 }
 
 export async function getProviderAvailability(

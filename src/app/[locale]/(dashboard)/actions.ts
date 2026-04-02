@@ -7,6 +7,7 @@ import {
   businessProfileSchema,
   serviceSchema,
   availabilitySchema,
+  employeeSchema,
 } from "@/lib/validations/provider";
 import type { Database } from "@/types/database";
 
@@ -397,6 +398,257 @@ export async function deleteAvailability(
     .eq("provider_id", provider.id)
     .eq("day_of_week", dayOfWeek)
     .is("employee_id", null);
+
+  if (deleteError) {
+    return { error: "saveFailed" };
+  }
+
+  return { success: true };
+}
+
+export async function addEmployee(
+  formData: FormData
+): Promise<ActionResult<{ employeeId: string }>> {
+  const { db, profile, provider } = await getAuthenticatedProvider();
+
+  if (!profile) {
+    return { error: "unauthorized" };
+  }
+
+  if (!provider) {
+    return { error: "providerNotFound" };
+  }
+
+  const raw = {
+    name: formData.get("name")?.toString() ?? "",
+  };
+
+  const parsed = employeeSchema.safeParse(raw);
+  if (!parsed.success) {
+    return { error: "validationError" };
+  }
+
+  const { data: created, error: insertError } = await db
+    .from("employees")
+    .insert({
+      provider_id: provider.id,
+      name: parsed.data.name,
+    })
+    .select("id")
+    .single();
+
+  if (insertError || !created) {
+    return { error: "saveFailed" };
+  }
+
+  return { success: true, data: { employeeId: (created as { id: string }).id } };
+}
+
+export async function updateEmployee(
+  formData: FormData
+): Promise<ActionResult> {
+  const { db, profile, provider } = await getAuthenticatedProvider();
+
+  if (!profile) {
+    return { error: "unauthorized" };
+  }
+
+  if (!provider) {
+    return { error: "providerNotFound" };
+  }
+
+  const employeeId = formData.get("employeeId")?.toString() ?? "";
+  if (!employeeId || !/^[0-9a-f-]{36}$/i.test(employeeId)) {
+    return { error: "validationError" };
+  }
+
+  const raw = {
+    name: formData.get("name")?.toString() ?? "",
+  };
+
+  const parsed = employeeSchema.safeParse(raw);
+  if (!parsed.success) {
+    return { error: "validationError" };
+  }
+
+  const { data: employeeData } = await db
+    .from("employees")
+    .select("provider_id")
+    .eq("id", employeeId)
+    .single();
+
+  const employee = employeeData as { provider_id: string } | null;
+
+  if (!employee || employee.provider_id !== provider.id) {
+    return { error: "unauthorized" };
+  }
+
+  const { error: updateError } = await db
+    .from("employees")
+    .update({ name: parsed.data.name })
+    .eq("id", employeeId)
+    .eq("provider_id", provider.id);
+
+  if (updateError) {
+    return { error: "saveFailed" };
+  }
+
+  return { success: true };
+}
+
+export async function deactivateEmployee(
+  formData: FormData
+): Promise<ActionResult> {
+  const { db, profile, provider } = await getAuthenticatedProvider();
+
+  if (!profile) {
+    return { error: "unauthorized" };
+  }
+
+  if (!provider) {
+    return { error: "providerNotFound" };
+  }
+
+  const employeeId = formData.get("employeeId")?.toString() ?? "";
+  if (!employeeId) {
+    return { error: "validationError" };
+  }
+
+  const { data: employeeData } = await db
+    .from("employees")
+    .select("provider_id")
+    .eq("id", employeeId)
+    .single();
+
+  const employee = employeeData as { provider_id: string } | null;
+
+  if (!employee || employee.provider_id !== provider.id) {
+    return { error: "unauthorized" };
+  }
+
+  const { error: updateError } = await db
+    .from("employees")
+    .update({ is_active: false })
+    .eq("id", employeeId)
+    .eq("provider_id", provider.id);
+
+  if (updateError) {
+    return { error: "deleteFailed" };
+  }
+
+  return { success: true };
+}
+
+export async function setEmployeeAvailability(
+  formData: FormData
+): Promise<ActionResult> {
+  const { db, profile, provider } = await getAuthenticatedProvider();
+
+  if (!profile) {
+    return { error: "unauthorized" };
+  }
+
+  if (!provider) {
+    return { error: "providerNotFound" };
+  }
+
+  const employeeId = formData.get("employeeId")?.toString() ?? "";
+  if (!employeeId) {
+    return { error: "validationError" };
+  }
+
+  const raw = {
+    dayOfWeek: formData.get("dayOfWeek")?.toString() ?? "",
+    startTime: formData.get("startTime")?.toString() ?? "",
+    endTime: formData.get("endTime")?.toString() ?? "",
+  };
+
+  const parsed = availabilitySchema.safeParse(raw);
+  if (!parsed.success) {
+    return { error: "validationError" };
+  }
+
+  const { data: employeeData } = await db
+    .from("employees")
+    .select("provider_id")
+    .eq("id", employeeId)
+    .single();
+
+  const employee = employeeData as { provider_id: string } | null;
+
+  if (!employee || employee.provider_id !== provider.id) {
+    return { error: "unauthorized" };
+  }
+
+  const { error: deleteError } = await db
+    .from("availability")
+    .delete()
+    .eq("provider_id", provider.id)
+    .eq("employee_id", employeeId)
+    .eq("day_of_week", parsed.data.dayOfWeek);
+
+  if (deleteError) {
+    return { error: "saveFailed" };
+  }
+
+  const { error: insertError } = await db.from("availability").insert({
+    provider_id: provider.id,
+    employee_id: employeeId,
+    day_of_week: parsed.data.dayOfWeek,
+    start_time: parsed.data.startTime,
+    end_time: parsed.data.endTime,
+  });
+
+  if (insertError) {
+    return { error: "saveFailed" };
+  }
+
+  return { success: true };
+}
+
+export async function deleteEmployeeAvailability(
+  formData: FormData
+): Promise<ActionResult> {
+  const { db, profile, provider } = await getAuthenticatedProvider();
+
+  if (!profile) {
+    return { error: "unauthorized" };
+  }
+
+  if (!provider) {
+    return { error: "providerNotFound" };
+  }
+
+  const employeeId = formData.get("employeeId")?.toString() ?? "";
+  if (!employeeId) {
+    return { error: "validationError" };
+  }
+
+  const dayOfWeekRaw = formData.get("dayOfWeek")?.toString() ?? "";
+  const dayOfWeek = parseInt(dayOfWeekRaw, 10);
+
+  if (isNaN(dayOfWeek) || dayOfWeek < 0 || dayOfWeek > 6) {
+    return { error: "validationError" };
+  }
+
+  const { data: employeeData } = await db
+    .from("employees")
+    .select("provider_id")
+    .eq("id", employeeId)
+    .single();
+
+  const employee = employeeData as { provider_id: string } | null;
+
+  if (!employee || employee.provider_id !== provider.id) {
+    return { error: "unauthorized" };
+  }
+
+  const { error: deleteError } = await db
+    .from("availability")
+    .delete()
+    .eq("provider_id", provider.id)
+    .eq("employee_id", employeeId)
+    .eq("day_of_week", dayOfWeek);
 
   if (deleteError) {
     return { error: "saveFailed" };

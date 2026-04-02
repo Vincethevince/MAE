@@ -128,6 +128,7 @@
       "calendar": "Calendar",
       "services": "Services",
       "availability": "Availability",
+      "employees": "Employees",
       "settings": "Settings"
     },
     "overview": {
@@ -201,6 +202,29 @@
         "saveFailed": "Failed to save",
         "deleteFailed": "Failed to delete",
         "providerNotFound": "Provider not found"
+      }
+    },
+    "employees": {
+      "title": "Employees",
+      "description": "Manage your staff members and their schedules",
+      "addEmployee": "Add Employee",
+      "noEmployees": "No employees yet. Add your first staff member.",
+      "deactivate": "Deactivate",
+      "deactivateConfirm": "Are you sure you want to deactivate this employee?",
+      "availabilityTitle": "Availability",
+      "saveSuccess": "Saved successfully",
+      "addSuccess": "Employee added",
+      "deactivateSuccess": "Employee deactivated",
+      "fields": {
+        "name": "Name"
+      },
+      "errors": {
+        "validationError": "Please check your input",
+        "unauthorized": "Not authorized",
+        "saveFailed": "Failed to save",
+        "deleteFailed": "Failed to deactivate",
+        "providerNotFound": "Provider not found",
+        "employeeNotFound": "Employee not found"
       }
     }
   },

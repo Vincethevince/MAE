@@ -57,6 +57,11 @@ export const availabilitySchema = z
     }
   );
 
+export const employeeSchema = z.object({
+  name: z.string().min(2).max(100),
+});
+
 export type BusinessProfileInput = z.infer<typeof businessProfileSchema>;
 export type ServiceInput = z.infer<typeof serviceSchema>;
 export type AvailabilityInput = z.infer<typeof availabilitySchema>;
+export type EmployeeInput = z.infer<typeof employeeSchema>;

@@ -9,6 +9,7 @@ import {
   Scissors,
   Clock,
   Settings,
+  Users,
   Menu,
   X,
 } from "lucide-react";
@@ -21,6 +22,7 @@ interface NavLabels {
   dashboard: string;
   calendar: string;
   services: string;
+  employees: string;
   availability: string;
   settings: string;
 }
@@ -54,6 +56,11 @@ export function DashboardSidebar({
       href: `/${locale}/dashboard/services`,
       label: navLabels.services,
       icon: Scissors,
+    },
+    {
+      href: `/${locale}/dashboard/employees`,
+      label: navLabels.employees,
+      icon: Users,
     },
     {
       href: `/${locale}/dashboard/availability`,
