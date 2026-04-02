@@ -22,6 +22,10 @@
       "title": "Book appointments, made easy",
       "subtitle": "Find available appointments with service providers near you – matching your schedule.",
       "cta": "Find an appointment"
+    },
+    "categories": {
+      "title": "Explore categories",
+      "subtitle": "Choose a category to find matching providers near you"
     }
   },
   "search": {
@@ -32,7 +36,29 @@
     "rating": "Rating",
     "price": "Price",
     "distance": "Distance",
-    "availability": "Availability"
+    "availability": "Availability",
+    "searchLabel": "Search for a service",
+    "cityLabel": "City",
+    "categoryLabel": "Category",
+    "categoryAll": "All categories",
+    "searchButton": "Search",
+    "resultsCount": "{count} result found",
+    "resultsCountPlural": "{count} results found",
+    "emptyState": "No providers found",
+    "emptyStateHint": "Try different search terms or a different city.",
+    "from": "from",
+    "reviewCount": "{count} review",
+    "reviewCountPlural": "{count} reviews",
+    "categories": {
+      "friseur": "Hairdresser",
+      "kosmetik": "Cosmetics",
+      "nagelstudio": "Nail Studio",
+      "massage": "Massage",
+      "physiotherapie": "Physiotherapy",
+      "tattoostudio": "Tattoo Studio",
+      "barbershop": "Barbershop",
+      "waxing": "Waxing"
+    }
   },
   "booking": {
     "selectTime": "Select a time",
@@ -49,7 +75,30 @@
     "settings": "Settings",
     "reviews": "Reviews",
     "newAppointment": "New appointment",
-    "noAppointments": "No appointments for this day"
+    "noAppointments": "No appointments for this day",
+    "notFound": "Provider not found",
+    "notFoundHint": "This provider does not exist or is no longer active.",
+    "bookButton": "Book appointment",
+    "servicesTitle": "Services",
+    "noServices": "No services available",
+    "scheduleTitle": "Opening hours",
+    "noSchedule": "No opening hours provided",
+    "reviewsTitle": "Reviews",
+    "noReviews": "No reviews yet",
+    "duration": "{minutes} min.",
+    "address": "Address",
+    "phone": "Phone",
+    "website": "Website",
+    "ratingLabel": "Rating",
+    "days": {
+      "0": "Sunday",
+      "1": "Monday",
+      "2": "Tuesday",
+      "3": "Wednesday",
+      "4": "Thursday",
+      "5": "Friday",
+      "6": "Saturday"
+    }
   },
   "dashboard": {
     "nav": {

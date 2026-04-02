@@ -22,6 +22,10 @@
       "title": "Termine buchen, einfach gemacht",
       "subtitle": "Finde freie Termine bei Dienstleistern in deiner Nähe – passend zu deinem Kalender.",
       "cta": "Jetzt Termin finden"
+    },
+    "categories": {
+      "title": "Kategorien entdecken",
+      "subtitle": "Wähle eine Kategorie, um passende Anbieter in deiner Nähe zu finden"
     }
   },
   "search": {
@@ -32,7 +36,29 @@
     "rating": "Bewertung",
     "price": "Preis",
     "distance": "Entfernung",
-    "availability": "Verfügbarkeit"
+    "availability": "Verfügbarkeit",
+    "searchLabel": "Dienstleistung suchen",
+    "cityLabel": "Stadt",
+    "categoryLabel": "Kategorie",
+    "categoryAll": "Alle Kategorien",
+    "searchButton": "Suchen",
+    "resultsCount": "{count} Ergebnis gefunden",
+    "resultsCountPlural": "{count} Ergebnisse gefunden",
+    "emptyState": "Keine Anbieter gefunden",
+    "emptyStateHint": "Versuche andere Suchbegriffe oder eine andere Stadt.",
+    "from": "ab",
+    "reviewCount": "{count} Bewertung",
+    "reviewCountPlural": "{count} Bewertungen",
+    "categories": {
+      "friseur": "Friseur",
+      "kosmetik": "Kosmetik",
+      "nagelstudio": "Nagelstudio",
+      "massage": "Massage",
+      "physiotherapie": "Physiotherapie",
+      "tattoostudio": "Tattoostudio",
+      "barbershop": "Barbershop",
+      "waxing": "Waxing"
+    }
   },
   "booking": {
     "selectTime": "Wähle einen Termin",
@@ -49,7 +75,30 @@
     "settings": "Einstellungen",
     "reviews": "Bewertungen",
     "newAppointment": "Neuer Termin",
-    "noAppointments": "Keine Termine für diesen Tag"
+    "noAppointments": "Keine Termine für diesen Tag",
+    "notFound": "Anbieter nicht gefunden",
+    "notFoundHint": "Dieser Anbieter existiert nicht oder ist nicht mehr aktiv.",
+    "bookButton": "Termin buchen",
+    "servicesTitle": "Dienstleistungen",
+    "noServices": "Keine Dienstleistungen verfügbar",
+    "scheduleTitle": "Öffnungszeiten",
+    "noSchedule": "Keine Öffnungszeiten hinterlegt",
+    "reviewsTitle": "Bewertungen",
+    "noReviews": "Noch keine Bewertungen",
+    "duration": "{minutes} Min.",
+    "address": "Adresse",
+    "phone": "Telefon",
+    "website": "Website",
+    "ratingLabel": "Bewertung",
+    "days": {
+      "0": "Sonntag",
+      "1": "Montag",
+      "2": "Dienstag",
+      "3": "Mittwoch",
+      "4": "Donnerstag",
+      "5": "Freitag",
+      "6": "Samstag"
+    }
   },
   "dashboard": {
     "nav": {
