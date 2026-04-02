@@ -18,6 +18,7 @@ export default async function PublicLayout({ children, params }: PublicLayoutPro
   } = await supabase.auth.getUser();
 
   const t = await getTranslations("common");
+  const tAppointments = await getTranslations("appointments");
 
   return (
     <div className="flex min-h-screen flex-col">
@@ -32,12 +33,20 @@ export default async function PublicLayout({ children, params }: PublicLayoutPro
 
           <nav className="flex items-center gap-2">
             {user ? (
-              <Link
-                href={`/${locale}/dashboard`}
-                className={buttonVariants({ variant: "outline", size: "sm" })}
-              >
-                {t("appName")}
-              </Link>
+              <>
+                <Link
+                  href={`/${locale}/appointments`}
+                  className={buttonVariants({ variant: "ghost", size: "sm" })}
+                >
+                  {tAppointments("myAppointments")}
+                </Link>
+                <Link
+                  href={`/${locale}/dashboard`}
+                  className={buttonVariants({ variant: "outline", size: "sm" })}
+                >
+                  {t("appName")}
+                </Link>
+              </>
             ) : (
               <>
                 <Link
