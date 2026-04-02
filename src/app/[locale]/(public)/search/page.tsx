@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { getTranslations } from "next-intl/server";
 
 import { createClient } from "@/lib/supabase/server";
@@ -22,6 +23,7 @@ export default async function SearchPage({ params, searchParams }: SearchPagePro
   });
 
   const t = await getTranslations("search");
+  const tBy = await getTranslations("search.byTimeSearch");
 
   const hasFilters = Boolean(query || city || category);
 
@@ -32,13 +34,22 @@ export default async function SearchPage({ params, searchParams }: SearchPagePro
 
   return (
     <div className="mx-auto max-w-6xl px-4 py-8">
-      <div className="mb-8">
+      <div className="mb-4">
         <SearchForm
           locale={locale}
           initialQuery={query}
           initialCity={city}
           initialCategory={category}
         />
+      </div>
+
+      <div className="mb-8">
+        <Link
+          href={`/${locale}/search/by-time`}
+          className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+        >
+          {tBy("title")} →
+        </Link>
       </div>
 
       {hasFilters && (

@@ -2,6 +2,7 @@ import Link from "next/link";
 import { getTranslations } from "next-intl/server";
 
 import { SearchForm } from "@/components/features/SearchForm";
+import { ByTimeSearchForm } from "@/components/features/ByTimeSearchForm";
 
 interface HomePageProps {
   params: Promise<{ locale: string }>;
@@ -34,6 +35,7 @@ export default async function HomePage({ params }: HomePageProps) {
   const t = await getTranslations("home.hero");
   const tCat = await getTranslations("home.categories");
   const tSearch = await getTranslations("search");
+  const tBy = await getTranslations("search.byTimeSearch");
 
   return (
     <main className="flex flex-col">
@@ -48,6 +50,17 @@ export default async function HomePage({ params }: HomePageProps) {
 
         <div className="w-full max-w-3xl">
           <SearchForm locale={locale} />
+        </div>
+      </section>
+
+      {/* Find by availability section */}
+      <section className="flex flex-col items-center justify-center border-t bg-background px-4 py-16">
+        <div className="max-w-3xl w-full">
+          <div className="mb-8 text-center">
+            <h2 className="text-2xl font-bold">{tBy("title")}</h2>
+            <p className="mt-2 text-muted-foreground">{tBy("subtitle")}</p>
+          </div>
+          <ByTimeSearchForm locale={locale} />
         </div>
       </section>
 

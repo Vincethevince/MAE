@@ -58,6 +58,18 @@
       "tattoostudio": "Tattoostudio",
       "barbershop": "Barbershop",
       "waxing": "Waxing"
+    },
+    "byTimeSearch": {
+      "title": "Nach deiner freien Zeit suchen",
+      "subtitle": "Sag uns, wann du Zeit hast – wir zeigen dir passende Anbieter",
+      "dateLabel": "Datum",
+      "startTimeLabel": "Von",
+      "endTimeLabel": "Bis",
+      "searchButton": "Anbieter finden",
+      "resultsTitle": "Verfügbare Anbieter",
+      "noResults": "Keine Anbieter in diesem Zeitfenster verfügbar",
+      "noResultsHint": "Versuche einen anderen Zeitraum oder ein anderes Datum",
+      "validationError": "Endzeit muss nach der Startzeit liegen"
     }
   },
   "booking": {

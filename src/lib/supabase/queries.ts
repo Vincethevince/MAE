@@ -376,6 +376,152 @@ export async function getProviderAppointmentsRange(
   }));
 }
 
+export interface TimeSlotSearchOptions {
+  date: Date;
+  startTime: string; // "HH:MM" — user's available window start
+  endTime: string;   // "HH:MM" — user's available window end
+  city?: string;
+  category?: string;
+}
+
+// TODO: This runs N queries for N providers. Acceptable for MVP with small
+// provider counts. Refactor to a single SQL/RPC call when scaling.
+export async function searchProvidersByTimeSlot(
+  supabase: TypedSupabaseClient,
+  options: TimeSlotSearchOptions
+): Promise<ProviderSearchResult[]> {
+  const { computeAvailableSlots } = await import("@/lib/booking");
+
+  // 1. Get all active providers, optionally filtered by city/category
+  let q = db(supabase)
+    .from("providers")
+    .select("*")
+    .eq("is_active", true);
+
+  if (options.city) {
+    q = q.ilike("city", `%${options.city}%`);
+  }
+  if (options.category) {
+    q = q.ilike("category", `%${options.category}%`);
+  }
+
+  const { data: providers } = await q.order("rating", { ascending: false });
+
+  if (!providers || providers.length === 0) return [];
+
+  const allProviders = providers as ProviderRow[];
+  const providerIds = allProviders.map((p) => p.id);
+
+  // 2. Fetch all active services for these providers in one query
+  const { data: allServices } = await db(supabase)
+    .from("services")
+    .select("provider_id, duration_minutes, price_cents")
+    .in("provider_id", providerIds)
+    .eq("is_active", true);
+
+  type ServiceLookup = { provider_id: string; duration_minutes: number; price_cents: number };
+
+  const servicesByProvider = new Map<string, ServiceLookup[]>();
+  const minPriceMap = new Map<string, number>();
+
+  if (allServices) {
+    for (const svc of allServices as ServiceLookup[]) {
+      const existing = servicesByProvider.get(svc.provider_id) ?? [];
+      existing.push(svc);
+      servicesByProvider.set(svc.provider_id, existing);
+
+      const currentMin = minPriceMap.get(svc.provider_id);
+      if (currentMin === undefined || svc.price_cents < currentMin) {
+        minPriceMap.set(svc.provider_id, svc.price_cents);
+      }
+    }
+  }
+
+  // 3. Fetch availability for all providers in one query
+  const { data: allAvailability } = await db(supabase)
+    .from("availability")
+    .select("*")
+    .in("provider_id", providerIds);
+
+  const availabilityByProvider = new Map<string, AvailabilityRow[]>();
+  if (allAvailability) {
+    for (const row of allAvailability as AvailabilityRow[]) {
+      const existing = availabilityByProvider.get(row.provider_id) ?? [];
+      existing.push(row);
+      availabilityByProvider.set(row.provider_id, existing);
+    }
+  }
+
+  // 4. Fetch existing appointments for all providers on this date in one query
+  const dayStart = new Date(options.date);
+  dayStart.setHours(0, 0, 0, 0);
+  const dayEnd = new Date(options.date);
+  dayEnd.setHours(23, 59, 59, 999);
+
+  const { data: allAppointments } = await db(supabase)
+    .from("appointments")
+    .select("*")
+    .in("provider_id", providerIds)
+    .neq("status", "cancelled")
+    .gte("start_time", dayStart.toISOString())
+    .lte("start_time", dayEnd.toISOString());
+
+  const appointmentsByProvider = new Map<string, AppointmentRow[]>();
+  if (allAppointments) {
+    for (const appt of allAppointments as AppointmentRow[]) {
+      const existing = appointmentsByProvider.get(appt.provider_id) ?? [];
+      existing.push(appt);
+      appointmentsByProvider.set(appt.provider_id, existing);
+    }
+  }
+
+  // 5. Parse user's requested window as Date objects on options.date
+  function parseWindowTime(timeStr: string): Date {
+    const [h, m] = timeStr.split(":").map((s) => parseInt(s, 10));
+    const d = new Date(options.date);
+    d.setHours(h ?? 0, m ?? 0, 0, 0);
+    return d;
+  }
+
+  const windowStart = parseWindowTime(options.startTime);
+  const windowEnd = parseWindowTime(options.endTime);
+
+  // 6. Filter providers that have at least one slot fitting in the window
+  const matchingProviders: ProviderSearchResult[] = [];
+
+  for (const provider of allProviders) {
+    const services = servicesByProvider.get(provider.id);
+    if (!services || services.length === 0) continue;
+
+    // Use the shortest service duration for slot generation
+    const minDuration = Math.min(...services.map((s) => s.duration_minutes));
+
+    const availability = availabilityByProvider.get(provider.id) ?? [];
+    const appointments = appointmentsByProvider.get(provider.id) ?? [];
+
+    const slots = computeAvailableSlots(
+      options.date,
+      availability,
+      appointments,
+      minDuration
+    );
+
+    // A slot fits if it starts >= windowStart AND ends <= windowEnd
+    const hasMatch = slots.some(
+      (slot) => slot.startTime >= windowStart && slot.endTime <= windowEnd
+    );
+
+    if (hasMatch) {
+      matchingProviders.push({
+        ...provider,
+        min_price_cents: minPriceMap.get(provider.id) ?? null,
+      });
+    }
+  }
+
+  return matchingProviders;
+}
+
 export async function getProviderRevenue30Days(
   supabase: TypedSupabaseClient,
   providerId: string
