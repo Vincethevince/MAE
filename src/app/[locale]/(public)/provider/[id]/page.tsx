@@ -35,6 +35,17 @@ function formatTime(time: string): string {
   return time.slice(0, 5);
 }
 
+function safeWebsiteUrl(url: string | null): string | null {
+  if (!url) return null;
+  try {
+    const parsed = new URL(url);
+    if (parsed.protocol !== "https:" && parsed.protocol !== "http:") return null;
+    return url;
+  } catch {
+    return null;
+  }
+}
+
 export default async function ProviderDetailPage({ params }: ProviderDetailPageProps) {
   const { locale, id } = await params;
 
@@ -113,11 +124,11 @@ export default async function ProviderDetailPage({ params }: ProviderDetailPageP
               </a>
             </div>
           )}
-          {provider.website && (
+          {safeWebsiteUrl(provider.website) && (
             <div>
               <span className="font-medium">{t("website")}: </span>
               <a
-                href={provider.website}
+                href={safeWebsiteUrl(provider.website)!}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="text-primary hover:underline"
