@@ -16,6 +16,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Pencil, Check, X as XIcon } from "lucide-react";
 
 // ─── Employee Availability Form ─────────────────────────────────────────────
 
@@ -194,6 +195,8 @@ function EmployeeCard({ employee, onDeactivated }: EmployeeCardProps) {
   const [showAvailability, setShowAvailability] = useState(false);
   const [isPending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
+  const [isEditing, setIsEditing] = useState(false);
+  const [editName, setEditName] = useState(employee.name);
   const router = useRouter();
 
   const handleDeactivate = () => {
@@ -212,11 +215,77 @@ function EmployeeCard({ employee, onDeactivated }: EmployeeCardProps) {
     });
   };
 
+  const handleRename = () => {
+    if (!editName.trim() || editName.trim() === employee.name) {
+      setIsEditing(false);
+      return;
+    }
+    setError(null);
+    startTransition(async () => {
+      const fd = new FormData();
+      fd.set("employeeId", employee.id);
+      fd.set("name", editName.trim());
+      const result = await updateEmployee(fd);
+      if ("error" in result && result.error) {
+        setError(t(`errors.${result.error}`));
+      } else {
+        setIsEditing(false);
+        router.refresh();
+      }
+    });
+  };
+
   return (
     <Card>
       <CardContent className="pt-4">
         <div className="flex items-center justify-between gap-4">
-          <h3 className="font-semibold">{employee.name}</h3>
+          {isEditing ? (
+            <div className="flex items-center gap-2 flex-1 min-w-0">
+              <Input
+                value={editName}
+                onChange={(e) => setEditName(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") handleRename();
+                  if (e.key === "Escape") { setIsEditing(false); setEditName(employee.name); }
+                }}
+                autoFocus
+                className="h-8 text-sm"
+                maxLength={100}
+              />
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-8 w-8 shrink-0"
+                onClick={handleRename}
+                disabled={isPending}
+                aria-label={tCommon("save")}
+              >
+                <Check className="h-4 w-4 text-green-600" />
+              </Button>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-8 w-8 shrink-0"
+                onClick={() => { setIsEditing(false); setEditName(employee.name); }}
+                aria-label={tCommon("cancel")}
+              >
+                <XIcon className="h-4 w-4 text-muted-foreground" />
+              </Button>
+            </div>
+          ) : (
+            <div className="flex items-center gap-2 min-w-0">
+              <h3 className="font-semibold truncate">{employee.name}</h3>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-6 w-6 shrink-0 opacity-50 hover:opacity-100"
+                onClick={() => setIsEditing(true)}
+                aria-label={tCommon("edit")}
+              >
+                <Pencil className="h-3 w-3" />
+              </Button>
+            </div>
+          )}
           <div className="flex gap-2 shrink-0">
             <Button
               variant="outline"

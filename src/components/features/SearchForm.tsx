@@ -14,17 +14,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-
-const CATEGORIES = [
-  "friseur",
-  "kosmetik",
-  "nagelstudio",
-  "massage",
-  "physiotherapie",
-  "tattoostudio",
-  "barbershop",
-  "waxing",
-] as const;
+import { PROVIDER_CATEGORIES } from "@/lib/validations/provider";
 
 interface SearchFormProps {
   locale: string;
@@ -100,7 +90,7 @@ export function SearchForm({
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="all">{t("categoryAll")}</SelectItem>
-              {CATEGORIES.map((cat) => (
+              {PROVIDER_CATEGORIES.map((cat) => (
                 <SelectItem key={cat} value={cat}>
                   {t(`categories.${cat}`)}
                 </SelectItem>
