@@ -7,10 +7,10 @@ import {
   LayoutDashboard,
   CalendarDays,
   Scissors,
+  Clock,
   Settings,
   Menu,
   X,
-  LogOut,
 } from "lucide-react";
 import { clsx } from "clsx";
 
@@ -21,6 +21,7 @@ interface NavLabels {
   dashboard: string;
   calendar: string;
   services: string;
+  availability: string;
   settings: string;
 }
 
@@ -53,6 +54,11 @@ export function DashboardSidebar({
       href: `/${locale}/dashboard/services`,
       label: navLabels.services,
       icon: Scissors,
+    },
+    {
+      href: `/${locale}/dashboard/availability`,
+      label: navLabels.availability,
+      icon: Clock,
     },
     {
       href: `/${locale}/dashboard/settings`,

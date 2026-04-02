@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-const PROVIDER_CATEGORIES = [
+export const PROVIDER_CATEGORIES = [
   "friseur",
   "kosmetik",
   "nagelstudio",
@@ -40,8 +40,8 @@ export const serviceSchema = z.object({
 export const availabilitySchema = z
   .object({
     dayOfWeek: z.coerce.number().int().min(0).max(6),
-    startTime: z.string().regex(/^\d{2}:\d{2}$/, "timeFormatInvalid"),
-    endTime: z.string().regex(/^\d{2}:\d{2}$/, "timeFormatInvalid"),
+    startTime: z.string().regex(/^([01]\d|2[0-3]):[0-5]\d$/, "timeFormatInvalid"),
+    endTime: z.string().regex(/^([01]\d|2[0-3]):[0-5]\d$/, "timeFormatInvalid"),
   })
   .refine(
     (data) => {

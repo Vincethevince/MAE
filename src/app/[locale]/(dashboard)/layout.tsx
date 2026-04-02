@@ -50,6 +50,7 @@ export default async function DashboardLayout({
           dashboard: t("nav.dashboard"),
           calendar: t("nav.calendar"),
           services: t("nav.services"),
+          availability: t("nav.availability"),
           settings: t("nav.settings"),
         }}
       />

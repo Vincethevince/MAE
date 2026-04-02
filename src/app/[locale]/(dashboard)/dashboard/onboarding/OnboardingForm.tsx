@@ -9,10 +9,18 @@ import {
   addService,
   setAvailability,
 } from "../../actions";
+import { PROVIDER_CATEGORIES } from "@/lib/validations/provider";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import {
   Card,
   CardContent,
@@ -28,6 +36,7 @@ type Step = 1 | 2 | 3;
 export function OnboardingForm() {
   const t = useTranslations("onboarding");
   const tCommon = useTranslations("common");
+  const tSearch = useTranslations("search");
   const locale = useLocale();
   const router = useRouter();
 
@@ -149,12 +158,18 @@ export function OnboardingForm() {
               </div>
               <div className="space-y-1.5">
                 <Label htmlFor="category">{t("fields.category")}</Label>
-                <Input
-                  id="category"
-                  name="category"
-                  required
-                  placeholder={t("fields.categoryPlaceholder")}
-                />
+                <Select name="category" required>
+                  <SelectTrigger id="category">
+                    <SelectValue placeholder={t("fields.categoryPlaceholder")} />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {PROVIDER_CATEGORIES.map((cat) => (
+                      <SelectItem key={cat} value={cat}>
+                        {tSearch(`categories.${cat}` as Parameters<typeof tSearch>[0])}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
               <div className="space-y-1.5">
                 <Label htmlFor="address">{t("fields.address")}</Label>

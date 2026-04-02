@@ -371,6 +371,40 @@ export async function setAvailability(
   return { success: true };
 }
 
+export async function deleteAvailability(
+  formData: FormData
+): Promise<ActionResult> {
+  const { db, profile, provider } = await getAuthenticatedProvider();
+
+  if (!profile) {
+    return { error: "unauthorized" };
+  }
+
+  if (!provider) {
+    return { error: "providerNotFound" };
+  }
+
+  const dayOfWeekRaw = formData.get("dayOfWeek")?.toString() ?? "";
+  const dayOfWeek = parseInt(dayOfWeekRaw, 10);
+
+  if (isNaN(dayOfWeek) || dayOfWeek < 0 || dayOfWeek > 6) {
+    return { error: "validationError" };
+  }
+
+  const { error: deleteError } = await db
+    .from("availability")
+    .delete()
+    .eq("provider_id", provider.id)
+    .eq("day_of_week", dayOfWeek)
+    .is("employee_id", null);
+
+  if (deleteError) {
+    return { error: "saveFailed" };
+  }
+
+  return { success: true };
+}
+
 export async function completeOnboarding(): Promise<never> {
   const supabase = await createClient();
   const {
