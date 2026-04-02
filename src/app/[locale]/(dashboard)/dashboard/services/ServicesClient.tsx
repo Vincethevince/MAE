@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useTransition } from "react";
+import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 
 import type { Database } from "@/types/database";
@@ -239,6 +240,7 @@ function ServiceCard({ service, onDeleted, onUpdated }: ServiceCardProps) {
 
 export function ServicesClient({ services: initialServices }: ServicesClientProps) {
   const t = useTranslations("dashboard.services");
+  const router = useRouter();
   const [services, setServices] = useState<Service[]>(initialServices);
   const [showAddForm, setShowAddForm] = useState(false);
 
@@ -254,8 +256,7 @@ export function ServicesClient({ services: initialServices }: ServicesClientProp
 
   const handleAdded = () => {
     setShowAddForm(false);
-    // Reload to get the newly created service from server
-    window.location.reload();
+    router.refresh();
   };
 
   return (

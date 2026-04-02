@@ -263,7 +263,8 @@ export async function updateService(
       price_cents: parsed.data.priceCents,
       category: parsed.data.category,
     })
-    .eq("id", serviceId);
+    .eq("id", serviceId)
+    .eq("provider_id", provider.id);
 
   if (updateError) {
     return { error: "saveFailed" };
@@ -306,7 +307,8 @@ export async function deleteService(
   const { error: updateError } = await db
     .from("services")
     .update({ is_active: false })
-    .eq("id", serviceId);
+    .eq("id", serviceId)
+    .eq("provider_id", provider.id);
 
   if (updateError) {
     return { error: "deleteFailed" };
@@ -365,6 +367,15 @@ export async function setAvailability(
 }
 
 export async function completeOnboarding(): Promise<never> {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) {
+    redirect("/login");
+  }
+
   redirect("/dashboard");
 }
 
