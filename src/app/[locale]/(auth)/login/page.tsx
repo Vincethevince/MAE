@@ -54,9 +54,17 @@ export default function LoginPage() {
           {state?.error && (
             <p className="text-sm text-destructive">{t(state.error)}</p>
           )}
-          <Button type="submit" className="w-full" disabled={pending}>
-            {pending ? tCommon("loading") : tCommon("login")}
-          </Button>
+          <div className="flex items-center justify-between gap-2">
+            <Button type="submit" className="flex-1" disabled={pending}>
+              {pending ? tCommon("loading") : tCommon("login")}
+            </Button>
+            <Link
+              href={`/${locale}/forgot-password`}
+              className="text-sm text-muted-foreground underline-offset-4 hover:underline hover:text-foreground transition-colors"
+            >
+              {t("forgotPassword")}
+            </Link>
+          </div>
         </form>
       </CardContent>
       <CardFooter className="justify-center gap-1 text-sm">

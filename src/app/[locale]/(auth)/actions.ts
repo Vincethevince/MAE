@@ -3,7 +3,8 @@
 import { redirect } from "next/navigation";
 
 import { createClient } from "@/lib/supabase/server";
-import { loginSchema, registerSchema } from "@/lib/validations/auth";
+import { headers } from "next/headers";
+import { loginSchema, registerSchema, forgotPasswordSchema, resetPasswordSchema } from "@/lib/validations/auth";
 
 export async function login(
   _prevState: { error: string } | null,
@@ -69,6 +70,62 @@ export async function register(
   }
 
   redirect("/");
+}
+
+export async function requestPasswordReset(
+  _prevState: { error?: string; success?: boolean } | null,
+  formData: FormData
+): Promise<{ error?: string; success?: boolean }> {
+  const raw = { email: formData.get("email")?.toString() ?? "" };
+  const parsed = forgotPasswordSchema.safeParse(raw);
+  if (!parsed.success) return { error: "validationError" };
+
+  const locale = formData.get("locale")?.toString() ?? "de";
+  const safeLocale = ["de", "en"].includes(locale) ? locale : "de";
+
+  const headersList = await headers();
+  const host = headersList.get("host") ?? "localhost:3000";
+  const protocol = host.startsWith("localhost") ? "http" : "https";
+  const origin = `${protocol}://${host}`;
+
+  const supabase = await createClient();
+  // Always return success to prevent email enumeration attacks.
+  // Supabase will silently no-op if the email doesn't exist.
+  await supabase.auth.resetPasswordForEmail(parsed.data.email, {
+    redirectTo: `${origin}/${safeLocale}/callback?next=/${safeLocale}/reset-password`,
+  });
+
+  return { success: true };
+}
+
+export async function updatePassword(
+  _prevState: { error?: string; success?: boolean } | null,
+  formData: FormData
+): Promise<{ error?: string; success?: boolean }> {
+  const raw = {
+    password: formData.get("password")?.toString() ?? "",
+    confirmPassword: formData.get("confirmPassword")?.toString() ?? "",
+  };
+
+  const parsed = resetPasswordSchema.safeParse(raw);
+  if (!parsed.success) {
+    const isMismatch = parsed.error.issues.some(
+      (i) => i.path.includes("confirmPassword") && i.code === "custom"
+    );
+    return { error: isMismatch ? "passwordMismatch" : "validationError" };
+  }
+
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return { error: "unauthorized" };
+
+  const { error } = await supabase.auth.updateUser({
+    password: parsed.data.password,
+  });
+
+  if (error) return { error: "updateFailed" };
+
+  return { success: true };
 }
 
 export async function logout(): Promise<never> {

@@ -444,6 +444,19 @@
     "invalidCredentials": "Invalid credentials",
     "registrationFailed": "Registration failed. Please try again.",
     "passwordMismatch": "Passwords do not match",
-    "validationError": "Please check your input"
+    "validationError": "Please check your input",
+    "forgotPasswordTitle": "Reset your password",
+    "forgotPasswordDescription": "Enter your email address and we'll send you a reset link.",
+    "sendResetEmail": "Send reset email",
+    "resetEmailSentTitle": "Check your email",
+    "resetEmailSentMessage": "If an account exists for that email, you will receive a password reset link shortly.",
+    "backToLogin": "Back to login",
+    "resetPasswordTitle": "Set a new password",
+    "resetPasswordDescription": "Enter and confirm your new password.",
+    "newPassword": "New password",
+    "updatePassword": "Update password",
+    "passwordUpdated": "Password updated! Redirecting to login…",
+    "unauthorized": "Not signed in",
+    "updateFailed": "Failed to update password. Please try again."
   }
 }

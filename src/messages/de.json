@@ -444,6 +444,19 @@
     "invalidCredentials": "Ungültige Anmeldedaten",
     "registrationFailed": "Registrierung fehlgeschlagen. Bitte erneut versuchen.",
     "passwordMismatch": "Passwörter stimmen nicht überein",
-    "validationError": "Bitte überprüfe deine Eingaben"
+    "validationError": "Bitte überprüfe deine Eingaben",
+    "forgotPasswordTitle": "Passwort zurücksetzen",
+    "forgotPasswordDescription": "Gib deine E-Mail-Adresse ein und wir senden dir einen Reset-Link.",
+    "sendResetEmail": "Reset-E-Mail senden",
+    "resetEmailSentTitle": "E-Mail überprüfen",
+    "resetEmailSentMessage": "Falls ein Konto für diese E-Mail existiert, erhältst du in Kürze einen Link zum Zurücksetzen des Passworts.",
+    "backToLogin": "Zurück zur Anmeldung",
+    "resetPasswordTitle": "Neues Passwort festlegen",
+    "resetPasswordDescription": "Gib dein neues Passwort ein und bestätige es.",
+    "newPassword": "Neues Passwort",
+    "updatePassword": "Passwort aktualisieren",
+    "passwordUpdated": "Passwort aktualisiert! Weiterleitung zur Anmeldung…",
+    "unauthorized": "Nicht angemeldet",
+    "updateFailed": "Passwort konnte nicht aktualisiert werden. Bitte erneut versuchen."
   }
 }
