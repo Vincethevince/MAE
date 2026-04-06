@@ -142,6 +142,7 @@
       "services": "Services",
       "availability": "Availability",
       "employees": "Employees",
+      "reviews": "Reviews",
       "settings": "Settings"
     },
     "overview": {
@@ -246,6 +247,14 @@
         "providerNotFound": "Provider not found",
         "employeeNotFound": "Employee not found"
       }
+    },
+    "reviews": {
+      "title": "Reviews",
+      "noReviews": "No reviews yet",
+      "anonymous": "Anonymous",
+      "averageRating": "Average rating",
+      "totalReviews": "{count} reviews",
+      "starDistribution": "Rating distribution"
     }
   },
   "onboarding": {

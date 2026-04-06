@@ -142,6 +142,7 @@
       "services": "Dienstleistungen",
       "availability": "Verfügbarkeit",
       "employees": "Mitarbeiter",
+      "reviews": "Bewertungen",
       "settings": "Einstellungen"
     },
     "overview": {
@@ -246,6 +247,14 @@
         "providerNotFound": "Anbieter nicht gefunden",
         "employeeNotFound": "Mitarbeiter nicht gefunden"
       }
+    },
+    "reviews": {
+      "title": "Bewertungen",
+      "noReviews": "Noch keine Bewertungen",
+      "anonymous": "Anonym",
+      "averageRating": "Durchschnittliche Bewertung",
+      "totalReviews": "{count} Bewertungen",
+      "starDistribution": "Bewertungsverteilung"
     }
   },
   "onboarding": {

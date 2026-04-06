@@ -10,6 +10,7 @@ import {
   Clock,
   Settings,
   Users,
+  Star,
   Menu,
   X,
 } from "lucide-react";
@@ -23,6 +24,7 @@ interface NavLabels {
   calendar: string;
   services: string;
   employees: string;
+  reviews: string;
   availability: string;
   settings: string;
 }
@@ -61,6 +63,11 @@ export function DashboardSidebar({
       href: `/${locale}/dashboard/employees`,
       label: navLabels.employees,
       icon: Users,
+    },
+    {
+      href: `/${locale}/dashboard/reviews`,
+      label: navLabels.reviews,
+      icon: Star,
     },
     {
       href: `/${locale}/dashboard/availability`,
