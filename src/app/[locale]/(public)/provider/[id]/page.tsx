@@ -1,5 +1,7 @@
 import { notFound } from "next/navigation";
 import { getTranslations } from "next-intl/server";
+import type { Metadata } from "next";
+import { cache } from "react";
 
 import { createClient } from "@/lib/supabase/server";
 import { getProviderById, getProviderReviews } from "@/lib/supabase/queries";
@@ -14,6 +16,37 @@ const UUID_REGEX =
 
 interface ProviderDetailPageProps {
   params: Promise<{ locale: string; id: string }>;
+}
+
+// Cache the provider fetch to share between generateMetadata and the page
+const getProvider = cache(async (id: string) => {
+  const supabase = await createClient();
+  return getProviderById(supabase, id);
+});
+
+export async function generateMetadata({
+  params,
+}: ProviderDetailPageProps): Promise<Metadata> {
+  const { id } = await params;
+  if (!UUID_REGEX.test(id)) return {};
+
+  const provider = await getProvider(id);
+  if (!provider) return {};
+
+  const title = `${provider.business_name} – MAE`;
+  const description = provider.description
+    ? provider.description.slice(0, 160)
+    : `${provider.business_name} – ${provider.category} in ${provider.city}. Jetzt Termin buchen auf MAE.`;
+
+  return {
+    title,
+    description,
+    openGraph: {
+      title,
+      description,
+      type: "website",
+    },
+  };
 }
 
 function formatPrice(cents: number): string {
@@ -55,7 +88,7 @@ export default async function ProviderDetailPage({ params }: ProviderDetailPageP
 
   const supabase = await createClient();
   const [provider, reviews] = await Promise.all([
-    getProviderById(supabase, id),
+    getProvider(id),
     getProviderReviews(supabase, id),
   ]);
 
@@ -198,10 +231,12 @@ export default async function ProviderDetailPage({ params }: ProviderDetailPageP
                       <div className="flex items-center gap-3 mb-2">
                         <RatingStars rating={review.rating} size="sm" />
                         <span className="text-sm font-medium">
-                          {review.user_full_name ?? "Anonym"}
+                          {review.user_full_name ?? t("anonymousReviewer")}
                         </span>
                         <span className="text-xs text-muted-foreground ml-auto">
-                          {new Date(review.created_at).toLocaleDateString("de-DE")}
+                          {new Date(review.created_at).toLocaleDateString(
+                            locale === "de" ? "de-DE" : "en-GB"
+                          )}
                         </span>
                       </div>
                       {review.comment && (
