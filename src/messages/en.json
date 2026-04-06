@@ -186,6 +186,7 @@
       "businessProfileDescription": "Update your business information",
       "categoryNote": "The category cannot be changed after registration",
       "saveSuccess": "Changes saved successfully",
+      "viewPublicProfile": "View public profile",
       "fields": {
         "businessName": "Business name",
         "category": "Category",

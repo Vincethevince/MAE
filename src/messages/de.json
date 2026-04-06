@@ -186,6 +186,7 @@
       "businessProfileDescription": "Aktualisiere deine Unternehmensdaten",
       "categoryNote": "Die Kategorie kann nach der Registrierung nicht mehr geändert werden",
       "saveSuccess": "Änderungen erfolgreich gespeichert",
+      "viewPublicProfile": "Öffentliches Profil ansehen",
       "fields": {
         "businessName": "Unternehmensname",
         "category": "Kategorie",
