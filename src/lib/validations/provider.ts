@@ -30,6 +30,8 @@ export const businessProfileSchema = z.object({
   website: z
     .string()
     .url("websiteInvalid")
+    // Security: Zod's .url() alone accepts javascript: and data: URIs.
+    // This refine is required to block non-HTTP(S) schemes.
     .refine(
       (url) => url.startsWith("https://") || url.startsWith("http://"),
       "websiteInvalid"
