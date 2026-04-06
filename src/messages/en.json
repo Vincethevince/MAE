@@ -364,6 +364,7 @@
     "confirmButton": "Confirm",
     "cancelButton": "Cancel",
     "noShowButton": "No Show",
+    "completeButton": "Mark as Complete",
     "customerLabel": "Customer",
     "serviceLabel": "Service",
     "timeLabel": "Time",
@@ -371,6 +372,7 @@
     "confirmSuccess": "Appointment confirmed.",
     "cancelSuccess": "Appointment cancelled.",
     "noShowSuccess": "Marked as no show.",
+    "completeSuccess": "Appointment marked as complete.",
     "actionFailed": "Action failed.",
     "status": {
       "pending": "Pending",

@@ -364,6 +364,7 @@
     "confirmButton": "Bestätigen",
     "cancelButton": "Absagen",
     "noShowButton": "Nicht erschienen",
+    "completeButton": "Als abgeschlossen markieren",
     "customerLabel": "Kunde",
     "serviceLabel": "Dienstleistung",
     "timeLabel": "Uhrzeit",
@@ -371,6 +372,7 @@
     "confirmSuccess": "Termin bestätigt.",
     "cancelSuccess": "Termin abgesagt.",
     "noShowSuccess": "Als nicht erschienen markiert.",
+    "completeSuccess": "Termin als abgeschlossen markiert.",
     "actionFailed": "Aktion fehlgeschlagen.",
     "status": {
       "pending": "Ausstehend",

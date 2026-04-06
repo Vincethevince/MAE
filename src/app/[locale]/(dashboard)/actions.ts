@@ -805,6 +805,53 @@ export async function cancelAppointmentAsProvider(
   return { success: true };
 }
 
+export async function markCompleted(
+  formData: FormData
+): Promise<AppointmentActionResult> {
+  const appointmentId = formData.get("appointmentId")?.toString() ?? "";
+  const locale = formData.get("locale")?.toString() ?? "de";
+
+  if (!appointmentId) {
+    return { error: "notFound" };
+  }
+
+  const { db, provider, appt } = await getProviderForAppointment(appointmentId);
+
+  if (!provider) {
+    return { error: "unauthorized" };
+  }
+
+  if (!appt) {
+    return { error: "notFound" };
+  }
+
+  if (appt.provider_id !== provider.id) {
+    return { error: "unauthorized" };
+  }
+
+  if (appt.status !== "confirmed") {
+    return { error: "invalidStatus" };
+  }
+
+  if (new Date(appt.start_time) > new Date()) {
+    return { error: "invalidStatus" };
+  }
+
+  const { error: updateError } = await db
+    .from("appointments")
+    .update({ status: "completed" })
+    .eq("id", appointmentId);
+
+  if (updateError) {
+    return { error: "actionFailed" };
+  }
+
+  const { revalidatePath } = await import("next/cache");
+  const safeLocale = ["de", "en"].includes(locale) ? locale : "de";
+  revalidatePath(`/${safeLocale}/dashboard/calendar`);
+  return { success: true };
+}
+
 export async function markNoShow(
   formData: FormData
 ): Promise<AppointmentActionResult> {

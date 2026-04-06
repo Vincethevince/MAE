@@ -12,6 +12,7 @@ import {
   confirmAppointment as confirmAppointmentAction,
   cancelAppointmentAsProvider as cancelAppointmentAsProviderAction,
   markNoShow as markNoShowAction,
+  markCompleted as markCompletedAction,
 } from "../../actions";
 
 async function confirmAppointment(formData: FormData): Promise<void> {
@@ -27,6 +28,11 @@ async function cancelAppointmentAsProvider(formData: FormData): Promise<void> {
 async function markNoShow(formData: FormData): Promise<void> {
   "use server";
   await markNoShowAction(formData);
+}
+
+async function markCompleted(formData: FormData): Promise<void> {
+  "use server";
+  await markCompletedAction(formData);
 }
 
 interface CalendarPageProps {
@@ -82,6 +88,7 @@ interface AppointmentRowCardProps {
   confirmButtonLabel: string;
   cancelButtonLabel: string;
   noShowButtonLabel: string;
+  completeButtonLabel: string;
   confirmActionLabel: string;
   cancelActionLabel: string;
 }
@@ -96,6 +103,7 @@ function AppointmentRowCard({
   confirmButtonLabel,
   cancelButtonLabel,
   noShowButtonLabel,
+  completeButtonLabel,
   confirmActionLabel,
   cancelActionLabel,
 }: AppointmentRowCardProps) {
@@ -105,6 +113,7 @@ function AppointmentRowCard({
   const canCancel = appt.status === "pending" || appt.status === "confirmed";
   const canNoShow =
     isPast && (appt.status === "pending" || appt.status === "confirmed");
+  const canComplete = isPast && appt.status === "confirmed";
 
   return (
     <div className="flex flex-col gap-3 rounded-lg border bg-card p-4 sm:flex-row sm:items-center sm:justify-between">
@@ -169,6 +178,15 @@ function AppointmentRowCard({
               }}
             >
               {noShowButtonLabel}
+            </Button>
+          </form>
+        )}
+        {canComplete && (
+          <form action={markCompleted}>
+            <input type="hidden" name="appointmentId" value={appt.id} />
+            <input type="hidden" name="locale" value={locale} />
+            <Button type="submit" size="sm" variant="default">
+              {completeButtonLabel}
             </Button>
           </form>
         )}
@@ -252,6 +270,7 @@ export default async function CalendarPage({ params }: CalendarPageProps) {
                       confirmButtonLabel={t("confirmButton")}
                       cancelButtonLabel={t("cancelButton")}
                       noShowButtonLabel={t("noShowButton")}
+                      completeButtonLabel={t("completeButton")}
                       confirmActionLabel={t("noShowSuccess")}
                       cancelActionLabel={t("cancelSuccess")}
                     />
