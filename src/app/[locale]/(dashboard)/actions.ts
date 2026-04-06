@@ -757,7 +757,8 @@ export async function confirmAppointment(
   }
 
   const { revalidatePath } = await import("next/cache");
-  revalidatePath(`/${locale}/dashboard/calendar`);
+  const safeLocale = ["de", "en"].includes(locale) ? locale : "de";
+  revalidatePath(`/${safeLocale}/dashboard/calendar`);
   return { success: true };
 }
 
@@ -799,7 +800,8 @@ export async function cancelAppointmentAsProvider(
   }
 
   const { revalidatePath } = await import("next/cache");
-  revalidatePath(`/${locale}/dashboard/calendar`);
+  const safeLocale = ["de", "en"].includes(locale) ? locale : "de";
+  revalidatePath(`/${safeLocale}/dashboard/calendar`);
   return { success: true };
 }
 
@@ -846,6 +848,7 @@ export async function markNoShow(
   }
 
   const { revalidatePath } = await import("next/cache");
-  revalidatePath(`/${locale}/dashboard/calendar`);
+  const safeLocale = ["de", "en"].includes(locale) ? locale : "de";
+  revalidatePath(`/${safeLocale}/dashboard/calendar`);
   return { success: true };
 }

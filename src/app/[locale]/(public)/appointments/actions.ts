@@ -63,7 +63,8 @@ export async function cancelAppointment(formData: FormData): Promise<ActionResul
     return { error: "cancelFailed" };
   }
 
-  revalidatePath(`/${locale}/appointments`);
+  const safeLocale = ["de", "en"].includes(locale) ? locale : "de";
+  revalidatePath(`/${safeLocale}/appointments`);
   return { success: true };
 }
 
