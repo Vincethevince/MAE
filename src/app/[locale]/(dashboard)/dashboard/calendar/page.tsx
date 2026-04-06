@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { redirect } from "next/navigation";
 import { getTranslations } from "next-intl/server";
 
@@ -37,6 +38,7 @@ async function markCompleted(formData: FormData): Promise<void> {
 
 interface CalendarPageProps {
   params: Promise<{ locale: string }>;
+  searchParams: Promise<{ view?: string }>;
 }
 
 type AppointmentStatus = AppointmentWithProviderAndService["status"];
@@ -91,6 +93,7 @@ interface AppointmentRowCardProps {
   completeButtonLabel: string;
   confirmActionLabel: string;
   cancelActionLabel: string;
+  isPastView: boolean;
 }
 
 function AppointmentRowCard({
@@ -106,14 +109,15 @@ function AppointmentRowCard({
   completeButtonLabel,
   confirmActionLabel,
   cancelActionLabel,
+  isPastView,
 }: AppointmentRowCardProps) {
   const apptStart = new Date(appt.start_time);
   const isPast = apptStart < new Date();
-  const canConfirm = appt.status === "pending";
-  const canCancel = appt.status === "pending" || appt.status === "confirmed";
+  const canConfirm = !isPastView && appt.status === "pending";
+  const canCancel = !isPastView && (appt.status === "pending" || appt.status === "confirmed");
   const canNoShow =
-    isPast && (appt.status === "pending" || appt.status === "confirmed");
-  const canComplete = isPast && appt.status === "confirmed";
+    !isPastView && isPast && (appt.status === "pending" || appt.status === "confirmed");
+  const canComplete = !isPastView && isPast && appt.status === "confirmed";
 
   return (
     <div className="flex flex-col gap-3 rounded-lg border bg-card p-4 sm:flex-row sm:items-center sm:justify-between">
@@ -126,7 +130,7 @@ function AppointmentRowCard({
         </div>
         <dl className="grid grid-cols-[auto,1fr] gap-x-3 gap-y-0.5 text-sm text-muted-foreground">
           <dt>{customerLabel}:</dt>
-          <dd className="text-foreground">{appt.providerName}</dd>
+          <dd className="text-foreground">{appt.providerName || "—"}</dd>
           <dt>{serviceLabel}:</dt>
           <dd className="text-foreground">{appt.serviceName}</dd>
           <dt>{timeLabel}:</dt>
@@ -195,8 +199,13 @@ function AppointmentRowCard({
   );
 }
 
-export default async function CalendarPage({ params }: CalendarPageProps) {
+export default async function CalendarPage({ params, searchParams }: CalendarPageProps) {
   const { locale } = await params;
+  const { view } = await searchParams;
+
+  // Whitelist the view param
+  const isPastView = view === "past";
+
   const supabase = await createClient();
 
   const {
@@ -214,22 +223,46 @@ export default async function CalendarPage({ params }: CalendarPageProps) {
   }
 
   const now = new Date();
-  const todayStart = new Date(now);
-  todayStart.setHours(0, 0, 0, 0);
-  const endDate = new Date(todayStart);
-  endDate.setDate(todayStart.getDate() + 7);
-  endDate.setHours(23, 59, 59, 999);
+
+  let from: Date;
+  let to: Date;
+
+  if (isPastView) {
+    // Last 30 days (up to but not including today midnight)
+    from = new Date(now);
+    from.setDate(now.getDate() - 30);
+    from.setHours(0, 0, 0, 0);
+    to = new Date(now);
+    to.setHours(0, 0, 0, 0);
+    to.setMilliseconds(-1);
+  } else {
+    // Today + next 7 days
+    from = new Date(now);
+    from.setHours(0, 0, 0, 0);
+    to = new Date(from);
+    to.setDate(from.getDate() + 7);
+    to.setHours(23, 59, 59, 999);
+  }
 
   const [appointments, t] = await Promise.all([
-    getProviderAppointmentsRange(supabase, provider.id, todayStart, endDate),
+    getProviderAppointmentsRange(supabase, provider.id, from, to),
     getTranslations("calendar"),
   ]);
 
   // Group by date key
   const grouped = new Map<string, AppointmentWithProviderAndService[]>();
-  for (let d = new Date(todayStart); d <= endDate; d.setDate(d.getDate() + 1)) {
-    grouped.set(isoDateKey(new Date(d)), []);
+
+  if (isPastView) {
+    // Past: iterate backwards (most recent first)
+    for (let d = new Date(to); d >= from; d.setDate(d.getDate() - 1)) {
+      grouped.set(isoDateKey(new Date(d)), []);
+    }
+  } else {
+    for (let d = new Date(from); d <= to; d.setDate(d.getDate() + 1)) {
+      grouped.set(isoDateKey(new Date(d)), []);
+    }
   }
+
   for (const appt of appointments) {
     const key = isoDateKey(new Date(appt.start_time));
     const bucket = grouped.get(key);
@@ -238,48 +271,80 @@ export default async function CalendarPage({ params }: CalendarPageProps) {
     }
   }
 
-  const days = Array.from(grouped.entries());
+  // For past view, skip empty days to reduce noise
+  const days = Array.from(grouped.entries()).filter(
+    ([, appts]) => !isPastView || appts.length > 0
+  );
 
   return (
     <div>
       <h1 className="text-2xl font-bold">{t("title")}</h1>
       <p className="mt-1 text-muted-foreground">{provider.business_name}</p>
 
+      {/* Tab navigation */}
+      <div className="mt-4 flex gap-2 border-b pb-0">
+        <Link
+          href={`/${locale}/dashboard/calendar`}
+          className={`px-4 py-2 text-sm font-medium border-b-2 -mb-px transition-colors ${
+            !isPastView
+              ? "border-primary text-foreground"
+              : "border-transparent text-muted-foreground hover:text-foreground"
+          }`}
+        >
+          {t("today")}
+        </Link>
+        <Link
+          href={`/${locale}/dashboard/calendar?view=past`}
+          className={`px-4 py-2 text-sm font-medium border-b-2 -mb-px transition-colors ${
+            isPastView
+              ? "border-primary text-foreground"
+              : "border-transparent text-muted-foreground hover:text-foreground"
+          }`}
+        >
+          {t("past30Days")}
+        </Link>
+      </div>
+
       <div className="mt-6 flex flex-col gap-8">
-        {days.map(([dateKey, dayAppts]) => {
-          const dayDate = new Date(dateKey + "T00:00:00");
-          return (
-            <section key={dateKey}>
-              <h2 className="text-base font-semibold mb-3">
-                {formatDayHeading(dayDate, locale)}
-              </h2>
-              <Separator className="mb-3" />
-              {dayAppts.length === 0 ? (
-                <p className="text-sm text-muted-foreground">{t("noAppointments")}</p>
-              ) : (
-                <div className="flex flex-col gap-3">
-                  {dayAppts.map((appt) => (
-                    <AppointmentRowCard
-                      key={appt.id}
-                      appt={appt}
-                      locale={locale}
-                      customerLabel={t("customerLabel")}
-                      serviceLabel={t("serviceLabel")}
-                      timeLabel={t("timeLabel")}
-                      statusLabel={t(`status.${appt.status}`)}
-                      confirmButtonLabel={t("confirmButton")}
-                      cancelButtonLabel={t("cancelButton")}
-                      noShowButtonLabel={t("noShowButton")}
-                      completeButtonLabel={t("completeButton")}
-                      confirmActionLabel={t("noShowSuccess")}
-                      cancelActionLabel={t("cancelSuccess")}
-                    />
-                  ))}
-                </div>
-              )}
-            </section>
-          );
-        })}
+        {days.length === 0 ? (
+          <p className="text-sm text-muted-foreground">{t("noAppointments")}</p>
+        ) : (
+          days.map(([dateKey, dayAppts]) => {
+            const dayDate = new Date(dateKey + "T00:00:00");
+            return (
+              <section key={dateKey}>
+                <h2 className="text-base font-semibold mb-3">
+                  {formatDayHeading(dayDate, locale)}
+                </h2>
+                <Separator className="mb-3" />
+                {dayAppts.length === 0 ? (
+                  <p className="text-sm text-muted-foreground">{t("noAppointments")}</p>
+                ) : (
+                  <div className="flex flex-col gap-3">
+                    {dayAppts.map((appt) => (
+                      <AppointmentRowCard
+                        key={appt.id}
+                        appt={appt}
+                        locale={locale}
+                        customerLabel={t("customerLabel")}
+                        serviceLabel={t("serviceLabel")}
+                        timeLabel={t("timeLabel")}
+                        statusLabel={t(`status.${appt.status}`)}
+                        confirmButtonLabel={t("confirmButton")}
+                        cancelButtonLabel={t("cancelButton")}
+                        noShowButtonLabel={t("noShowButton")}
+                        completeButtonLabel={t("completeButton")}
+                        confirmActionLabel={t("noShowSuccess")}
+                        cancelActionLabel={t("cancelSuccess")}
+                        isPastView={isPastView}
+                      />
+                    ))}
+                  </div>
+                )}
+              </section>
+            );
+          })
+        )}
       </div>
     </div>
   );

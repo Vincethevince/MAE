@@ -360,8 +360,9 @@
   },
   "calendar": {
     "title": "Calendar",
-    "today": "Today",
+    "today": "Upcoming",
     "next7Days": "Next 7 Days",
+    "past30Days": "Past 30 Days",
     "noAppointments": "No appointments in this period",
     "confirmButton": "Confirm",
     "cancelButton": "Cancel",
