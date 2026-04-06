@@ -20,6 +20,7 @@ describe("businessProfileSchema", () => {
     phone: "",
     category: "friseur" as const,
     description: "",
+    website: "",
   };
 
   it("accepts a complete valid profile", () => {
@@ -68,6 +69,26 @@ describe("businessProfileSchema", () => {
 
   it("rejects description longer than 500 chars", () => {
     expect(businessProfileSchema.safeParse({ ...valid, description: "A".repeat(501) }).success).toBe(false);
+  });
+
+  it("accepts empty website (optional)", () => {
+    expect(businessProfileSchema.safeParse({ ...valid, website: "" }).success).toBe(true);
+  });
+
+  it("accepts valid https website URL", () => {
+    expect(businessProfileSchema.safeParse({ ...valid, website: "https://example.com" }).success).toBe(true);
+  });
+
+  it("accepts valid http website URL", () => {
+    expect(businessProfileSchema.safeParse({ ...valid, website: "http://example.com" }).success).toBe(true);
+  });
+
+  it("rejects javascript: URL scheme", () => {
+    expect(businessProfileSchema.safeParse({ ...valid, website: "javascript:alert(1)" }).success).toBe(false);
+  });
+
+  it("rejects non-URL website value", () => {
+    expect(businessProfileSchema.safeParse({ ...valid, website: "not-a-url" }).success).toBe(false);
   });
 });
 
