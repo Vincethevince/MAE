@@ -83,6 +83,7 @@ export async function createOrUpdateProvider(
     phone: formData.get("phone")?.toString() ?? "",
     category: formData.get("category")?.toString() ?? "",
     description: formData.get("description")?.toString() ?? "",
+    website: formData.get("website")?.toString() ?? "",
   };
 
   const parsed = businessProfileSchema.safeParse(raw);
@@ -134,6 +135,7 @@ export async function createOrUpdateProvider(
         // category is immutable after creation — always use the stored value
         category: existing.category,
         description: parsed.data.description ?? null,
+        website: parsed.data.website ?? null,
       })
       .eq("id", existing.id)
       .eq("profile_id", user.id);
@@ -159,6 +161,7 @@ export async function createOrUpdateProvider(
       phone: parsed.data.phone ?? null,
       category: parsed.data.category,
       description: parsed.data.description ?? null,
+      website: parsed.data.website ?? null,
     })
     .select("id")
     .single();

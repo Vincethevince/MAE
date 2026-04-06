@@ -27,6 +27,15 @@ export const businessProfileSchema = z.object({
     message: "categoryRequired",
   }),
   description: z.string().max(500).optional().or(z.literal("")),
+  website: z
+    .string()
+    .url("websiteInvalid")
+    .refine(
+      (url) => url.startsWith("https://") || url.startsWith("http://"),
+      "websiteInvalid"
+    )
+    .optional()
+    .or(z.literal("")),
 });
 
 export const serviceSchema = z.object({

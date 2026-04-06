@@ -45,6 +45,7 @@ export default async function SettingsPage({ params }: SettingsPageProps) {
           phone: provider.phone,
           category: provider.category,
           description: provider.description,
+          website: provider.website,
         }}
       />
     </div>

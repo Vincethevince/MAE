@@ -19,6 +19,7 @@ interface ProviderData {
   phone: string | null;
   category: string;
   description: string | null;
+  website: string | null;
 }
 
 interface SettingsFormProps {
@@ -129,6 +130,18 @@ export function SettingsForm({ provider }: SettingsFormProps) {
               type="tel"
               defaultValue={provider.phone ?? ""}
               maxLength={20}
+            />
+          </div>
+
+          <div className="space-y-1.5">
+            <Label htmlFor="website">{t("fields.website")}</Label>
+            <Input
+              id="website"
+              name="website"
+              type="url"
+              placeholder="https://example.com"
+              defaultValue={provider.website ?? ""}
+              maxLength={200}
             />
           </div>
 

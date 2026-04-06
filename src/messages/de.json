@@ -193,6 +193,7 @@
         "postalCode": "PLZ",
         "city": "Stadt",
         "phone": "Telefon (optional)",
+        "website": "Website (optional)",
         "description": "Beschreibung (optional)"
       },
       "errors": {

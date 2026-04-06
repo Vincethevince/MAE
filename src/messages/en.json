@@ -193,6 +193,7 @@
         "postalCode": "Postal code",
         "city": "City",
         "phone": "Phone (optional)",
+        "website": "Website (optional)",
         "description": "Description (optional)"
       },
       "errors": {
