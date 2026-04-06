@@ -47,7 +47,17 @@ export default async function SuccessPage({
 
   if (appointmentId) {
     const supabase = await createClient();
-    appointment = await getAppointmentById(supabase, appointmentId);
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+
+    if (user) {
+      const appt = await getAppointmentById(supabase, appointmentId);
+      // Only show appointment details to the user who booked it
+      if (appt && appt.user_id === user.id) {
+        appointment = appt;
+      }
+    }
   }
 
   return (
@@ -96,7 +106,7 @@ export default async function SuccessPage({
 
       <div className="flex flex-col gap-3">
         <Link
-          href={`/${locale}/dashboard`}
+          href={`/${locale}/appointments`}
           className={buttonVariants({ className: "w-full" })}
         >
           {t("viewAppointments")}
