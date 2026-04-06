@@ -16,10 +16,8 @@ type ActionResult =
   | { error: string; appointmentId?: never }
   | { error?: never; appointmentId: string };
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-async function queryDb(supabase: any): Promise<any> {
-  return supabase;
-}
+const VALID_LOCALES = ["de", "en"] as const;
+const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 type AppointmentRow = Database["public"]["Tables"]["appointments"]["Row"];
 
@@ -42,7 +40,8 @@ export async function createAppointment(
   const { providerId, serviceId, startTime, notes } = parsed.data;
 
   const supabase = await createClient();
-  const db = await queryDb(supabase);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const db = supabase as any;
 
   // Require authenticated user
   const {
@@ -107,6 +106,19 @@ export async function createAppointment(
     return { error: "slotNotAvailable" };
   }
 
+  // Check provider blocks
+  const { data: blockData } = await db
+    .from("provider_blocks")
+    .select("start_time, end_time")
+    .eq("provider_id", service.provider_id)
+    .lt("start_time", requestedEnd.toISOString())
+    .gt("end_time", requestedStart.toISOString());
+
+  const hasBlockConflict = (blockData ?? []).length > 0;
+  if (hasBlockConflict) {
+    return { error: "slotNotAvailable" };
+  }
+
   // Price comes from service record, never from the client
   const priceCents = service.price_cents;
 
@@ -135,15 +147,24 @@ export async function createAppointment(
 }
 
 export async function confirmAndRedirect(formData: FormData): Promise<never> {
-  const locale = formData.get("locale")?.toString() ?? "de";
+  const rawLocale = formData.get("locale")?.toString() ?? "de";
+  const safeLocale = VALID_LOCALES.includes(rawLocale as typeof VALID_LOCALES[number])
+    ? rawLocale
+    : "de";
 
   const result = await createAppointment(formData);
 
   if (result.error) {
+    // Validate UUIDs before embedding in the redirect path to prevent path traversal
+    const rawProviderId = formData.get("providerId")?.toString() ?? "";
+    const rawServiceId = formData.get("serviceId")?.toString() ?? "";
+    if (!UUID_REGEX.test(rawProviderId) || !UUID_REGEX.test(rawServiceId)) {
+      redirect(`/${safeLocale}/search`);
+    }
     redirect(
-      `/${locale}/book/${formData.get("providerId")}/${formData.get("serviceId")}/confirm?startTime=${encodeURIComponent(formData.get("startTime")?.toString() ?? "")}&error=${result.error}`
+      `/${safeLocale}/book/${rawProviderId}/${rawServiceId}/confirm?startTime=${encodeURIComponent(formData.get("startTime")?.toString() ?? "")}&error=${result.error}`
     );
   }
 
-  redirect(`/${locale}/book/success?appointmentId=${result.appointmentId}`);
+  redirect(`/${safeLocale}/book/success?appointmentId=${result.appointmentId}`);
 }

@@ -545,6 +545,22 @@ export async function getProviderRevenue30Days(
   );
 }
 
+export async function getProviderBlocksForDateRange(
+  supabase: TypedSupabaseClient,
+  providerId: string,
+  from: Date,
+  to: Date
+): Promise<{ id: string; start_time: string; end_time: string; label: string | null }[]> {
+  const { data } = await db(supabase)
+    .from("provider_blocks")
+    .select("id, start_time, end_time, label")
+    .eq("provider_id", providerId)
+    .lt("start_time", to.toISOString())
+    .gt("end_time", from.toISOString());
+
+  return (data as { id: string; start_time: string; end_time: string; label: string | null }[] | null) ?? [];
+}
+
 export async function getProviderReviews(
   supabase: TypedSupabaseClient,
   providerId: string

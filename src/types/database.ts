@@ -235,6 +235,29 @@ export interface Database {
           comment?: string | null;
         };
       };
+      provider_blocks: {
+        Row: {
+          id: string;
+          provider_id: string;
+          start_time: string;
+          end_time: string;
+          label: string | null;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          provider_id: string;
+          start_time: string;
+          end_time: string;
+          label?: string | null;
+          created_at?: string;
+        };
+        Update: {
+          start_time?: string;
+          end_time?: string;
+          label?: string | null;
+        };
+      };
     };
     Views: Record<string, never>;
     Functions: Record<string, never>;

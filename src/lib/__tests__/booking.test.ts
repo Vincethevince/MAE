@@ -166,6 +166,49 @@ describe("computeAvailableSlots", () => {
     expect(slots).toHaveLength(0);
   });
 
+  it("excludes slots that overlap with a provider block", () => {
+    const monday = dateForWeekday(1);
+    const availability = [makeAvail(1, "09:00", "12:00")];
+    // Block from 10:00 to 11:00
+    const blockStart = new Date(monday);
+    blockStart.setHours(10, 0, 0, 0);
+    const blockEnd = new Date(monday);
+    blockEnd.setHours(11, 0, 0, 0);
+    const blocks = [{ start_time: blockStart.toISOString(), end_time: blockEnd.toISOString() }];
+
+    const slots = computeAvailableSlots(monday, availability, [], 60, blocks);
+    for (const slot of slots) {
+      const overlaps =
+        slot.startTime.getTime() < blockEnd.getTime() &&
+        blockStart.getTime() < slot.endTime.getTime();
+      expect(overlaps).toBe(false);
+    }
+    // 09:00–10:00 should be available (doesn't overlap block)
+    expect(slots.some(s => s.startTime.getHours() === 9 && s.startTime.getMinutes() === 0)).toBe(true);
+    // 11:00–12:00 should be available
+    expect(slots.some(s => s.startTime.getHours() === 11 && s.startTime.getMinutes() === 0)).toBe(true);
+  });
+
+  it("with empty blocks array behaves identically to no-blocks call", () => {
+    const monday = dateForWeekday(1);
+    const availability = [makeAvail(1, "09:00", "17:00")];
+    const withBlocks = computeAvailableSlots(monday, availability, [], 30, []);
+    const withoutBlocks = computeAvailableSlots(monday, availability, [], 30);
+    expect(withBlocks).toEqual(withoutBlocks);
+  });
+
+  it("full-day block prevents all slots", () => {
+    const monday = dateForWeekday(1);
+    const availability = [makeAvail(1, "09:00", "17:00")];
+    const blockStart = new Date(monday);
+    blockStart.setHours(0, 0, 0, 0);
+    const blockEnd = new Date(monday);
+    blockEnd.setHours(23, 59, 59, 999);
+    const blocks = [{ start_time: blockStart.toISOString(), end_time: blockEnd.toISOString() }];
+    const slots = computeAvailableSlots(monday, availability, [], 30, blocks);
+    expect(slots).toHaveLength(0);
+  });
+
   it("returns all slots when appointments have status=cancelled", () => {
     const monday = dateForWeekday(1);
     const availability = [makeAvail(1, "09:00", "10:00")];

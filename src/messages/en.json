@@ -178,6 +178,22 @@
         "unauthorized": "Not authorized",
         "saveFailed": "Failed to save",
         "providerNotFound": "Provider not found"
+      },
+      "blocks": {
+        "title": "Schedule Blocks",
+        "description": "Block specific dates or times (vacation, holidays) to prevent bookings",
+        "startDate": "Start date",
+        "startTime": "Start time",
+        "endDate": "End date",
+        "endTime": "End time",
+        "labelField": "Label (optional)",
+        "addButton": "Add block",
+        "removeButton": "Remove",
+        "noBlocks": "No blocks configured",
+        "errors": {
+          "validationError": "Please check your input",
+          "saveFailed": "Failed to save"
+        }
       }
     },
     "settings": {

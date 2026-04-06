@@ -6,8 +6,10 @@ import {
   getProviderById,
   getServiceById,
   getAppointmentsForDate,
+  getProviderBlocksForDateRange,
 } from "@/lib/supabase/queries";
 import { computeAvailableSlots } from "@/lib/booking";
+import type { BlockInterval } from "@/lib/booking";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
@@ -67,16 +69,34 @@ export default async function BookingPage({ params }: BookingPageProps) {
     futureDates.push(d);
   }
 
+  // Fetch provider blocks for the full 14-day range once
+  const rangeEnd = new Date(today);
+  rangeEnd.setDate(today.getDate() + 14);
+  const allBlocks = await getProviderBlocksForDateRange(supabase, providerId, today, rangeEnd);
+
   // Pre-compute slots for each date
   const slotsByDate: Record<string, Array<{ startTime: string; endTime: string }>> = {};
 
   for (const date of futureDates) {
+    const dayStart = new Date(date);
+    dayStart.setHours(0, 0, 0, 0);
+    const dayEnd = new Date(date);
+    dayEnd.setHours(23, 59, 59, 999);
+
+    // Filter blocks that overlap this day
+    const dayBlocks: BlockInterval[] = allBlocks.filter((b) => {
+      const bStart = new Date(b.start_time);
+      const bEnd = new Date(b.end_time);
+      return bStart < dayEnd && bEnd > dayStart;
+    });
+
     const existingAppointments = await getAppointmentsForDate(supabase, providerId, date);
     const slots = computeAvailableSlots(
       date,
       provider.availability,
       existingAppointments,
-      service.duration_minutes
+      service.duration_minutes,
+      dayBlocks
     );
     const dateKey = date.toISOString().split("T")[0] ?? "";
     slotsByDate[dateKey] = slots.map((s) => ({

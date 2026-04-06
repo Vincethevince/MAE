@@ -10,6 +10,11 @@ export interface TimeSlot {
   endTime: Date;
 }
 
+export interface BlockInterval {
+  start_time: string;
+  end_time: string;
+}
+
 /**
  * Parse a time string (HH:MM or HH:MM:SS) and apply it to a date.
  */
@@ -48,7 +53,8 @@ export function computeAvailableSlots(
   date: Date,
   availability: AvailabilityRow[],
   existingAppointments: AppointmentRow[],
-  serviceDurationMinutes: number
+  serviceDurationMinutes: number,
+  blocks: BlockInterval[] = []
 ): TimeSlot[] {
   // JS day of week: 0=Sunday … 6=Saturday
   const dayOfWeek = date.getDay();
@@ -82,7 +88,14 @@ export function computeAvailableSlots(
         return intervalsOverlap(cursor, slotEnd, apptStart, apptEnd);
       });
 
-      if (!hasConflict) {
+      // Check against schedule blocks (vacation, holidays)
+      const hasBlockConflict = blocks.some((block) => {
+        const blockStart = new Date(block.start_time);
+        const blockEnd = new Date(block.end_time);
+        return intervalsOverlap(cursor, slotEnd, blockStart, blockEnd);
+      });
+
+      if (!hasConflict && !hasBlockConflict) {
         slots.push({ startTime: new Date(cursor), endTime: new Date(slotEnd) });
       }
 

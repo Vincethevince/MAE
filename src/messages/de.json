@@ -178,6 +178,22 @@
         "unauthorized": "Keine Berechtigung",
         "saveFailed": "Speichern fehlgeschlagen",
         "providerNotFound": "Anbieter nicht gefunden"
+      },
+      "blocks": {
+        "title": "Zeitblockierungen",
+        "description": "Blockiere bestimmte Daten oder Zeiten (Urlaub, Feiertage), um Buchungen zu verhindern",
+        "startDate": "Startdatum",
+        "startTime": "Startzeit",
+        "endDate": "Enddatum",
+        "endTime": "Endzeit",
+        "labelField": "Bezeichnung (optional)",
+        "addButton": "Blockierung hinzufügen",
+        "removeButton": "Entfernen",
+        "noBlocks": "Keine Blockierungen eingerichtet",
+        "errors": {
+          "validationError": "Bitte überprüfe deine Eingaben",
+          "saveFailed": "Speichern fehlgeschlagen"
+        }
       }
     },
     "settings": {
