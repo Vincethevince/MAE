@@ -337,6 +337,7 @@
       "unauthorized": "Keine Berechtigung",
       "notFound": "Termin nicht gefunden",
       "cannotCancel": "Dieser Termin kann nicht mehr abgesagt werden",
+      "cancelTooLate": "Termine können nicht innerhalb von 24 Stunden vor dem Termin abgesagt werden",
       "cancelFailed": "Absagen fehlgeschlagen"
     },
     "review": {

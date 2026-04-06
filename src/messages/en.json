@@ -337,6 +337,7 @@
       "unauthorized": "Not authorized",
       "notFound": "Appointment not found",
       "cannotCancel": "This appointment can no longer be cancelled",
+      "cancelTooLate": "Appointments cannot be cancelled within 24 hours of the start time",
       "cancelFailed": "Failed to cancel appointment"
     },
     "review": {

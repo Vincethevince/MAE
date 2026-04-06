@@ -73,6 +73,8 @@ interface AppointmentCardProps {
   priceLabel: string;
   onCancel: (formData: FormData) => Promise<void>;
   showCancel: boolean;
+  cancelTooLateLabel: string;
+  isCancelBlockedByTime: boolean;
   hasReview: boolean;
   reviewedLabel: string;
 }
@@ -86,6 +88,8 @@ function AppointmentCard({
   priceLabel,
   onCancel,
   showCancel,
+  cancelTooLateLabel,
+  isCancelBlockedByTime,
   hasReview,
   reviewedLabel,
 }: AppointmentCardProps) {
@@ -133,6 +137,9 @@ function AppointmentCard({
             locale={locale}
             onCancel={onCancel}
           />
+        )}
+        {isCancelBlockedByTime && (
+          <p className="mt-3 text-xs text-muted-foreground">{cancelTooLateLabel}</p>
         )}
 
         {appt.status === "completed" &&
@@ -194,21 +201,28 @@ export default async function AppointmentsPage({ params }: AppointmentsPageProps
           <p className="text-muted-foreground text-sm">{t("emptyUpcoming")}</p>
         ) : (
           <div className="flex flex-col gap-4">
-            {upcoming.map((appt) => (
-              <AppointmentCard
-                key={appt.id}
-                appt={appt}
-                locale={locale}
-                statusLabel={t(`status.${appt.status}`)}
-                durationLabel={t("fields.duration")}
-                minutesLabel={t("fields.minutes")}
-                priceLabel={t("fields.price")}
-                onCancel={cancelAppointment}
-                showCancel={appt.status === "pending" || appt.status === "confirmed"}
-                hasReview={reviewedIds.has(appt.id)}
-                reviewedLabel={t("review.alreadyReviewed")}
-              />
-            ))}
+            {upcoming.map((appt) => {
+              const isCancellableStatus = appt.status === "pending" || appt.status === "confirmed";
+              const hoursUntilStart = (new Date(appt.start_time).getTime() - Date.now()) / (1000 * 60 * 60);
+              const withinCutoff = hoursUntilStart < 24;
+              return (
+                <AppointmentCard
+                  key={appt.id}
+                  appt={appt}
+                  locale={locale}
+                  statusLabel={t(`status.${appt.status}`)}
+                  durationLabel={t("fields.duration")}
+                  minutesLabel={t("fields.minutes")}
+                  priceLabel={t("fields.price")}
+                  onCancel={cancelAppointment}
+                  showCancel={isCancellableStatus && !withinCutoff}
+                  cancelTooLateLabel={t("errors.cancelTooLate")}
+                  isCancelBlockedByTime={isCancellableStatus && withinCutoff}
+                  hasReview={reviewedIds.has(appt.id)}
+                  reviewedLabel={t("review.alreadyReviewed")}
+                />
+              );
+            })}
           </div>
         )}
       </section>
@@ -230,6 +244,8 @@ export default async function AppointmentsPage({ params }: AppointmentsPageProps
                 priceLabel={t("fields.price")}
                 onCancel={cancelAppointment}
                 showCancel={false}
+                cancelTooLateLabel=""
+                isCancelBlockedByTime={false}
                 hasReview={reviewedIds.has(appt.id)}
                 reviewedLabel={t("review.alreadyReviewed")}
               />

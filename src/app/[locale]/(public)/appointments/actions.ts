@@ -36,11 +36,11 @@ export async function cancelAppointment(formData: FormData): Promise<ActionResul
 
   const { data: apptData } = await db
     .from("appointments")
-    .select("id, user_id, status")
+    .select("id, user_id, status, start_time")
     .eq("id", appointmentId)
     .single();
 
-  const appt = apptData as Pick<AppointmentRow, "id" | "user_id" | "status"> | null;
+  const appt = apptData as Pick<AppointmentRow, "id" | "user_id" | "status" | "start_time"> | null;
 
   if (!appt) {
     return { error: "notFound" };
@@ -52,6 +52,12 @@ export async function cancelAppointment(formData: FormData): Promise<ActionResul
 
   if (appt.status !== "pending" && appt.status !== "confirmed") {
     return { error: "cannotCancel" };
+  }
+
+  // Enforce 24-hour cancellation cutoff
+  const hoursUntilStart = (new Date(appt.start_time).getTime() - Date.now()) / (1000 * 60 * 60);
+  if (hoursUntilStart < 24) {
+    return { error: "cancelTooLate" };
   }
 
   const { error: updateError } = await db
