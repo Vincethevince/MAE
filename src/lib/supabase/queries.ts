@@ -343,7 +343,7 @@ export async function getProviderAppointmentsRange(
 
   const [{ data: profiles }, { data: services }] = await Promise.all([
     db(supabase)
-      .from("profiles")
+      .from("public_profiles")
       .select("id, full_name")
       .in("id", userIds),
     db(supabase)
@@ -551,7 +551,7 @@ export async function getProviderReviews(
 ): Promise<ReviewWithUser[]> {
   const { data: reviews } = await db(supabase)
     .from("reviews")
-    .select("*")
+    .select("id, provider_id, user_id, appointment_id, rating, comment, created_at")
     .eq("provider_id", providerId)
     .order("created_at", { ascending: false });
 
@@ -559,8 +559,10 @@ export async function getProviderReviews(
 
   const userIds = [...new Set((reviews as ReviewRow[]).map((r) => r.user_id))];
 
+  // Use public_profiles view (exposes only id + full_name) instead of the
+  // profiles table directly, so we don't require broad RLS on profiles.
   const { data: profiles } = await db(supabase)
-    .from("profiles")
+    .from("public_profiles")
     .select("id, full_name")
     .in("id", userIds);
 
