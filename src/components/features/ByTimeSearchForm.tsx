@@ -2,7 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -38,7 +38,7 @@ export function ByTimeSearchForm({
   const t = useTranslations("search");
   const tBy = useTranslations("search.byTimeSearch");
 
-  const todayStr = new Date().toISOString().split("T")[0] ?? "";
+  const todayStr = useMemo(() => new Date().toISOString().split("T")[0] ?? "", []);
 
   const [date, setDate] = useState(initialDate);
   const [startTime, setStartTime] = useState(initialStartTime);
@@ -67,11 +67,11 @@ export function ByTimeSearchForm({
     router.push(`/${locale}/search/by-time?${params.toString()}`);
   }
 
-  const TIME_PRESETS = [
+  const TIME_PRESETS = useMemo(() => [
     { label: tBy("morning"),   start: "09:00", end: "12:00" },
     { label: tBy("afternoon"), start: "12:00", end: "17:00" },
     { label: tBy("evening"),   start: "17:00", end: "21:00" },
-  ] as const;
+  ], [tBy]);
 
   return (
     <form onSubmit={handleSubmit} className="w-full">
@@ -170,7 +170,7 @@ export function ByTimeSearchForm({
             <Select
               value={category || "all"}
               onValueChange={(val) =>
-                setCategory(val == null || val === "all" ? "" : val)
+                setCategory(!val || val === "all" ? "" : val)
               }
             >
               <SelectTrigger id="by-time-category">

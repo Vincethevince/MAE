@@ -124,6 +124,7 @@ export async function getProviderAvailability(
     .from("availability")
     .select("*")
     .eq("provider_id", providerId)
+    .is("employee_id", null) // Only provider-level slots, not employee-specific ones
     .order("day_of_week");
 
   return (data as AvailabilityRow[] | null) ?? [];
@@ -515,9 +516,11 @@ export async function searchProvidersByTimeSlot(
 
   // 5. Parse user's requested window as Date objects on options.date
   function parseWindowTime(timeStr: string): Date {
-    const [h, m] = timeStr.split(":").map((s) => parseInt(s, 10));
+    const parts = timeStr.split(":");
+    const h = parseInt(parts[0] ?? "0", 10);
+    const m = parseInt(parts[1] ?? "0", 10);
     const d = new Date(options.date);
-    d.setHours(h ?? 0, m ?? 0, 0, 0);
+    d.setHours(isNaN(h) ? 0 : h, isNaN(m) ? 0 : m, 0, 0);
     return d;
   }
 
@@ -746,8 +749,8 @@ export async function getProviderMonthStats(
     topServices = topServiceIds.map((id) => ({
       serviceId: id,
       serviceName: nameMap.get(id) ?? id,
-      completedCount: serviceAgg.get(id)!.completedCount,
-      revenueCents: serviceAgg.get(id)!.revenueCents,
+      completedCount: serviceAgg.get(id)?.completedCount ?? 0,
+      revenueCents: serviceAgg.get(id)?.revenueCents ?? 0,
     }));
   }
 

@@ -368,6 +368,7 @@ export default async function CalendarPage({ params, searchParams }: CalendarPag
                         isPastView={isPastView}
                         noteEditor={
                           <ProviderNoteEditor
+                            key={appt.id}
                             appointmentId={appt.id}
                             initialNote={notesMap.get(appt.id) ?? null}
                             locale={locale}

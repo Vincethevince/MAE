@@ -30,10 +30,10 @@ export default async function ForBusinessesPage({ params }: PageProps) {
   ];
 
   const freeItems = [
-    t("pricing.item1"),
-    t("pricing.item2"),
-    t("pricing.item3"),
-    t("pricing.item4"),
+    { key: "item1", label: t("pricing.item1") },
+    { key: "item2", label: t("pricing.item2") },
+    { key: "item3", label: t("pricing.item3") },
+    { key: "item4", label: t("pricing.item4") },
   ];
 
   return (
@@ -92,10 +92,10 @@ export default async function ForBusinessesPage({ params }: PageProps) {
             </div>
             <p className="mt-3 text-sm text-muted-foreground">{t("pricing.freeDescription")}</p>
             <ul className="mt-6 space-y-3 text-left">
-              {freeItems.map((item) => (
-                <li key={item} className="flex items-center gap-3 text-sm">
+              {freeItems.map(({ key, label }) => (
+                <li key={key} className="flex items-center gap-3 text-sm">
                   <CheckCircle2 className="h-4 w-4 shrink-0 text-primary" />
-                  {item}
+                  {label}
                 </li>
               ))}
             </ul>

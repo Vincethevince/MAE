@@ -33,10 +33,12 @@ export default async function PublicLayout({ children, params }: PublicLayoutPro
   const isProvider = !!provider;
   const userRole = (profileResult.data as { role?: string } | null)?.role ?? null;
 
-  const t = await getTranslations("common");
-  const tAppointments = await getTranslations("appointments");
-  const tProfile = await getTranslations("profile");
-  const tLegal = await getTranslations("legal");
+  const [t, tAppointments, tProfile, tLegal] = await Promise.all([
+    getTranslations("common"),
+    getTranslations("appointments"),
+    getTranslations("profile"),
+    getTranslations("legal"),
+  ]);
 
   return (
     <div className="flex min-h-screen flex-col">

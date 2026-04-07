@@ -21,6 +21,7 @@ export function foldLine(line: string): string {
   const bytes = new TextEncoder().encode(line);
   if (bytes.length <= 75) return line;
 
+  const decoder = new TextDecoder();
   const parts: string[] = [];
   let pos = 0;
   let first = true;
@@ -35,7 +36,7 @@ export function foldLine(line: string): string {
       // Retreat to a valid UTF-8 boundary
       while (end > pos && (bytes[end] & 0xc0) === 0x80) end--;
     }
-    const chunk = new TextDecoder().decode(bytes.slice(pos, end));
+    const chunk = decoder.decode(bytes.slice(pos, end));
     parts.push(first ? chunk : " " + chunk);
     pos = end;
     first = false;

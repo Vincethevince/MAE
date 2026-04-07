@@ -23,6 +23,7 @@ export function CityAutocomplete({
   const [open, setOpen] = useState(false);
   const [activeIndex, setActiveIndex] = useState(-1);
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const abortRef = useRef<AbortController | null>(null);
   const listRef = useRef<HTMLUListElement>(null);
 
   const fetchSuggestions = useCallback(async (q: string) => {
@@ -31,17 +32,22 @@ export function CityAutocomplete({
       setOpen(false);
       return;
     }
+    // Cancel any in-flight request so stale responses can't overwrite newer ones
+    abortRef.current?.abort();
+    abortRef.current = new AbortController();
     try {
       const res = await fetch(
         `/api/geo/suggestions?q=${encodeURIComponent(q)}`,
+        { signal: abortRef.current.signal },
       );
       if (!res.ok) return;
       const data = (await res.json()) as GeoSuggestion[];
       setSuggestions(data);
       setOpen(data.length > 0);
       setActiveIndex(-1);
-    } catch {
-      // Network error — ignore silently
+    } catch (err) {
+      if (err instanceof DOMException && err.name === "AbortError") return;
+      // Other network errors — ignore silently
     }
   }, []);
 
@@ -74,10 +80,11 @@ export function CityAutocomplete({
     }
   }
 
-  // Cleanup debounce on unmount
+  // Cleanup debounce and in-flight request on unmount
   useEffect(() => {
     return () => {
       if (debounceRef.current) clearTimeout(debounceRef.current);
+      abortRef.current?.abort();
     };
   }, []);
 
