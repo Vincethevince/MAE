@@ -94,3 +94,95 @@ export async function changePassword(formData: FormData): Promise<ActionResult> 
 
   return { success: true };
 }
+
+export async function deleteAccount(formData: FormData): Promise<ActionResult> {
+  const confirmation = formData.get("confirmation")?.toString() ?? "";
+
+  // Require the user to type "löschen" to confirm
+  if (confirmation.toLowerCase().trim() !== "löschen") {
+    return { error: "confirmationRequired" };
+  }
+
+  const supabase = await createClient();
+
+  const {
+    data: { user },
+    error: authError,
+  } = await supabase.auth.getUser();
+
+  if (authError || !user) {
+    return { error: "unauthorized" };
+  }
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const db = supabase as any;
+
+  // 1. Cancel all upcoming pending/confirmed appointments
+  // (historical/completed ones remain, anonymized by the FK SET NULL cascade)
+  const now = new Date().toISOString();
+  const { data: upcomingAppts } = await db
+    .from("appointments")
+    .select("id, provider_id, service_id, start_time")
+    .eq("user_id", user.id)
+    .in("status", ["pending", "confirmed"])
+    .gt("start_time", now);
+
+  if (upcomingAppts && upcomingAppts.length > 0) {
+    await db
+      .from("appointments")
+      .update({ status: "cancelled" })
+      .eq("user_id", user.id)
+      .in("status", ["pending", "confirmed"])
+      .gt("start_time", now);
+
+    // Notify providers of cancellations (best-effort, non-blocking)
+    const { sendProviderCancellationAlert } = await import("@/lib/email");
+
+    for (const appt of upcomingAppts) {
+      const [providerResult, serviceResult] = await Promise.allSettled([
+        db.from("providers").select("business_name, address, city, profile_id").eq("id", appt.provider_id).single(),
+        db.from("services").select("name").eq("id", appt.service_id).single(),
+      ]);
+
+      const providerData = providerResult.status === "fulfilled"
+        ? (providerResult.value.data as { business_name?: string; address?: string | null; city?: string | null; profile_id?: string } | null)
+        : null;
+
+      const serviceName = serviceResult.status === "fulfilled"
+        ? (serviceResult.value.data as { name?: string } | null)?.name ?? "Service"
+        : "Service";
+
+      if (providerData?.profile_id) {
+        const profileResult = await db.from("profiles").select("email").eq("id", providerData.profile_id).single();
+        const providerEmail = (profileResult.data as { email?: string } | null)?.email ?? null;
+
+        if (providerEmail) {
+          await sendProviderCancellationAlert(providerEmail, {
+            appointmentId: appt.id,
+            businessName: providerData.business_name ?? "",
+            serviceName,
+            startTime: appt.start_time,
+            address: providerData.address && providerData.city
+              ? `${providerData.address}, ${providerData.city}`
+              : providerData.address ?? null,
+            customerName: null, // already deleting the account
+          });
+        }
+      }
+    }
+  }
+
+  // 2. Delete the auth user via admin client (this cascades to profile,
+  //    which SET-NULL-cascades to appointments and reviews)
+  const { createAdminClient } = await import("@/lib/supabase/admin");
+  const adminClient = createAdminClient();
+
+  const { error: deleteError } = await adminClient.auth.admin.deleteUser(user.id);
+
+  if (deleteError) {
+    console.error("[deleteAccount] Failed to delete user:", deleteError);
+    return { error: "deleteFailed" };
+  }
+
+  return { success: true };
+}

@@ -430,11 +430,18 @@
     "changePasswordTitle": "Change password",
     "currentPasswordLabel": "Current password",
     "passwordChanged": "Password changed successfully.",
+    "deleteAccountTitle": "Delete account",
+    "deleteAccountDescription": "Deleting your account cannot be undone. Upcoming appointments will be cancelled and providers notified. Your personal data will be removed; completed appointments remain anonymised in the providers' booking history.",
+    "deleteAccountConfirmLabel": "Type \"löschen\" to confirm",
+    "deleteAccountConfirmPlaceholder": "löschen",
+    "deleteAccountButton": "Permanently delete account",
     "errors": {
       "validationError": "Please check your input",
       "unauthorized": "Not signed in",
       "saveFailed": "Failed to save",
-      "currentPasswordWrong": "Current password is incorrect"
+      "currentPasswordWrong": "Current password is incorrect",
+      "confirmationRequired": "Please type \"löschen\" to confirm",
+      "deleteFailed": "Failed to delete account. Please try again."
     }
   },
   "auth": {

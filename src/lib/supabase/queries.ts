@@ -386,7 +386,7 @@ export async function getProviderAppointmentsRange(
   return appts.map((appt) => ({
     ...appt,
     // For provider calendar view, providerName holds the customer's name
-    providerName: profileMap.get(appt.user_id) ?? "",
+    providerName: appt.user_id != null ? (profileMap.get(appt.user_id) ?? "") : "",
     providerId: appt.provider_id,
     // Provider contact fields not needed in the provider's own calendar view
     providerAddress: null,
@@ -597,7 +597,7 @@ export async function getProviderReviews(
 
   if (!reviews || reviews.length === 0) return [];
 
-  const userIds = [...new Set((reviews as ReviewRow[]).map((r) => r.user_id))];
+  const userIds = [...new Set((reviews as ReviewRow[]).map((r) => r.user_id).filter((id): id is string => id != null))];
 
   // Use public_profiles view (exposes only id + full_name) instead of the
   // profiles table directly, so we don't require broad RLS on profiles.
@@ -615,6 +615,6 @@ export async function getProviderReviews(
 
   return (reviews as ReviewRow[]).map((r) => ({
     ...r,
-    user_full_name: profileMap.get(r.user_id) ?? null,
+    user_full_name: r.user_id != null ? (profileMap.get(r.user_id) ?? null) : null,
   }));
 }

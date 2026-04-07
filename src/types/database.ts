@@ -176,7 +176,7 @@ export interface Database {
       appointments: {
         Row: {
           id: string;
-          user_id: string;
+          user_id: string | null;
           provider_id: string;
           employee_id: string | null;
           service_id: string;
@@ -217,7 +217,7 @@ export interface Database {
       reviews: {
         Row: {
           id: string;
-          user_id: string;
+          user_id: string | null;
           provider_id: string;
           appointment_id: string;
           rating: number;

@@ -430,11 +430,18 @@
     "changePasswordTitle": "Passwort ändern",
     "currentPasswordLabel": "Aktuelles Passwort",
     "passwordChanged": "Passwort erfolgreich geändert.",
+    "deleteAccountTitle": "Konto löschen",
+    "deleteAccountDescription": "Das Löschen deines Kontos kann nicht rückgängig gemacht werden. Bevorstehende Termine werden abgesagt und die Anbieter benachrichtigt. Deine persönlichen Daten werden gelöscht; abgeschlossene Termine bleiben anonymisiert in der Buchungshistorie der Anbieter erhalten.",
+    "deleteAccountConfirmLabel": "Tippe „löschen" zur Bestätigung",
+    "deleteAccountConfirmPlaceholder": "löschen",
+    "deleteAccountButton": "Konto unwiderruflich löschen",
     "errors": {
       "validationError": "Bitte überprüfe deine Eingaben",
       "unauthorized": "Nicht angemeldet",
       "saveFailed": "Speichern fehlgeschlagen",
-      "currentPasswordWrong": "Das aktuelle Passwort ist falsch"
+      "currentPasswordWrong": "Das aktuelle Passwort ist falsch",
+      "confirmationRequired": "Bitte tippe „löschen" zur Bestätigung",
+      "deleteFailed": "Konto konnte nicht gelöscht werden. Bitte versuche es erneut."
     }
   },
   "auth": {
