@@ -6,7 +6,7 @@ import { cache } from "react";
 import { createClient } from "@/lib/supabase/server";
 import { getProviderById, getProviderReviews } from "@/lib/supabase/queries";
 import { Badge } from "@/components/ui/badge";
-import { buttonVariants } from "@/components/ui/button";
+import { buttonVariants } from "@/lib/button-variants";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { RatingStars } from "@/components/features/RatingStars";

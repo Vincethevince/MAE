@@ -5,7 +5,8 @@ import { CalendarPlus } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
 import { getAppointmentById } from "@/lib/supabase/queries";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button, buttonVariants } from "@/components/ui/button";
+import { Button } from "@/components/ui/button";
+import { buttonVariants } from "@/lib/button-variants";
 import { Separator } from "@/components/ui/separator";
 
 interface SuccessPageProps {

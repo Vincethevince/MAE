@@ -4,7 +4,7 @@ import { getTranslations } from "next-intl/server";
 
 import { createClient } from "@/lib/supabase/server";
 import { getCurrentProvider } from "@/lib/supabase/queries";
-import { buttonVariants } from "@/components/ui/button";
+import { buttonVariants } from "@/lib/button-variants";
 import { LogoutButton } from "@/components/features/LogoutButton";
 import { Separator } from "@/components/ui/separator";
 
