@@ -1,6 +1,7 @@
 "use server";
 
 import { redirect } from "next/navigation";
+import { revalidatePath } from "next/cache";
 
 import { createClient } from "@/lib/supabase/server";
 import {
@@ -26,6 +27,14 @@ type ProviderRow = Database["public"]["Tables"]["providers"]["Row"];
 
 // RFC 4122 UUID — used to validate IDs from formData before any DB call
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
+// Supported locales — centralised so adding a new locale is a single change
+const VALID_LOCALES = ["de", "en"] as const;
+type AppLocale = typeof VALID_LOCALES[number];
+function sanitizeLocale(raw: string | undefined): AppLocale {
+  const l = raw ?? "de";
+  return (VALID_LOCALES as readonly string[]).includes(l) ? (l as AppLocale) : "de";
+}
 
 // supabase-js 2.100+ uses a newer internal schema format that doesn't match
 // the hand-written Database type, so we cast where table queries are needed.
@@ -151,7 +160,6 @@ export async function createOrUpdateProvider(
       return { error: "saveFailed" };
     }
 
-    const { revalidatePath } = await import("next/cache");
     revalidatePath(`/provider/${existing.id}`);
 
     return { success: true, data: { providerId: existing.id } };
@@ -357,25 +365,18 @@ export async function setAvailability(
     return { error: "providerNotFound" };
   }
 
-  const { error: deleteError } = await db
-    .from("availability")
-    .delete()
-    .eq("provider_id", provider.id)
-    .eq("day_of_week", parsed.data.dayOfWeek)
-    .is("employee_id", null);
+  // Upsert is atomic — avoids a window where the slot is deleted but not yet re-inserted
+  const { error: upsertError } = await db.from("availability").upsert(
+    {
+      provider_id: provider.id,
+      day_of_week: parsed.data.dayOfWeek,
+      start_time: parsed.data.startTime,
+      end_time: parsed.data.endTime,
+    },
+    { onConflict: "provider_id,day_of_week" }
+  );
 
-  if (deleteError) {
-    return { error: "saveFailed" };
-  }
-
-  const { error: insertError } = await db.from("availability").insert({
-    provider_id: provider.id,
-    day_of_week: parsed.data.dayOfWeek,
-    start_time: parsed.data.startTime,
-    end_time: parsed.data.endTime,
-  });
-
-  if (insertError) {
+  if (upsertError) {
     return { error: "saveFailed" };
   }
 
@@ -668,15 +669,7 @@ export async function deleteEmployeeAvailability(
 }
 
 export async function completeOnboarding(): Promise<never> {
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-
-  if (!user) {
-    redirect("/login");
-  }
-
+  // Auth is enforced by middleware; this action only redirects after onboarding.
   redirect("/dashboard");
 }
 
@@ -761,8 +754,7 @@ export async function confirmAppointment(
   formData: FormData
 ): Promise<AppointmentActionResult> {
   const appointmentId = formData.get("appointmentId")?.toString() ?? "";
-  const rawLocale = formData.get("locale")?.toString() ?? "de";
-  const locale = ["de", "en"].includes(rawLocale) ? rawLocale : "de";
+  const locale = sanitizeLocale(formData.get("locale")?.toString());
 
   if (!appointmentId) {
     return { error: "notFound" };
@@ -796,7 +788,6 @@ export async function confirmAppointment(
     return { error: "actionFailed" };
   }
 
-  const { revalidatePath } = await import("next/cache");
   revalidatePath(`/${locale}/dashboard/calendar`);
 
   // Send confirmation email to customer (never throws)
@@ -821,8 +812,7 @@ export async function cancelAppointmentAsProvider(
   formData: FormData
 ): Promise<AppointmentActionResult> {
   const appointmentId = formData.get("appointmentId")?.toString() ?? "";
-  const rawLocale = formData.get("locale")?.toString() ?? "de";
-  const locale = ["de", "en"].includes(rawLocale) ? rawLocale : "de";
+  const locale = sanitizeLocale(formData.get("locale")?.toString());
 
   if (!appointmentId) {
     return { error: "notFound" };
@@ -856,7 +846,6 @@ export async function cancelAppointmentAsProvider(
     return { error: "actionFailed" };
   }
 
-  const { revalidatePath } = await import("next/cache");
   revalidatePath(`/${locale}/dashboard/calendar`);
 
   // Send cancellation email to customer (never throws)
@@ -881,7 +870,7 @@ export async function markCompleted(
   formData: FormData
 ): Promise<AppointmentActionResult> {
   const appointmentId = formData.get("appointmentId")?.toString() ?? "";
-  const locale = formData.get("locale")?.toString() ?? "de";
+  const locale = sanitizeLocale(formData.get("locale")?.toString());
 
   if (!appointmentId) {
     return { error: "notFound" };
@@ -919,9 +908,7 @@ export async function markCompleted(
     return { error: "actionFailed" };
   }
 
-  const { revalidatePath } = await import("next/cache");
-  const safeLocale = ["de", "en"].includes(locale) ? locale : "de";
-  revalidatePath(`/${safeLocale}/dashboard/calendar`);
+  revalidatePath(`/${locale}/dashboard/calendar`);
   return { success: true };
 }
 
@@ -929,7 +916,7 @@ export async function markNoShow(
   formData: FormData
 ): Promise<AppointmentActionResult> {
   const appointmentId = formData.get("appointmentId")?.toString() ?? "";
-  const locale = formData.get("locale")?.toString() ?? "de";
+  const locale = sanitizeLocale(formData.get("locale")?.toString());
 
   if (!appointmentId) {
     return { error: "notFound" };
@@ -968,17 +955,14 @@ export async function markNoShow(
     return { error: "actionFailed" };
   }
 
-  const { revalidatePath } = await import("next/cache");
-  const safeLocale = ["de", "en"].includes(locale) ? locale : "de";
-  revalidatePath(`/${safeLocale}/dashboard/calendar`);
+  revalidatePath(`/${locale}/dashboard/calendar`);
   return { success: true };
 }
 
 export async function saveProviderNote(formData: FormData): Promise<{ error: string } | { success: true }> {
   const appointmentId = formData.get("appointmentId")?.toString() ?? "";
   const noteRaw = formData.get("providerNote")?.toString() ?? "";
-  const rawLocale = formData.get("locale")?.toString() ?? "de";
-  const locale = ["de", "en"].includes(rawLocale) ? rawLocale : "de";
+  const locale = sanitizeLocale(formData.get("locale")?.toString());
 
   if (!UUID_RE.test(appointmentId)) {
     return { error: "notFound" };
@@ -1028,7 +1012,6 @@ export async function saveProviderNote(formData: FormData): Promise<{ error: str
     return { error: "saveFailed" };
   }
 
-  const { revalidatePath } = await import("next/cache");
   revalidatePath(`/${locale}/dashboard/calendar`);
   return { success: true };
 }
