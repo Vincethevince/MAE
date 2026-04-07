@@ -36,6 +36,7 @@ function makeAppt(startIso: string, endIso: string): AppointmentRow {
     status: "confirmed",
     notes: null,
     price_cents: 5000,
+    reminder_24h_sent_at: null,
     created_at: new Date().toISOString(),
     updated_at: new Date().toISOString(),
   };

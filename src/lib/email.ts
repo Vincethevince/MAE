@@ -262,6 +262,25 @@ export async function sendCancellationByProvider(
   await sendEmail({ to: customerEmail, subject, html });
 }
 
+/**
+ * Sent ~24 hours before the appointment as a reminder.
+ */
+export async function sendAppointmentReminder(
+  customerEmail: string,
+  details: EmailAppointmentDetails
+): Promise<void> {
+  const subject = `Erinnerung: Dein Termin morgen bei ${sanitizeSubject(details.businessName)}`;
+  const html = baseTemplate(`
+    <h2 style="margin:0 0 8px;font-size:20px;font-weight:700;color:#18181b;">Terminerinnerung</h2>
+    <p style="margin:0 0 4px;font-size:14px;color:#3f3f46;">Dein Termin bei ${escapeHtml(details.businessName)} findet morgen statt.</p>
+    ${appointmentDetailsBlock(details)}
+    <p style="margin:16px 0 4px;font-size:14px;color:#3f3f46;">Bitte erscheine pünktlich. Bei Absagen bis 24 Stunden vorher ist eine kostenlose Stornierung möglich.</p>
+    ${primaryButton("Meine Termine anzeigen", `${APP_URL}/de/appointments`)}
+  `);
+
+  await sendEmail({ to: customerEmail, subject, html });
+}
+
 // ─── Provider notifications ───────────────────────────────────────────────────
 
 /**
