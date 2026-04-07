@@ -3,7 +3,7 @@ import type { Metadata } from "next";
 import { getTranslations } from "next-intl/server";
 
 import { createClient } from "@/lib/supabase/server";
-import { searchProviders } from "@/lib/supabase/queries";
+import { searchProviders, getSavedProviderIds } from "@/lib/supabase/queries";
 import { SearchForm } from "@/components/features/SearchForm";
 import { ProviderCard } from "@/components/features/ProviderCard";
 
@@ -46,13 +46,20 @@ export default async function SearchPage({ params, searchParams }: SearchPagePro
   const minRating = minRatingNum >= 1 && minRatingNum <= 5 ? minRatingNum : 0;
 
   const supabase = await createClient();
-  const providers = await searchProviders(supabase, {
-    query,
-    city,
-    category,
-    sort,
-    minRating,
-  });
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  const [providers, savedIds] = await Promise.all([
+    searchProviders(supabase, {
+      query,
+      city,
+      category,
+      sort,
+      minRating,
+    }),
+    user ? getSavedProviderIds(supabase, user.id) : Promise.resolve(new Set<string>()),
+  ]);
 
   const t = await getTranslations("search");
   const tBy = await getTranslations("search.byTimeSearch");
@@ -130,7 +137,13 @@ export default async function SearchPage({ params, searchParams }: SearchPagePro
       {providers.length > 0 ? (
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {providers.map((provider) => (
-            <ProviderCard key={provider.id} provider={provider} locale={locale} />
+            <ProviderCard
+              key={provider.id}
+              provider={provider}
+              locale={locale}
+              isSaved={savedIds.has(provider.id)}
+              showSaveButton={!!user}
+            />
           ))}
         </div>
       ) : (

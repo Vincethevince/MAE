@@ -94,6 +94,8 @@
     "from": "from",
     "reviewCount": "{count} review",
     "reviewCountPlural": "{count} reviews",
+    "saveProvider": "Save provider",
+    "unsaveProvider": "Remove from saved",
     "categories": {
       "friseur": "Hairdresser",
       "kosmetik": "Cosmetics",
@@ -616,5 +618,10 @@
       "cookies": "Cookies",
       "cookiesBeschreibung": "This website uses only technically necessary cookies for authentication (session management). No tracking or advertising cookies are used. Consent is not required for these cookies as they are essential for the operation of the website."
     }
+  },
+  "saved": {
+    "title": "Saved Providers",
+    "navLabel": "Saved",
+    "empty": "You haven't saved any providers yet. Browse providers and tap the heart to save them."
   }
 }

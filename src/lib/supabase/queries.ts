@@ -659,6 +659,67 @@ export interface ProviderMonthStats {
  * Note: Uses local-time month boundaries (consistent with getAppointmentsForDate).
  * Suitable for a DE-based MVP; revisit for multi-timezone deployments.
  */
+export async function getSavedProviderIds(
+  supabase: TypedSupabaseClient,
+  userId: string
+): Promise<Set<string>> {
+  const { data } = await db(supabase)
+    .from("saved_providers")
+    .select("provider_id")
+    .eq("customer_id", userId);
+
+  if (!data) return new Set();
+  return new Set((data as { provider_id: string }[]).map((row) => row.provider_id));
+}
+
+export async function getSavedProviders(
+  supabase: TypedSupabaseClient,
+  userId: string
+): Promise<ProviderSearchResult[]> {
+  const { data: saved } = await db(supabase)
+    .from("saved_providers")
+    .select("provider_id")
+    .eq("customer_id", userId);
+
+  if (!saved || saved.length === 0) return [];
+
+  const providerIds = (saved as { provider_id: string }[]).map((row) => row.provider_id);
+
+  const { data: providers } = await db(supabase)
+    .from("providers")
+    .select("*")
+    .in("id", providerIds)
+    .eq("is_active", true);
+
+  if (!providers || providers.length === 0) return [];
+
+  const providerList = providers as ProviderRow[];
+  const providerIdSet = new Set(providerList.map((p) => p.id));
+
+  const { data: services } = await db(supabase)
+    .from("services")
+    .select("provider_id, price_cents")
+    .in("provider_id", providerIds)
+    .eq("is_active", true);
+
+  const minPriceMap = new Map<string, number>();
+  if (services) {
+    for (const svc of services as { provider_id: string; price_cents: number }[]) {
+      const current = minPriceMap.get(svc.provider_id);
+      if (current === undefined || svc.price_cents < current) {
+        minPriceMap.set(svc.provider_id, svc.price_cents);
+      }
+    }
+  }
+
+  return providerList
+    .filter((p) => minPriceMap.has(p.id))
+    .map((p) => ({
+      ...p,
+      min_price_cents: minPriceMap.get(p.id) ?? null,
+    }));
+}
+
 export async function getProviderMonthStats(
   supabase: TypedSupabaseClient,
   providerId: string

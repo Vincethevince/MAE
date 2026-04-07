@@ -279,6 +279,25 @@ export interface Database {
           label?: string | null;
         };
       };
+      saved_providers: {
+        Row: {
+          id: string;
+          customer_id: string;
+          provider_id: string;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          customer_id: string;
+          provider_id: string;
+          created_at?: string;
+        };
+        Update: {
+          customer_id?: string;
+          provider_id?: string;
+          created_at?: string;
+        };
+      };
     };
     Views: Record<string, never>;
     Functions: Record<string, never>;

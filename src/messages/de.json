@@ -94,6 +94,8 @@
     "from": "ab",
     "reviewCount": "{count} Bewertung",
     "reviewCountPlural": "{count} Bewertungen",
+    "saveProvider": "Anbieter speichern",
+    "unsaveProvider": "Aus Gespeicherten entfernen",
     "categories": {
       "friseur": "Friseur",
       "kosmetik": "Kosmetik",
@@ -616,5 +618,10 @@
       "cookies": "Cookies",
       "cookiesBeschreibung": "Diese Website verwendet ausschließlich technisch notwendige Cookies für die Authentifizierung (Sitzungsverwaltung). Es werden keine Tracking- oder Werbe-Cookies eingesetzt. Eine Einwilligung ist für diese Cookies nicht erforderlich, da sie für den Betrieb der Website unerlässlich sind."
     }
+  },
+  "saved": {
+    "title": "Gespeicherte Anbieter",
+    "navLabel": "Gespeichert",
+    "empty": "Du hast noch keine Anbieter gespeichert. Stöbere durch Anbieter und tippe auf das Herz, um sie zu speichern."
   }
 }

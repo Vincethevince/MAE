@@ -19,6 +19,7 @@ interface MobileNavProps {
     dashboard: string;
     completeSetup: string;
     myAppointments: string;
+    saved: string;
     profile: string;
     logout: string;
   };
@@ -82,6 +83,13 @@ export function MobileNav({
                     className={buttonVariants({ variant: "ghost" })}
                   >
                     {labels.myAppointments}
+                  </Link>
+                  <Link
+                    href={`/${locale}/saved`}
+                    onClick={() => setOpen(false)}
+                    className={buttonVariants({ variant: "ghost" })}
+                  >
+                    {labels.saved}
                   </Link>
                   <Link
                     href={`/${locale}/profile`}

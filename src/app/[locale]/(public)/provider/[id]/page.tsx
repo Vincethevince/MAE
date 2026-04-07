@@ -4,12 +4,13 @@ import type { Metadata } from "next";
 import { cache } from "react";
 
 import { createClient } from "@/lib/supabase/server";
-import { getProviderById, getProviderReviews } from "@/lib/supabase/queries";
+import { getProviderById, getProviderReviews, getSavedProviderIds } from "@/lib/supabase/queries";
 import { Badge } from "@/components/ui/badge";
 import { buttonVariants } from "@/lib/button-variants";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { RatingStars } from "@/components/features/RatingStars";
+import { SaveProviderButton } from "@/components/features/SaveProviderButton";
 
 const UUID_REGEX =
   /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
@@ -87,9 +88,14 @@ export default async function ProviderDetailPage({ params }: ProviderDetailPageP
   }
 
   const supabase = await createClient();
-  const [provider, reviews] = await Promise.all([
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  const [provider, reviews, savedIds] = await Promise.all([
     getProvider(id),
     getProviderReviews(supabase, id),
+    user ? getSavedProviderIds(supabase, user.id) : Promise.resolve(new Set<string>()),
   ]);
 
   if (!provider) {
@@ -118,6 +124,15 @@ export default async function ProviderDetailPage({ params }: ProviderDetailPageP
             <div className="flex items-center gap-3 mb-2">
               <h1 className="text-3xl font-bold">{provider.business_name}</h1>
               <Badge variant="secondary">{provider.category}</Badge>
+              {user && (
+                <SaveProviderButton
+                  providerId={id}
+                  initialSaved={savedIds.has(id)}
+                  locale={locale}
+                  saveLabel={tSearch("saveProvider")}
+                  unsaveLabel={tSearch("unsaveProvider")}
+                />
+              )}
             </div>
             <div className="flex items-center gap-2 mb-2">
               <RatingStars rating={provider.rating} size="md" />

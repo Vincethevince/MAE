@@ -4,11 +4,14 @@ import { useTranslations } from "next-intl";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { RatingStars } from "@/components/features/RatingStars";
+import { SaveProviderButton } from "@/components/features/SaveProviderButton";
 import type { ProviderSearchResult } from "@/lib/supabase/queries";
 
 interface ProviderCardProps {
   provider: ProviderSearchResult;
   locale: string;
+  isSaved?: boolean;
+  showSaveButton?: boolean;
 }
 
 function formatPrice(cents: number): string {
@@ -25,7 +28,12 @@ function formatRating(rating: number): string {
   }).format(rating);
 }
 
-export function ProviderCard({ provider, locale }: ProviderCardProps) {
+export function ProviderCard({
+  provider,
+  locale,
+  isSaved,
+  showSaveButton,
+}: ProviderCardProps) {
   const t = useTranslations("search");
 
   const reviewLabel =
@@ -41,9 +49,20 @@ export function ProviderCard({ provider, locale }: ProviderCardProps) {
             <h3 className="font-semibold text-base leading-tight group-hover:text-primary transition-colors">
               {provider.business_name}
             </h3>
-            <Badge variant="secondary" className="shrink-0 text-xs">
-              {provider.category}
-            </Badge>
+            <div className="flex items-center gap-2 shrink-0">
+              <Badge variant="secondary" className="text-xs">
+                {provider.category}
+              </Badge>
+              {showSaveButton && isSaved !== undefined && locale && (
+                <SaveProviderButton
+                  providerId={provider.id}
+                  initialSaved={isSaved}
+                  locale={locale}
+                  saveLabel={t("saveProvider")}
+                  unsaveLabel={t("unsaveProvider")}
+                />
+              )}
+            </div>
           </div>
 
           <p className="text-sm text-muted-foreground mb-3">{provider.city}</p>

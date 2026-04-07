@@ -35,10 +35,11 @@ export default async function PublicLayout({ children, params }: PublicLayoutPro
   const isProvider = !!provider;
   const userRole = (profileResult.data as { role?: string } | null)?.role ?? null;
 
-  const [t, tAppointments, tProfile, tLegal] = await Promise.all([
+  const [t, tAppointments, tProfile, tSaved, tLegal] = await Promise.all([
     getTranslations("common"),
     getTranslations("appointments"),
     getTranslations("profile"),
+    getTranslations("saved"),
     getTranslations("legal"),
   ]);
 
@@ -50,6 +51,7 @@ export default async function PublicLayout({ children, params }: PublicLayoutPro
     dashboard: t("dashboard"),
     completeSetup: t("completeSetup"),
     myAppointments: tAppointments("myAppointments"),
+    saved: tSaved("navLabel"),
     profile: tProfile("navLabel"),
     logout: t("logout"),
   };
@@ -75,6 +77,12 @@ export default async function PublicLayout({ children, params }: PublicLayoutPro
                   className={buttonVariants({ variant: "ghost", size: "sm" })}
                 >
                   {tAppointments("myAppointments")}
+                </Link>
+                <Link
+                  href={`/${locale}/saved`}
+                  className={buttonVariants({ variant: "ghost", size: "sm" })}
+                >
+                  {tSaved("navLabel")}
                 </Link>
                 <Link
                   href={`/${locale}/profile`}
