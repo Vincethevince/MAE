@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { getTranslations } from "next-intl/server";
-import { MapPin, Phone, Globe, ExternalLink } from "lucide-react";
+import { MapPin, Phone, Globe, ExternalLink, CalendarPlus } from "lucide-react";
 
 import { createClient } from "@/lib/supabase/server";
 import { getUserAppointments } from "@/lib/supabase/queries";
@@ -81,6 +81,8 @@ interface AppointmentCardProps {
   reviewedLabel: string;
   viewProviderLabel: string;
   getDirectionsLabel: string;
+  addToCalendarLabel: string;
+  showAddToCalendar: boolean;
 }
 
 function AppointmentCard({
@@ -98,6 +100,8 @@ function AppointmentCard({
   reviewedLabel,
   viewProviderLabel,
   getDirectionsLabel,
+  addToCalendarLabel,
+  showAddToCalendar,
 }: AppointmentCardProps) {
   const startDate = new Date(appt.start_time);
   const dateStr = startDate.toLocaleDateString(locale === "de" ? "de-DE" : "en-GB", {
@@ -188,6 +192,16 @@ function AppointmentCard({
               <ExternalLink className="h-3.5 w-3.5 shrink-0" />
               {viewProviderLabel}
             </Link>
+            {showAddToCalendar && (
+              <a
+                href={`/api/appointments/${appt.id}/ics`}
+                download
+                className="flex items-center gap-2 text-xs text-primary hover:underline"
+              >
+                <CalendarPlus className="h-3.5 w-3.5 shrink-0" />
+                {addToCalendarLabel}
+              </a>
+            )}
           </div>
         )}
 
@@ -282,6 +296,8 @@ export default async function AppointmentsPage({ params }: AppointmentsPageProps
                   reviewedLabel={t("review.alreadyReviewed")}
                   viewProviderLabel={t("viewProvider")}
                   getDirectionsLabel={t("getDirections")}
+                  addToCalendarLabel={t("addToCalendar")}
+                  showAddToCalendar={isCancellableStatus}
                 />
               );
             })}
@@ -312,6 +328,8 @@ export default async function AppointmentsPage({ params }: AppointmentsPageProps
                 reviewedLabel={t("review.alreadyReviewed")}
                 viewProviderLabel={t("viewProvider")}
                 getDirectionsLabel={t("getDirections")}
+                addToCalendarLabel={t("addToCalendar")}
+                showAddToCalendar={false}
               />
             ))}
           </div>

@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { getTranslations } from "next-intl/server";
+import { CalendarPlus } from "lucide-react";
 
 import { createClient } from "@/lib/supabase/server";
 import { getAppointmentById } from "@/lib/supabase/queries";
@@ -105,6 +106,16 @@ export default async function SuccessPage({
       )}
 
       <div className="flex flex-col gap-3">
+        {appointment && (
+          <a
+            href={`/api/appointments/${appointment.id}/ics`}
+            download
+            className={buttonVariants({ variant: "outline", className: "w-full" })}
+          >
+            <CalendarPlus className="mr-2 h-4 w-4" />
+            {t("addToCalendar")}
+          </a>
+        )}
         <Link
           href={`/${locale}/appointments`}
           className={buttonVariants({ className: "w-full" })}

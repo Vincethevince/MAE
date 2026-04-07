@@ -102,6 +102,7 @@
     "status": "Status",
     "statusPending": "Ausstehend",
     "viewAppointments": "Meine Termine ansehen",
+    "addToCalendar": "Zum Kalender hinzufügen",
     "backToSearch": "Zurück zur Suche"
   },
   "provider": {
@@ -336,6 +337,7 @@
     "cancelConfirm": "Möchtest du diesen Termin wirklich absagen?",
     "viewProvider": "Anbieterprofil ansehen",
     "getDirections": "Route anzeigen",
+    "addToCalendar": "Zum Kalender hinzufügen",
     "cancelSuccess": "Termin erfolgreich abgesagt.",
     "cancelFailed": "Absagen fehlgeschlagen. Bitte versuche es erneut.",
     "status": {

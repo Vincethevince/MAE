@@ -102,6 +102,7 @@
     "status": "Status",
     "statusPending": "Pending",
     "viewAppointments": "View my appointments",
+    "addToCalendar": "Add to calendar",
     "backToSearch": "Back to search"
   },
   "provider": {
@@ -336,6 +337,7 @@
     "cancelConfirm": "Are you sure you want to cancel this appointment?",
     "viewProvider": "View provider profile",
     "getDirections": "Get directions",
+    "addToCalendar": "Add to calendar",
     "cancelSuccess": "Appointment cancelled successfully.",
     "cancelFailed": "Failed to cancel. Please try again.",
     "status": {
