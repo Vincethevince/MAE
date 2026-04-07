@@ -180,6 +180,7 @@
     "phone": "Phone",
     "website": "Website",
     "ratingLabel": "Rating",
+    "replyLabel": "Provider reply",
     "days": {
       "0": "Sunday",
       "1": "Monday",
@@ -412,6 +413,7 @@
     "viewProvider": "View provider profile",
     "getDirections": "Get directions",
     "addToCalendar": "Add to calendar",
+    "bookAgain": "Book again →",
     "cancelSuccess": "Appointment cancelled successfully.",
     "cancelFailed": "Failed to cancel. Please try again.",
     "status": {
@@ -455,6 +457,13 @@
         "saveFailed": "Failed to save"
       }
     }
+  },
+  "reviews": {
+    "replyEdit": "Add / edit reply",
+    "replySave": "Save reply",
+    "replyCancel": "Cancel",
+    "replyPlaceholder": "Write a public reply to this review…",
+    "replyLabel": "Provider reply"
   },
   "calendar": {
     "title": "Calendar",

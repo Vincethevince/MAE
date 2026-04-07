@@ -180,6 +180,7 @@
     "phone": "Telefon",
     "website": "Website",
     "ratingLabel": "Bewertung",
+    "replyLabel": "Antwort des Anbieters",
     "days": {
       "0": "Sonntag",
       "1": "Montag",
@@ -412,6 +413,7 @@
     "viewProvider": "Anbieterprofil ansehen",
     "getDirections": "Route anzeigen",
     "addToCalendar": "Zum Kalender hinzufügen",
+    "bookAgain": "Erneut buchen →",
     "cancelSuccess": "Termin erfolgreich abgesagt.",
     "cancelFailed": "Absagen fehlgeschlagen. Bitte versuche es erneut.",
     "status": {
@@ -455,6 +457,13 @@
         "saveFailed": "Speichern fehlgeschlagen"
       }
     }
+  },
+  "reviews": {
+    "replyEdit": "Antwort hinzufügen / bearbeiten",
+    "replySave": "Antwort speichern",
+    "replyCancel": "Abbrechen",
+    "replyPlaceholder": "Schreibe eine öffentliche Antwort auf diese Bewertung…",
+    "replyLabel": "Antwort des Anbieters"
   },
   "calendar": {
     "title": "Kalender",

@@ -8,6 +8,7 @@ import { getUserAppointments } from "@/lib/supabase/queries";
 import type { AppointmentWithProviderAndService } from "@/lib/supabase/queries";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { buttonVariants } from "@/lib/button-variants";
 import { ReviewForm } from "@/components/features/ReviewForm";
 import { CancelAppointmentButton } from "@/components/features/CancelAppointmentButton";
 import { cancelAppointment as cancelAppointmentAction } from "./actions";
@@ -83,6 +84,8 @@ interface AppointmentCardProps {
   getDirectionsLabel: string;
   addToCalendarLabel: string;
   showAddToCalendar: boolean;
+  bookAgainLabel?: string;
+  showBookAgain?: boolean;
 }
 
 function AppointmentCard({
@@ -102,6 +105,8 @@ function AppointmentCard({
   getDirectionsLabel,
   addToCalendarLabel,
   showAddToCalendar,
+  bookAgainLabel,
+  showBookAgain,
 }: AppointmentCardProps) {
   const startDate = new Date(appt.start_time);
   const dateStr = startDate.toLocaleDateString(locale === "de" ? "de-DE" : "en-GB", {
@@ -222,6 +227,17 @@ function AppointmentCard({
           ) : (
             <ReviewForm appointmentId={appt.id} locale={locale} />
           ))}
+
+        {showBookAgain && bookAgainLabel && (
+          <div className="mt-3">
+            <Link
+              href={`/${locale}/book/${appt.providerId}/${appt.service_id}`}
+              className={buttonVariants({ variant: "outline", size: "sm" })}
+            >
+              {bookAgainLabel}
+            </Link>
+          </div>
+        )}
       </CardContent>
     </Card>
   );
@@ -330,6 +346,8 @@ export default async function AppointmentsPage({ params }: AppointmentsPageProps
                 getDirectionsLabel={t("getDirections")}
                 addToCalendarLabel={t("addToCalendar")}
                 showAddToCalendar={false}
+                bookAgainLabel={t("bookAgain")}
+                showBookAgain={true}
               />
             ))}
           </div>

@@ -40,6 +40,7 @@ export interface ProviderWithDetails extends ProviderRow {
 
 export interface ReviewWithUser extends ReviewRow {
   user_full_name: string | null;
+  provider_reply: string | null;
 }
 
 interface SearchProvidersOptions {
@@ -608,7 +609,7 @@ export async function getProviderReviews(
 ): Promise<ReviewWithUser[]> {
   const { data: reviews } = await db(supabase)
     .from("reviews")
-    .select("id, provider_id, user_id, appointment_id, rating, comment, created_at")
+    .select("id, provider_id, user_id, appointment_id, rating, comment, provider_reply, created_at")
     .eq("provider_id", providerId)
     .order("created_at", { ascending: false });
 

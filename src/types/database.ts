@@ -240,6 +240,7 @@ export interface Database {
           appointment_id: string;
           rating: number;
           comment: string | null;
+          provider_reply: string | null;
           created_at: string;
         };
         Insert: {
@@ -249,11 +250,13 @@ export interface Database {
           appointment_id: string;
           rating: number;
           comment?: string | null;
+          provider_reply?: string | null;
           created_at?: string;
         };
         Update: {
           rating?: number;
           comment?: string | null;
+          provider_reply?: string | null;
         };
       };
       provider_blocks: {

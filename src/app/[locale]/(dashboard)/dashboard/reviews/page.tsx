@@ -6,6 +6,7 @@ import { getCurrentProvider, getProviderReviews } from "@/lib/supabase/queries";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { RatingStars } from "@/components/features/RatingStars";
+import { ReviewReplyEditor } from "@/components/features/ReviewReplyEditor";
 
 interface ReviewsPageProps {
   params: Promise<{ locale: string }>;
@@ -23,6 +24,7 @@ export default async function ReviewsPage({ params }: ReviewsPageProps) {
 
   const reviews = await getProviderReviews(supabase, provider.id);
   const t = await getTranslations("dashboard.reviews");
+  const tReviews = await getTranslations("reviews");
 
   const average =
     reviews.length > 0
@@ -112,6 +114,16 @@ export default async function ReviewsPage({ params }: ReviewsPageProps) {
                 {r.comment && (
                   <p className="text-sm text-muted-foreground">{r.comment}</p>
                 )}
+                <ReviewReplyEditor
+                  reviewId={r.id}
+                  initialReply={r.provider_reply}
+                  locale={locale}
+                  editLabel={tReviews("replyEdit")}
+                  saveLabel={tReviews("replySave")}
+                  cancelLabel={tReviews("replyCancel")}
+                  placeholderText={tReviews("replyPlaceholder")}
+                  replyLabel={tReviews("replyLabel")}
+                />
               </CardContent>
             </Card>
           ))}

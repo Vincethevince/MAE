@@ -1015,3 +1015,37 @@ export async function saveProviderNote(formData: FormData): Promise<{ error: str
   revalidatePath(`/${locale}/dashboard/calendar`);
   return { success: true };
 }
+
+export async function saveReviewReply(formData: FormData): Promise<void> {
+  "use server";
+  const reviewId = formData.get("reviewId");
+  const reply = formData.get("reply");
+  const locale = sanitizeLocale(formData.get("locale")?.toString());
+
+  if (typeof reviewId !== "string" || !UUID_RE.test(reviewId)) return;
+  if (typeof reply !== "string") return;
+  // Trim and cap reply length
+  const trimmedReply = reply.trim().slice(0, 500);
+
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return;
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const db = supabase as any;
+  const { data: provider } = await db
+    .from("providers")
+    .select("id")
+    .eq("profile_id", user.id)
+    .maybeSingle();
+  if (!provider) return;
+
+  // Only update reviews belonging to this provider
+  await db
+    .from("reviews")
+    .update({ provider_reply: trimmedReply || null })
+    .eq("id", reviewId)
+    .eq("provider_id", provider.id);
+
+  revalidatePath(`/${locale}/dashboard/reviews`);
+}

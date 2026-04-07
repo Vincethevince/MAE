@@ -104,6 +104,7 @@ export default async function ProviderDetailPage({ params }: ProviderDetailPageP
 
   const t = await getTranslations("provider");
   const tSearch = await getTranslations("search");
+  const tProvider = await getTranslations("provider");
 
   // Group availability by day
   const availabilityByDay = new Map<number, { start: string; end: string }[]>();
@@ -256,6 +257,12 @@ export default async function ProviderDetailPage({ params }: ProviderDetailPageP
                       </div>
                       {review.comment && (
                         <p className="text-sm text-muted-foreground">{review.comment}</p>
+                      )}
+                      {review.provider_reply && (
+                        <div className="mt-2 text-sm text-muted-foreground bg-muted/40 rounded-md px-3 py-2">
+                          <span className="font-medium text-foreground">{tProvider("replyLabel")}: </span>
+                          {review.provider_reply}
+                        </div>
                       )}
                     </CardContent>
                   </Card>
