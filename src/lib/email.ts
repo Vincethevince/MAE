@@ -127,7 +127,7 @@ function appointmentDetailsBlock(details: EmailAppointmentDetails): string {
 }
 
 function primaryButton(text: string, href: string): string {
-  return `<a href="${href}" style="display:inline-block;margin-top:8px;padding:12px 24px;background:#18181b;color:#ffffff;font-size:14px;font-weight:600;text-decoration:none;border-radius:6px;">${escapeHtml(text)}</a>`;
+  return `<a href="${escapeHtml(href)}" style="display:inline-block;margin-top:8px;padding:12px 24px;background:#18181b;color:#ffffff;font-size:14px;font-weight:600;text-decoration:none;border-radius:6px;">${escapeHtml(text)}</a>`;
 }
 
 // ─── Types ───────────────────────────────────────────────────────────────────

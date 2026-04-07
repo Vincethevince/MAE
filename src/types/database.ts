@@ -184,7 +184,6 @@ export interface Database {
           end_time: string;
           status: "pending" | "confirmed" | "cancelled" | "completed" | "no_show";
           notes: string | null;
-          provider_notes: string | null;
           price_cents: number;
           reminder_24h_sent_at: string | null;
           created_at: string;
@@ -200,7 +199,6 @@ export interface Database {
           end_time: string;
           status?: "pending" | "confirmed" | "cancelled" | "completed" | "no_show";
           notes?: string | null;
-          provider_notes?: string | null;
           price_cents: number;
           reminder_24h_sent_at?: string | null;
           created_at?: string;
@@ -212,8 +210,25 @@ export interface Database {
           end_time?: string;
           status?: "pending" | "confirmed" | "cancelled" | "completed" | "no_show";
           notes?: string | null;
-          provider_notes?: string | null;
           reminder_24h_sent_at?: string | null;
+          updated_at?: string;
+        };
+      };
+      appointment_provider_notes: {
+        Row: {
+          appointment_id: string;
+          provider_id: string;
+          note: string;
+          updated_at: string;
+        };
+        Insert: {
+          appointment_id: string;
+          provider_id: string;
+          note: string;
+          updated_at?: string;
+        };
+        Update: {
+          note?: string;
           updated_at?: string;
         };
       };

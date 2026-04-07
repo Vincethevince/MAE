@@ -257,10 +257,26 @@ export default async function CalendarPage({ params, searchParams }: CalendarPag
     to.setHours(23, 59, 59, 999);
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const db = supabase as any;
   const [appointments, t] = await Promise.all([
     getProviderAppointmentsRange(supabase, provider.id, from, to),
     getTranslations("calendar"),
   ]);
+
+  // Fetch provider notes for these appointments (separate table — not visible to customers)
+  const apptIds = appointments.map((a) => a.id);
+  const { data: notesRows } = apptIds.length > 0
+    ? await db
+        .from("appointment_provider_notes")
+        .select("appointment_id, note")
+        .in("appointment_id", apptIds)
+    : { data: [] };
+  const notesMap = new Map<string, string>(
+    ((notesRows ?? []) as { appointment_id: string; note: string }[]).map(
+      (r) => [r.appointment_id, r.note]
+    )
+  );
 
   // Group by date key
   const grouped = new Map<string, AppointmentWithProviderAndService[]>();
@@ -353,7 +369,7 @@ export default async function CalendarPage({ params, searchParams }: CalendarPag
                         noteEditor={
                           <ProviderNoteEditor
                             appointmentId={appt.id}
-                            initialNote={appt.provider_notes ?? null}
+                            initialNote={notesMap.get(appt.id) ?? null}
                             locale={locale}
                           />
                         }
