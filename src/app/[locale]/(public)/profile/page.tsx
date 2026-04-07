@@ -4,6 +4,7 @@ import { getTranslations } from "next-intl/server";
 import { createClient } from "@/lib/supabase/server";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ProfileForm } from "./ProfileForm";
+import { ChangePasswordForm } from "./ChangePasswordForm";
 
 interface ProfilePageProps {
   params: Promise<{ locale: string }>;
@@ -50,6 +51,10 @@ export default async function ProfilePage({ params }: ProfilePageProps) {
           fullName={profile?.full_name ?? ""}
           locale={locale}
         />
+      </div>
+
+      <div className="mt-6">
+        <ChangePasswordForm />
       </div>
     </div>
   );

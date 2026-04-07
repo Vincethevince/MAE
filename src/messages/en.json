@@ -424,10 +424,14 @@
     "emailLabel": "Email",
     "fullNameLabel": "Name",
     "saveSuccess": "Profile saved",
+    "changePasswordTitle": "Change password",
+    "currentPasswordLabel": "Current password",
+    "passwordChanged": "Password changed successfully.",
     "errors": {
       "validationError": "Please check your input",
       "unauthorized": "Not signed in",
-      "saveFailed": "Failed to save"
+      "saveFailed": "Failed to save",
+      "currentPasswordWrong": "Current password is incorrect"
     }
   },
   "auth": {
