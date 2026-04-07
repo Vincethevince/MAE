@@ -18,6 +18,12 @@ export interface AppointmentWithDetails extends AppointmentRow {
 
 export interface AppointmentWithProviderAndService extends AppointmentRow {
   providerName: string;
+  providerId: string;
+  providerAddress: string | null;
+  providerCity: string | null;
+  providerPostalCode: string | null;
+  providerPhone: string | null;
+  providerWebsite: string | null;
   serviceName: string;
   serviceDurationMinutes: number;
   servicePriceCents: number;
@@ -288,7 +294,7 @@ export async function getUserAppointments(
   const [{ data: providers }, { data: services }] = await Promise.all([
     db(supabase)
       .from("providers")
-      .select("id, business_name")
+      .select("id, business_name, address, city, postal_code, phone, website")
       .in("id", providerIds),
     db(supabase)
       .from("services")
@@ -296,10 +302,11 @@ export async function getUserAppointments(
       .in("id", serviceIds),
   ]);
 
-  const providerMap = new Map<string, string>();
+  type ProviderLookup = Pick<ProviderRow, "id" | "business_name" | "address" | "city" | "postal_code" | "phone" | "website">;
+  const providerMap = new Map<string, ProviderLookup>();
   if (providers) {
-    for (const p of providers as Pick<ProviderRow, "id" | "business_name">[]) {
-      providerMap.set(p.id, p.business_name);
+    for (const p of providers as ProviderLookup[]) {
+      providerMap.set(p.id, p);
     }
   }
 
@@ -311,13 +318,22 @@ export async function getUserAppointments(
     }
   }
 
-  return appts.map((appt) => ({
-    ...appt,
-    providerName: providerMap.get(appt.provider_id) ?? "",
-    serviceName: serviceMap.get(appt.service_id)?.name ?? "",
-    serviceDurationMinutes: serviceMap.get(appt.service_id)?.duration_minutes ?? 0,
-    servicePriceCents: serviceMap.get(appt.service_id)?.price_cents ?? 0,
-  }));
+  return appts.map((appt) => {
+    const p = providerMap.get(appt.provider_id);
+    return {
+      ...appt,
+      providerName: p?.business_name ?? "",
+      providerId: appt.provider_id,
+      providerAddress: p?.address ?? null,
+      providerCity: p?.city ?? null,
+      providerPostalCode: p?.postal_code ?? null,
+      providerPhone: p?.phone ?? null,
+      providerWebsite: p?.website ?? null,
+      serviceName: serviceMap.get(appt.service_id)?.name ?? "",
+      serviceDurationMinutes: serviceMap.get(appt.service_id)?.duration_minutes ?? 0,
+      servicePriceCents: serviceMap.get(appt.service_id)?.price_cents ?? 0,
+    };
+  });
 }
 
 export async function getProviderAppointmentsRange(
@@ -369,7 +385,15 @@ export async function getProviderAppointmentsRange(
 
   return appts.map((appt) => ({
     ...appt,
+    // For provider calendar view, providerName holds the customer's name
     providerName: profileMap.get(appt.user_id) ?? "",
+    providerId: appt.provider_id,
+    // Provider contact fields not needed in the provider's own calendar view
+    providerAddress: null,
+    providerCity: null,
+    providerPostalCode: null,
+    providerPhone: null,
+    providerWebsite: null,
     serviceName: serviceMap.get(appt.service_id)?.name ?? "",
     serviceDurationMinutes: serviceMap.get(appt.service_id)?.duration_minutes ?? 0,
     servicePriceCents: serviceMap.get(appt.service_id)?.price_cents ?? 0,

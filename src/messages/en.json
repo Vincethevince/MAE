@@ -331,6 +331,8 @@
     "emptyPast": "You have no past appointments yet.",
     "cancelButton": "Cancel Appointment",
     "cancelConfirm": "Are you sure you want to cancel this appointment?",
+    "viewProvider": "View provider profile",
+    "getDirections": "Get directions",
     "cancelSuccess": "Appointment cancelled successfully.",
     "cancelFailed": "Failed to cancel. Please try again.",
     "status": {

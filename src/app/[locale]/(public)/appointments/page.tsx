@@ -1,5 +1,7 @@
+import Link from "next/link";
 import { redirect } from "next/navigation";
 import { getTranslations } from "next-intl/server";
+import { MapPin, Phone, Globe, ExternalLink } from "lucide-react";
 
 import { createClient } from "@/lib/supabase/server";
 import { getUserAppointments } from "@/lib/supabase/queries";
@@ -77,6 +79,8 @@ interface AppointmentCardProps {
   isCancelBlockedByTime: boolean;
   hasReview: boolean;
   reviewedLabel: string;
+  viewProviderLabel: string;
+  getDirectionsLabel: string;
 }
 
 function AppointmentCard({
@@ -92,6 +96,8 @@ function AppointmentCard({
   isCancelBlockedByTime,
   hasReview,
   reviewedLabel,
+  viewProviderLabel,
+  getDirectionsLabel,
 }: AppointmentCardProps) {
   const startDate = new Date(appt.start_time);
   const dateStr = startDate.toLocaleDateString(locale === "de" ? "de-DE" : "en-GB", {
@@ -130,6 +136,60 @@ function AppointmentCard({
           <dt className="text-muted-foreground">{priceLabel}</dt>
           <dd>{formatPrice(appt.servicePriceCents)}</dd>
         </dl>
+
+        {/* Provider contact / location info */}
+        {(appt.providerAddress || appt.providerPhone) && (
+          <div className="mt-3 space-y-1.5 border-t pt-3">
+            {appt.providerAddress && (
+              <a
+                href={`https://maps.google.com/?q=${encodeURIComponent(
+                  [appt.providerAddress, appt.providerPostalCode, appt.providerCity]
+                    .filter(Boolean)
+                    .join(", ")
+                )}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center gap-2 text-xs text-muted-foreground hover:text-foreground transition-colors"
+              >
+                <MapPin className="h-3.5 w-3.5 shrink-0" />
+                <span>
+                  {appt.providerAddress}
+                  {appt.providerPostalCode || appt.providerCity
+                    ? `, ${[appt.providerPostalCode, appt.providerCity].filter(Boolean).join(" ")}`
+                    : ""}
+                </span>
+                <span className="ml-auto text-xs opacity-60">{getDirectionsLabel}</span>
+              </a>
+            )}
+            {appt.providerPhone && (
+              <a
+                href={`tel:${appt.providerPhone}`}
+                className="flex items-center gap-2 text-xs text-muted-foreground hover:text-foreground transition-colors"
+              >
+                <Phone className="h-3.5 w-3.5 shrink-0" />
+                {appt.providerPhone}
+              </a>
+            )}
+            {appt.providerWebsite && (
+              <a
+                href={appt.providerWebsite}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center gap-2 text-xs text-muted-foreground hover:text-foreground transition-colors"
+              >
+                <Globe className="h-3.5 w-3.5 shrink-0" />
+                {appt.providerWebsite.replace(/^https?:\/\//, "")}
+              </a>
+            )}
+            <Link
+              href={`/${locale}/provider/${appt.providerId}`}
+              className="flex items-center gap-2 text-xs text-primary hover:underline"
+            >
+              <ExternalLink className="h-3.5 w-3.5 shrink-0" />
+              {viewProviderLabel}
+            </Link>
+          </div>
+        )}
 
         {showCancel && (
           <CancelAppointmentButton
@@ -220,6 +280,8 @@ export default async function AppointmentsPage({ params }: AppointmentsPageProps
                   isCancelBlockedByTime={isCancellableStatus && withinCutoff}
                   hasReview={reviewedIds.has(appt.id)}
                   reviewedLabel={t("review.alreadyReviewed")}
+                  viewProviderLabel={t("viewProvider")}
+                  getDirectionsLabel={t("getDirections")}
                 />
               );
             })}
@@ -248,6 +310,8 @@ export default async function AppointmentsPage({ params }: AppointmentsPageProps
                 isCancelBlockedByTime={false}
                 hasReview={reviewedIds.has(appt.id)}
                 reviewedLabel={t("review.alreadyReviewed")}
+                viewProviderLabel={t("viewProvider")}
+                getDirectionsLabel={t("getDirections")}
               />
             ))}
           </div>

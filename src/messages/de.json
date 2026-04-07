@@ -331,6 +331,8 @@
     "emptyPast": "Du hast noch keine vergangenen Termine.",
     "cancelButton": "Termin absagen",
     "cancelConfirm": "Möchtest du diesen Termin wirklich absagen?",
+    "viewProvider": "Anbieterprofil ansehen",
+    "getDirections": "Route anzeigen",
     "cancelSuccess": "Termin erfolgreich abgesagt.",
     "cancelFailed": "Absagen fehlgeschlagen. Bitte versuche es erneut.",
     "status": {
