@@ -467,5 +467,73 @@
     "passwordUpdated": "Password updated! Redirecting to login…",
     "unauthorized": "Not signed in",
     "updateFailed": "Failed to update password. Please try again."
+  },
+  "legal": {
+    "impressumLink": "Imprint",
+    "datenschutzLink": "Privacy Policy",
+    "impressum": {
+      "title": "Legal Notice (Impressum)",
+      "angaben": "Information pursuant to § 5 TMG",
+      "kontakt": "Contact",
+      "email": "Email",
+      "phone": "Phone",
+      "vertreter": "Authorized Representative",
+      "register": "Commercial Register",
+      "registerGericht": "Register Court",
+      "registerNummer": "Register Number",
+      "ust": "VAT ID",
+      "ustId": "VAT identification number pursuant to § 27a UStG",
+      "streitbeilegung": "Dispute Resolution",
+      "streitbeilegungText": "We are not willing or obliged to participate in dispute resolution proceedings before a consumer arbitration board.",
+      "euStreitschlichtung": "The European Commission provides a platform for online dispute resolution (ODR):"
+    },
+    "datenschutz": {
+      "title": "Privacy Policy",
+      "stand": "Last updated",
+      "verantwortlicher": "Data Controller",
+      "erhobene": "Data We Collect",
+      "erhobeneBeschreibung": "We collect and process the following personal data:",
+      "daten": {
+        "name": "Name (first and last name)",
+        "email": "Email address",
+        "phone": "Phone number (optional)",
+        "appointments": "Appointment bookings and history",
+        "reviews": "Reviews and comments",
+        "providerInfo": "Provider information (business name, address, opening hours, services)",
+        "technical": "Technical access data (IP address, browser type, timestamps)"
+      },
+      "zweck": "Purpose of Processing",
+      "zweckBeschreibung": "We process personal data for the following purposes:",
+      "zwecke": {
+        "konto": "Creating and managing user accounts",
+        "buchung": "Facilitating appointment bookings between customers and providers",
+        "kommunikation": "Sending booking confirmations and status updates by email",
+        "erinnerung": "Sending appointment reminders (24 hours before the appointment)",
+        "bewertungen": "Processing and displaying customer reviews",
+        "verbesserung": "Analysing and improving our services"
+      },
+      "rechtsgrundlage": "Legal Basis",
+      "rechtsgrundlageBeschreibung": "Processing is based on Art. 6(1)(b) GDPR (contract performance) for appointment bookings, Art. 6(1)(a) GDPR (consent) for optional data, and Art. 6(1)(f) GDPR (legitimate interests) for service improvement.",
+      "drittanbieter": "Third Parties and Data Transfers",
+      "supabase": "Our data is stored and processed on servers of Supabase (Supabase Inc.) in the EU (Frankfurt, Germany). Supabase is ISO 27001 certified. More information: https://supabase.com/privacy",
+      "vercel": "Our application is hosted via Vercel (Vercel Inc., USA). Vercel processes technical access data. Transfers to third countries are based on Standard Contractual Clauses. More information: https://vercel.com/legal/privacy-policy",
+      "resend": "For email delivery we use Resend (Resend Inc., USA). Email addresses are used exclusively for sending transactional emails (booking confirmations, reminders). More information: https://resend.com/privacy",
+      "speicherung": "Retention Period",
+      "speicherungBeschreibung": "Personal data is stored only for as long as necessary to provide our services or as required by law. After account deletion, personal data is removed within 30 days unless statutory retention obligations apply.",
+      "rechte": "Your Rights",
+      "rechteBeschreibung": "Under GDPR you have the following rights:",
+      "rechteListe": {
+        "auskunft": "Right of access (Art. 15 GDPR)",
+        "berichtigung": "Right to rectification (Art. 16 GDPR)",
+        "loeschung": "Right to erasure (Art. 17 GDPR)",
+        "einschraenkung": "Right to restriction of processing (Art. 18 GDPR)",
+        "widerspruch": "Right to object (Art. 21 GDPR)",
+        "uebertragbarkeit": "Right to data portability (Art. 20 GDPR)",
+        "beschwerde": "Right to lodge a complaint with a supervisory authority (Art. 77 GDPR)"
+      },
+      "rechteKontakt": "To exercise your rights, please contact us at:",
+      "cookies": "Cookies",
+      "cookiesBeschreibung": "This website uses only technically necessary cookies for authentication (session management). No tracking or advertising cookies are used. Consent is not required for these cookies as they are essential for the operation of the website."
+    }
   }
 }

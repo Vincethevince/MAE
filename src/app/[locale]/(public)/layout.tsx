@@ -6,6 +6,7 @@ import { createClient } from "@/lib/supabase/server";
 import { getCurrentProvider } from "@/lib/supabase/queries";
 import { buttonVariants } from "@/components/ui/button";
 import { LogoutButton } from "@/components/features/LogoutButton";
+import { Separator } from "@/components/ui/separator";
 
 interface PublicLayoutProps {
   children: ReactNode;
@@ -24,6 +25,7 @@ export default async function PublicLayout({ children, params }: PublicLayoutPro
   const t = await getTranslations("common");
   const tAppointments = await getTranslations("appointments");
   const tProfile = await getTranslations("profile");
+  const tLegal = await getTranslations("legal");
 
   return (
     <div className="flex min-h-screen flex-col">
@@ -83,8 +85,25 @@ export default async function PublicLayout({ children, params }: PublicLayoutPro
 
       <main className="flex-1">{children}</main>
 
-      <footer className="border-t py-6 text-center text-sm text-muted-foreground">
-        © {new Date().getFullYear()} {t("appName")} – {t("tagline")}
+      <footer className="border-t py-8 text-sm text-muted-foreground">
+        <div className="mx-auto max-w-6xl px-4 flex flex-col sm:flex-row items-center justify-between gap-4">
+          <span>© {new Date().getFullYear()} {t("appName")} – {t("tagline")}</span>
+          <nav className="flex items-center gap-1">
+            <Link
+              href={`/${locale}/impressum`}
+              className="hover:text-foreground transition-colors px-2 py-1"
+            >
+              {tLegal("impressumLink")}
+            </Link>
+            <Separator orientation="vertical" className="h-3" />
+            <Link
+              href={`/${locale}/datenschutz`}
+              className="hover:text-foreground transition-colors px-2 py-1"
+            >
+              {tLegal("datenschutzLink")}
+            </Link>
+          </nav>
+        </div>
       </footer>
     </div>
   );
