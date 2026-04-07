@@ -7,6 +7,7 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { CityAutocomplete } from "@/components/features/CityAutocomplete";
 import {
   Select,
   SelectContent,
@@ -154,12 +155,11 @@ export function ByTimeSearchForm({
             <Label htmlFor="by-time-city" className="sr-only">
               {t("cityLabel")}
             </Label>
-            <Input
+            <CityAutocomplete
               id="by-time-city"
-              type="text"
-              placeholder={t("cityLabel")}
               value={city}
-              onChange={(e) => setCity(e.target.value)}
+              onChange={setCity}
+              placeholder={t("cityLabel")}
             />
           </div>
 
