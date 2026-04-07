@@ -133,12 +133,16 @@ export default async function SearchPage({ params, searchParams }: SearchPagePro
             <ProviderCard key={provider.id} provider={provider} locale={locale} />
           ))}
         </div>
-      ) : hasFilters ? (
+      ) : (
         <div className="py-16 text-center">
-          <p className="text-lg font-medium text-foreground">{t("emptyState")}</p>
-          <p className="mt-2 text-sm text-muted-foreground">{t("emptyStateHint")}</p>
+          <p className="text-lg font-medium text-foreground">
+            {hasFilters ? t("emptyState") : t("emptyStateNoFilters")}
+          </p>
+          <p className="mt-2 text-sm text-muted-foreground">
+            {hasFilters ? t("emptyStateHint") : t("emptyStateCta")}
+          </p>
         </div>
-      ) : null}
+      )}
     </div>
   );
 }
