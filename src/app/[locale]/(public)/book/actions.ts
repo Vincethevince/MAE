@@ -10,6 +10,10 @@ import {
   getAppointmentsForDate,
 } from "@/lib/supabase/queries";
 import { computeAvailableSlots } from "@/lib/booking";
+import {
+  sendBookingConfirmation,
+  sendProviderNewBooking,
+} from "@/lib/email";
 import type { Database } from "@/types/database";
 
 type ActionResult =
@@ -143,6 +147,52 @@ export async function createAppointment(
   }
 
   const appointmentId = (created as { id: string }).id;
+
+  // Send email notifications (non-blocking — never fail the booking on email error)
+  const emailDetails = {
+    appointmentId,
+    businessName: provider.business_name,
+    serviceName: service.name,
+    startTime: requestedStart.toISOString(),
+    address: provider.address && provider.city
+      ? `${provider.address}, ${provider.city}`
+      : provider.address ?? null,
+  };
+
+  // Fetch customer name and provider email in parallel for notifications
+  const [customerProfileResult, providerProfileResult] = await Promise.allSettled([
+    db
+      .from("profiles")
+      .select("full_name")
+      .eq("id", user.id)
+      .single(),
+    db
+      .from("profiles")
+      .select("email")
+      .eq("id", provider.profile_id)
+      .single(),
+  ]);
+
+  const customerName =
+    customerProfileResult.status === "fulfilled"
+      ? (customerProfileResult.value.data as { full_name?: string } | null)?.full_name ?? null
+      : null;
+
+  const providerEmail =
+    providerProfileResult.status === "fulfilled"
+      ? (providerProfileResult.value.data as { email?: string } | null)?.email ?? null
+      : null;
+
+  // Send emails — awaited to ensure delivery on serverless (sendEmail never throws)
+  await Promise.all([
+    user.email
+      ? sendBookingConfirmation(user.email, { ...emailDetails, customerName })
+      : Promise.resolve(),
+    providerEmail
+      ? sendProviderNewBooking(providerEmail, { ...emailDetails, customerName })
+      : Promise.resolve(),
+  ]);
+
   return { appointmentId };
 }
 
@@ -166,5 +216,10 @@ export async function confirmAndRedirect(formData: FormData): Promise<never> {
     );
   }
 
-  redirect(`/${safeLocale}/book/success?appointmentId=${result.appointmentId}`);
+  // Validate appointmentId is a UUID before embedding in URL (defensive; Postgres always returns a UUID)
+  const appointmentId = result.appointmentId as string;
+  if (!UUID_REGEX.test(appointmentId)) {
+    redirect(`/${safeLocale}/search`);
+  }
+  redirect(`/${safeLocale}/book/success?appointmentId=${appointmentId}`);
 }

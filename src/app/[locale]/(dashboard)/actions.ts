@@ -9,6 +9,10 @@ import {
   availabilitySchema,
   employeeSchema,
 } from "@/lib/validations/provider";
+import {
+  sendAppointmentConfirmed,
+  sendCancellationByProvider,
+} from "@/lib/email";
 import type { Database } from "@/types/database";
 
 type ActionResult<T = undefined> =
@@ -682,7 +686,7 @@ async function getProviderForAppointment(
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   db: any;
   provider: ProviderRow | null;
-  appt: Pick<AppointmentRow, "id" | "provider_id" | "status" | "start_time"> | null;
+  appt: Pick<AppointmentRow, "id" | "provider_id" | "status" | "start_time" | "user_id" | "service_id"> | null;
 }> {
   const supabase = await createClient();
   const db = await queryDb(supabase);
@@ -710,16 +714,44 @@ async function getProviderForAppointment(
 
   const { data: apptData } = await db
     .from("appointments")
-    .select("id, provider_id, status, start_time")
+    .select("id, provider_id, status, start_time, user_id, service_id")
     .eq("id", appointmentId)
     .single();
 
   const appt = apptData as Pick<
     AppointmentRow,
-    "id" | "provider_id" | "status" | "start_time"
+    "id" | "provider_id" | "status" | "start_time" | "user_id" | "service_id"
   > | null;
 
   return { db, provider, appt };
+}
+
+/** Fetches customer email + customer name + service name for email notifications. */
+async function fetchEmailData(
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  db: any,
+  appt: Pick<AppointmentRow, "user_id" | "service_id">
+): Promise<{ customerEmail: string | null; customerName: string | null; serviceName: string }> {
+  const [customerProfileResult, serviceResult] = await Promise.allSettled([
+    db.from("profiles").select("email, full_name").eq("id", appt.user_id).single(),
+    db.from("services").select("name").eq("id", appt.service_id).single(),
+  ]);
+
+  const customerProfile =
+    customerProfileResult.status === "fulfilled"
+      ? (customerProfileResult.value.data as { email?: string; full_name?: string } | null)
+      : null;
+
+  const serviceName =
+    serviceResult.status === "fulfilled"
+      ? (serviceResult.value.data as { name?: string } | null)?.name ?? "Service"
+      : "Service";
+
+  return {
+    customerEmail: customerProfile?.email ?? null,
+    customerName: customerProfile?.full_name ?? null,
+    serviceName,
+  };
 }
 
 export async function confirmAppointment(
@@ -753,7 +785,8 @@ export async function confirmAppointment(
   const { error: updateError } = await db
     .from("appointments")
     .update({ status: "confirmed" })
-    .eq("id", appointmentId);
+    .eq("id", appointmentId)
+    .eq("provider_id", provider.id); // Defence-in-depth: re-assert ownership in DB WHERE clause
 
   if (updateError) {
     return { error: "actionFailed" };
@@ -762,6 +795,22 @@ export async function confirmAppointment(
   const { revalidatePath } = await import("next/cache");
   const safeLocale = ["de", "en"].includes(locale) ? locale : "de";
   revalidatePath(`/${safeLocale}/dashboard/calendar`);
+
+  // Send confirmation email to customer (never throws)
+  const { customerEmail, customerName, serviceName } = await fetchEmailData(db, appt);
+  if (customerEmail) {
+    await sendAppointmentConfirmed(customerEmail, {
+      appointmentId,
+      businessName: provider.business_name,
+      serviceName,
+      startTime: appt.start_time,
+      address: provider.address && provider.city
+        ? `${provider.address}, ${provider.city}`
+        : provider.address ?? null,
+      customerName,
+    });
+  }
+
   return { success: true };
 }
 
@@ -796,7 +845,8 @@ export async function cancelAppointmentAsProvider(
   const { error: updateError } = await db
     .from("appointments")
     .update({ status: "cancelled" })
-    .eq("id", appointmentId);
+    .eq("id", appointmentId)
+    .eq("provider_id", provider.id); // Defence-in-depth: re-assert ownership in DB WHERE clause
 
   if (updateError) {
     return { error: "actionFailed" };
@@ -805,6 +855,22 @@ export async function cancelAppointmentAsProvider(
   const { revalidatePath } = await import("next/cache");
   const safeLocale = ["de", "en"].includes(locale) ? locale : "de";
   revalidatePath(`/${safeLocale}/dashboard/calendar`);
+
+  // Send cancellation email to customer (never throws)
+  const { customerEmail, customerName, serviceName } = await fetchEmailData(db, appt);
+  if (customerEmail) {
+    await sendCancellationByProvider(customerEmail, {
+      appointmentId,
+      businessName: provider.business_name,
+      serviceName,
+      startTime: appt.start_time,
+      address: provider.address && provider.city
+        ? `${provider.address}, ${provider.city}`
+        : provider.address ?? null,
+      customerName,
+    });
+  }
+
   return { success: true };
 }
 
@@ -843,7 +909,8 @@ export async function markCompleted(
   const { error: updateError } = await db
     .from("appointments")
     .update({ status: "completed" })
-    .eq("id", appointmentId);
+    .eq("id", appointmentId)
+    .eq("provider_id", provider.id); // Defence-in-depth
 
   if (updateError) {
     return { error: "actionFailed" };
@@ -891,7 +958,8 @@ export async function markNoShow(
   const { error: updateError } = await db
     .from("appointments")
     .update({ status: "no_show" })
-    .eq("id", appointmentId);
+    .eq("id", appointmentId)
+    .eq("provider_id", provider.id); // Defence-in-depth
 
   if (updateError) {
     return { error: "actionFailed" };

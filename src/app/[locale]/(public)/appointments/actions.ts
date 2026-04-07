@@ -4,6 +4,10 @@ import { revalidatePath } from "next/cache";
 
 import { createClient } from "@/lib/supabase/server";
 import { reviewSchema } from "@/lib/validations/booking";
+import {
+  sendCancellationByCustomer,
+  sendProviderCancellationAlert,
+} from "@/lib/email";
 import type { Database } from "@/types/database";
 
 type ActionResult = { error: string } | { success: true };
@@ -36,11 +40,14 @@ export async function cancelAppointment(formData: FormData): Promise<ActionResul
 
   const { data: apptData } = await db
     .from("appointments")
-    .select("id, user_id, status, start_time")
+    .select("id, user_id, status, start_time, provider_id, service_id")
     .eq("id", appointmentId)
     .single();
 
-  const appt = apptData as Pick<AppointmentRow, "id" | "user_id" | "status" | "start_time"> | null;
+  const appt = apptData as Pick<
+    AppointmentRow,
+    "id" | "user_id" | "status" | "start_time" | "provider_id" | "service_id"
+  > | null;
 
   if (!appt) {
     return { error: "notFound" };
@@ -63,7 +70,8 @@ export async function cancelAppointment(formData: FormData): Promise<ActionResul
   const { error: updateError } = await db
     .from("appointments")
     .update({ status: "cancelled" })
-    .eq("id", appointmentId);
+    .eq("id", appointmentId)
+    .eq("user_id", user.id); // Defence-in-depth: re-assert ownership in DB WHERE clause
 
   if (updateError) {
     return { error: "cancelFailed" };
@@ -71,6 +79,63 @@ export async function cancelAppointment(formData: FormData): Promise<ActionResul
 
   const safeLocale = ["de", "en"].includes(locale) ? locale : "de";
   revalidatePath(`/${safeLocale}/appointments`);
+
+  // Send email notifications — non-blocking (sendEmail never throws)
+  // Fetch service + provider + customer data in parallel
+  const [serviceResult, providerResult, customerResult] = await Promise.allSettled([
+    db.from("services").select("name").eq("id", appt.service_id).single(),
+    db.from("providers").select("business_name, address, city, profile_id").eq("id", appt.provider_id).single(),
+    db.from("profiles").select("full_name").eq("id", user.id).single(),
+  ]);
+
+  const serviceName =
+    serviceResult.status === "fulfilled"
+      ? (serviceResult.value.data as { name?: string } | null)?.name ?? "Service"
+      : "Service";
+
+  const providerData =
+    providerResult.status === "fulfilled"
+      ? (providerResult.value.data as {
+          business_name?: string;
+          address?: string | null;
+          city?: string | null;
+          profile_id?: string;
+        } | null)
+      : null;
+
+  const customerName =
+    customerResult.status === "fulfilled"
+      ? (customerResult.value.data as { full_name?: string } | null)?.full_name ?? null
+      : null;
+
+  const emailDetails = {
+    appointmentId,
+    businessName: providerData?.business_name ?? "",
+    serviceName,
+    startTime: appt.start_time,
+    address: providerData?.address && providerData?.city
+      ? `${providerData.address}, ${providerData.city}`
+      : providerData?.address ?? null,
+    customerName,
+  };
+
+  // Fetch provider email via their profile_id
+  const providerProfileId = providerData?.profile_id;
+  const providerEmailResult = providerProfileId
+    ? await db.from("profiles").select("email").eq("id", providerProfileId).single()
+    : null;
+  const providerEmail =
+    (providerEmailResult?.data as { email?: string } | null)?.email ?? null;
+
+  await Promise.all([
+    user.email
+      ? sendCancellationByCustomer(user.email, emailDetails)
+      : Promise.resolve(),
+    providerEmail
+      ? sendProviderCancellationAlert(providerEmail, emailDetails)
+      : Promise.resolve(),
+  ]);
+
   return { success: true };
 }
 
