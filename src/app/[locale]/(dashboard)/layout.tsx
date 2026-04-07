@@ -65,6 +65,7 @@ export default async function DashboardLayout({
           services: t("nav.services"),
           employees: t("nav.employees"),
           reviews: t("nav.reviews"),
+          analytics: t("nav.analytics"),
           availability: t("nav.availability"),
           settings: t("nav.settings"),
         }}

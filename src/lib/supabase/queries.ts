@@ -632,3 +632,131 @@ export async function getProviderReviews(
     user_full_name: r.user_id != null ? (profileMap.get(r.user_id) ?? null) : null,
   }));
 }
+
+export interface MonthServiceStat {
+  serviceId: string;
+  serviceName: string;
+  completedCount: number;
+  revenueCents: number;
+}
+
+export interface ProviderMonthStats {
+  currentCompletedCount: number;
+  currentRevenueCents: number;
+  previousCompletedCount: number;
+  previousRevenueCents: number;
+  statusBreakdown: Record<AppointmentRow["status"], number>;
+  topServices: MonthServiceStat[];
+}
+
+/**
+ * Returns completed appointment counts and revenue for the current and previous
+ * calendar month, plus a status breakdown and top-5 services for the current month.
+ *
+ * Note: Uses local-time month boundaries (consistent with getAppointmentsForDate).
+ * Suitable for a DE-based MVP; revisit for multi-timezone deployments.
+ */
+export async function getProviderMonthStats(
+  supabase: TypedSupabaseClient,
+  providerId: string
+): Promise<ProviderMonthStats> {
+  const now = new Date();
+
+  // Current month boundaries (local time)
+  const currStart = new Date(now.getFullYear(), now.getMonth(), 1, 0, 0, 0, 0);
+  const currEnd   = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59, 999);
+
+  // Previous month boundaries (local time)
+  const prevStart = new Date(now.getFullYear(), now.getMonth() - 1, 1, 0, 0, 0, 0);
+  const prevEnd   = new Date(now.getFullYear(), now.getMonth(), 0, 23, 59, 59, 999);
+
+  const [{ data: currData }, { data: prevData }] = await Promise.all([
+    db(supabase)
+      .from("appointments")
+      .select("status, price_cents, service_id")
+      .eq("provider_id", providerId)
+      .gte("start_time", currStart.toISOString())
+      .lte("start_time", currEnd.toISOString()),
+    db(supabase)
+      .from("appointments")
+      .select("status, price_cents")
+      .eq("provider_id", providerId)
+      .gte("start_time", prevStart.toISOString())
+      .lte("start_time", prevEnd.toISOString()),
+  ]);
+
+  type CurrAppt = { status: AppointmentRow["status"]; price_cents: number; service_id: string };
+  type PrevAppt = { status: AppointmentRow["status"]; price_cents: number };
+
+  const curr = (currData ?? []) as CurrAppt[];
+  const prev = (prevData ?? []) as PrevAppt[];
+
+  const allStatuses: AppointmentRow["status"][] = [
+    "pending", "confirmed", "cancelled", "completed", "no_show",
+  ];
+  const statusBreakdown = Object.fromEntries(
+    allStatuses.map((s) => [s, 0])
+  ) as Record<AppointmentRow["status"], number>;
+
+  let currentCompletedCount = 0;
+  let currentRevenueCents = 0;
+  const serviceAgg = new Map<string, { completedCount: number; revenueCents: number }>();
+
+  for (const appt of curr) {
+    statusBreakdown[appt.status] = (statusBreakdown[appt.status] ?? 0) + 1;
+    if (appt.status === "completed") {
+      currentCompletedCount++;
+      currentRevenueCents += appt.price_cents;
+      const entry = serviceAgg.get(appt.service_id) ?? { completedCount: 0, revenueCents: 0 };
+      entry.completedCount++;
+      entry.revenueCents += appt.price_cents;
+      serviceAgg.set(appt.service_id, entry);
+    }
+  }
+
+  let previousCompletedCount = 0;
+  let previousRevenueCents = 0;
+  for (const appt of prev) {
+    if (appt.status === "completed") {
+      previousCompletedCount++;
+      previousRevenueCents += appt.price_cents;
+    }
+  }
+
+  // Resolve service names for top 5 by completed count
+  const topServiceIds = [...serviceAgg.entries()]
+    .sort((a, b) => b[1].completedCount - a[1].completedCount)
+    .slice(0, 5)
+    .map(([id]) => id);
+
+  let topServices: MonthServiceStat[] = [];
+  if (topServiceIds.length > 0) {
+    const { data: serviceRows } = await db(supabase)
+      .from("services")
+      .select("id, name")
+      .in("id", topServiceIds);
+
+    const nameMap = new Map<string, string>();
+    if (serviceRows) {
+      for (const row of serviceRows as { id: string; name: string }[]) {
+        nameMap.set(row.id, row.name);
+      }
+    }
+
+    topServices = topServiceIds.map((id) => ({
+      serviceId: id,
+      serviceName: nameMap.get(id) ?? id,
+      completedCount: serviceAgg.get(id)!.completedCount,
+      revenueCents: serviceAgg.get(id)!.revenueCents,
+    }));
+  }
+
+  return {
+    currentCompletedCount,
+    currentRevenueCents,
+    previousCompletedCount,
+    previousRevenueCents,
+    statusBreakdown,
+    topServices,
+  };
+}

@@ -153,6 +153,7 @@
       "availability": "Verfügbarkeit",
       "employees": "Mitarbeiter",
       "reviews": "Bewertungen",
+      "analytics": "Statistiken",
       "settings": "Einstellungen"
     },
     "overview": {
@@ -283,6 +284,19 @@
       "averageRating": "Durchschnittliche Bewertung",
       "totalReviews": "{count} Bewertungen",
       "starDistribution": "Bewertungsverteilung"
+    },
+    "analytics": {
+      "title": "Statistiken",
+      "subtitle": "Aktueller Kalendermonat im Vergleich zum Vormonat",
+      "completedAppointments": "Abgeschlossene Termine",
+      "revenue": "Umsatz (abgeschlossene Termine)",
+      "previousMonth": "Vormonat",
+      "statusBreakdown": "Terminstatus diesen Monat",
+      "topServices": "Top-5-Dienstleistungen diesen Monat",
+      "serviceColumn": "Dienstleistung",
+      "bookingsColumn": "Buchungen",
+      "revenueColumn": "Umsatz",
+      "noData": "Noch keine Daten für diesen Monat"
     }
   },
   "onboarding": {
@@ -440,7 +454,7 @@
     "passwordChanged": "Passwort erfolgreich geändert.",
     "deleteAccountTitle": "Konto löschen",
     "deleteAccountDescription": "Das Löschen deines Kontos kann nicht rückgängig gemacht werden. Bevorstehende Termine werden abgesagt und die Anbieter benachrichtigt. Deine persönlichen Daten werden gelöscht; abgeschlossene Termine bleiben anonymisiert in der Buchungshistorie der Anbieter erhalten.",
-    "deleteAccountConfirmLabel": "Tippe „löschen" zur Bestätigung",
+    "deleteAccountConfirmLabel": "Tippe \u201elöschen\u201c zur Bestätigung",
     "deleteAccountConfirmPlaceholder": "löschen",
     "deleteAccountButton": "Konto unwiderruflich löschen",
     "errors": {
@@ -448,7 +462,7 @@
       "unauthorized": "Nicht angemeldet",
       "saveFailed": "Speichern fehlgeschlagen",
       "currentPasswordWrong": "Das aktuelle Passwort ist falsch",
-      "confirmationRequired": "Bitte tippe „löschen" zur Bestätigung",
+      "confirmationRequired": "Bitte tippe \u201elöschen\u201c zur Bestätigung",
       "deleteFailed": "Konto konnte nicht gelöscht werden. Bitte versuche es erneut."
     }
   },

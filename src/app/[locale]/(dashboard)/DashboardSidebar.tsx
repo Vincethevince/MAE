@@ -11,6 +11,7 @@ import {
   Settings,
   Users,
   Star,
+  BarChart2,
   Menu,
   X,
 } from "lucide-react";
@@ -25,6 +26,7 @@ interface NavLabels {
   services: string;
   employees: string;
   reviews: string;
+  analytics: string;
   availability: string;
   settings: string;
 }
@@ -74,6 +76,12 @@ export function DashboardSidebar({
       href: `/${locale}/dashboard/reviews`,
       label: navLabels.reviews,
       icon: Star,
+      badge: 0,
+    },
+    {
+      href: `/${locale}/dashboard/analytics`,
+      label: navLabels.analytics,
+      icon: BarChart2,
       badge: 0,
     },
     {

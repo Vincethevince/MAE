@@ -153,6 +153,7 @@
       "availability": "Availability",
       "employees": "Employees",
       "reviews": "Reviews",
+      "analytics": "Analytics",
       "settings": "Settings"
     },
     "overview": {
@@ -283,6 +284,19 @@
       "averageRating": "Average rating",
       "totalReviews": "{count} reviews",
       "starDistribution": "Rating distribution"
+    },
+    "analytics": {
+      "title": "Analytics",
+      "subtitle": "Current calendar month compared to the previous month",
+      "completedAppointments": "Completed Appointments",
+      "revenue": "Revenue (completed appointments)",
+      "previousMonth": "Previous month",
+      "statusBreakdown": "Appointment status this month",
+      "topServices": "Top 5 services this month",
+      "serviceColumn": "Service",
+      "bookingsColumn": "Bookings",
+      "revenueColumn": "Revenue",
+      "noData": "No data yet for this month"
     }
   },
   "onboarding": {
