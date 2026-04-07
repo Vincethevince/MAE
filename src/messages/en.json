@@ -75,7 +75,11 @@
       "resultsTitle": "Available providers",
       "noResults": "No providers available in this time window",
       "noResultsHint": "Try a wider time range or a different date",
-      "validationError": "End time must be after start time"
+      "validationError": "End time must be after start time",
+      "todayButton": "Today",
+      "morning": "Morning",
+      "afternoon": "Afternoon",
+      "evening": "Evening"
     }
   },
   "booking": {

@@ -66,15 +66,30 @@ export function ByTimeSearchForm({
     router.push(`/${locale}/search/by-time?${params.toString()}`);
   }
 
+  const TIME_PRESETS = [
+    { label: tBy("morning"),   start: "09:00", end: "12:00" },
+    { label: tBy("afternoon"), start: "12:00", end: "17:00" },
+    { label: tBy("evening"),   start: "17:00", end: "21:00" },
+  ] as const;
+
   return (
     <form onSubmit={handleSubmit} className="w-full">
       <div className="flex flex-col gap-4">
         {/* Date + time row */}
         <div className="flex flex-col sm:flex-row gap-3">
           <div className="flex-1 min-w-0">
-            <Label htmlFor="by-time-date" className="block text-sm font-medium mb-1">
-              {tBy("dateLabel")}
-            </Label>
+            <div className="flex items-center justify-between mb-1">
+              <Label htmlFor="by-time-date" className="text-sm font-medium">
+                {tBy("dateLabel")}
+              </Label>
+              <button
+                type="button"
+                onClick={() => setDate(todayStr)}
+                className="text-xs text-primary hover:underline font-medium"
+              >
+                {tBy("todayButton")}
+              </button>
+            </div>
             <Input
               id="by-time-date"
               type="date"
@@ -110,6 +125,27 @@ export function ByTimeSearchForm({
               onChange={(e) => setEndTime(e.target.value)}
             />
           </div>
+        </div>
+
+        {/* Quick time presets */}
+        <div className="flex gap-2 flex-wrap">
+          {TIME_PRESETS.map((preset) => (
+            <button
+              key={preset.label}
+              type="button"
+              onClick={() => {
+                setStartTime(preset.start);
+                setEndTime(preset.end);
+              }}
+              className={
+                startTime === preset.start && endTime === preset.end
+                  ? "text-xs px-3 py-1 rounded-full border bg-primary text-primary-foreground font-medium"
+                  : "text-xs px-3 py-1 rounded-full border bg-background hover:bg-accent transition-colors"
+              }
+            >
+              {preset.label} ({preset.start}–{preset.end})
+            </button>
+          ))}
         </div>
 
         {/* City + category + submit row */}

@@ -75,7 +75,11 @@
       "resultsTitle": "Verfügbare Anbieter",
       "noResults": "Keine Anbieter in diesem Zeitfenster verfügbar",
       "noResultsHint": "Versuche einen anderen Zeitraum oder ein anderes Datum",
-      "validationError": "Endzeit muss nach der Startzeit liegen"
+      "validationError": "Endzeit muss nach der Startzeit liegen",
+      "todayButton": "Heute",
+      "morning": "Vormittag",
+      "afternoon": "Nachmittag",
+      "evening": "Abend"
     }
   },
   "booking": {
