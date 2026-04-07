@@ -131,7 +131,17 @@ export default async function BookingPage({ params }: BookingPageProps) {
         <CardContent className="space-y-3">
           <div className="flex items-center justify-between">
             <span className="text-sm text-muted-foreground">{t("provider")}</span>
-            <span className="font-medium">{provider.business_name}</span>
+            <div className="text-right">
+              <span className="font-medium">{provider.business_name}</span>
+              {provider.address && (
+                <p className="text-xs text-muted-foreground">
+                  {provider.address}
+                  {(provider.postal_code || provider.city) && (
+                    <>, {[provider.postal_code, provider.city].filter(Boolean).join(" ")}</>
+                  )}
+                </p>
+              )}
+            </div>
           </div>
           <Separator />
           <div className="flex items-center justify-between">
