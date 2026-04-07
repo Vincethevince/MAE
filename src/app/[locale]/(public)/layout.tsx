@@ -20,7 +20,18 @@ export default async function PublicLayout({ children, params }: PublicLayoutPro
     data: { user },
   } = await supabase.auth.getUser();
 
-  const isProvider = user ? !!(await getCurrentProvider(supabase)) : false;
+  // Fetch provider profile and user role in parallel
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const db = supabase as any;
+  const [provider, profileResult] = await Promise.all([
+    user ? getCurrentProvider(supabase) : Promise.resolve(null),
+    user
+      ? db.from("profiles").select("role").eq("id", user.id).single()
+      : Promise.resolve({ data: null }),
+  ]);
+
+  const isProvider = !!provider;
+  const userRole = (profileResult.data as { role?: string } | null)?.role ?? null;
 
   const t = await getTranslations("common");
   const tAppointments = await getTranslations("appointments");
@@ -53,18 +64,31 @@ export default async function PublicLayout({ children, params }: PublicLayoutPro
                 >
                   {tProfile("navLabel")}
                 </Link>
-                {isProvider && (
+                {isProvider ? (
                   <Link
                     href={`/${locale}/dashboard`}
                     className={buttonVariants({ variant: "outline", size: "sm" })}
                   >
-                    Dashboard
+                    {t("dashboard")}
                   </Link>
-                )}
+                ) : userRole === "provider" ? (
+                  <Link
+                    href={`/${locale}/dashboard/onboarding`}
+                    className={buttonVariants({ variant: "default", size: "sm" })}
+                  >
+                    {t("completeSetup")}
+                  </Link>
+                ) : null}
                 <LogoutButton />
               </>
             ) : (
               <>
+                <Link
+                  href={`/${locale}/register?role=provider`}
+                  className={buttonVariants({ variant: "ghost", size: "sm" })}
+                >
+                  {t("forBusinesses")}
+                </Link>
                 <Link
                   href={`/${locale}/login`}
                   className={buttonVariants({ variant: "ghost", size: "sm" })}

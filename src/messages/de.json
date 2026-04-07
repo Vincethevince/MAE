@@ -15,7 +15,10 @@
     "next": "Weiter",
     "loading": "Laden...",
     "error": "Ein Fehler ist aufgetreten",
-    "noResults": "Keine Ergebnisse gefunden"
+    "noResults": "Keine Ergebnisse gefunden",
+    "dashboard": "Dashboard",
+    "completeSetup": "Profil einrichten →",
+    "forBusinesses": "Für Unternehmen"
   },
   "home": {
     "hero": {

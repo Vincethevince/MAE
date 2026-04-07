@@ -15,7 +15,10 @@
     "next": "Next",
     "loading": "Loading...",
     "error": "An error occurred",
-    "noResults": "No results found"
+    "noResults": "No results found",
+    "dashboard": "Dashboard",
+    "completeSetup": "Complete setup →",
+    "forBusinesses": "For businesses"
   },
   "home": {
     "hero": {
