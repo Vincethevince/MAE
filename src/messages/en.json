@@ -40,7 +40,10 @@
       "title": "Transparent pricing",
       "freeTitle": "Free",
       "freeDescription": "Your profile, unlimited bookings, calendar overview, and customer reviews — always free.",
-      "freeItems": ["Public provider profile", "Unlimited appointment bookings", "Dashboard with calendar view", "Customer reviews"],
+      "item1": "Public provider profile",
+      "item2": "Unlimited appointment bookings",
+      "item3": "Dashboard with calendar view",
+      "item4": "Customer reviews",
       "note": "No credit card required. No hidden fees."
     },
     "cta": {

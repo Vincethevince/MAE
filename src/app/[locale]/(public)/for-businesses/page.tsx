@@ -30,10 +30,10 @@ export default async function ForBusinessesPage({ params }: PageProps) {
   ];
 
   const freeItems = [
-    t("pricing.freeItems.0"),
-    t("pricing.freeItems.1"),
-    t("pricing.freeItems.2"),
-    t("pricing.freeItems.3"),
+    t("pricing.item1"),
+    t("pricing.item2"),
+    t("pricing.item3"),
+    t("pricing.item4"),
   ];
 
   return (

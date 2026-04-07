@@ -40,7 +40,10 @@
       "title": "Transparente Preise",
       "freeTitle": "Kostenlos",
       "freeDescription": "Dein Profil, unbegrenzte Buchungen, Kalenderübersicht und Kundenbewertungen – immer kostenlos.",
-      "freeItems": ["Öffentliches Anbieterprofil", "Unbegrenzte Terminbuchungen", "Dashboard mit Kalenderansicht", "Kundenbewertungen"],
+      "item1": "Öffentliches Anbieterprofil",
+      "item2": "Unbegrenzte Terminbuchungen",
+      "item3": "Dashboard mit Kalenderansicht",
+      "item4": "Kundenbewertungen",
       "note": "Keine Kreditkarte erforderlich. Keine versteckten Kosten."
     },
     "cta": {
