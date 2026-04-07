@@ -6,6 +6,8 @@ import { createClient } from "@/lib/supabase/server";
 import { getCurrentProvider } from "@/lib/supabase/queries";
 import { buttonVariants } from "@/lib/button-variants";
 import { LogoutButton } from "@/components/features/LogoutButton";
+import { LocaleSwitcher } from "@/components/features/LocaleSwitcher";
+import { MobileNav } from "@/components/features/MobileNav";
 import { Separator } from "@/components/ui/separator";
 
 interface PublicLayoutProps {
@@ -40,6 +42,18 @@ export default async function PublicLayout({ children, params }: PublicLayoutPro
     getTranslations("legal"),
   ]);
 
+  const mobileLabels = {
+    appName: t("appName"),
+    forBusinesses: t("forBusinesses"),
+    login: t("login"),
+    register: t("register"),
+    dashboard: t("dashboard"),
+    completeSetup: t("completeSetup"),
+    myAppointments: tAppointments("myAppointments"),
+    profile: tProfile("navLabel"),
+    logout: t("logout"),
+  };
+
   return (
     <div className="flex min-h-screen flex-col">
       <header className="sticky top-0 z-40 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
@@ -51,7 +65,9 @@ export default async function PublicLayout({ children, params }: PublicLayoutPro
             {t("appName")}
           </Link>
 
-          <nav className="flex items-center gap-2">
+          {/* Desktop nav */}
+          <nav className="hidden md:flex items-center gap-2">
+            <LocaleSwitcher locale={locale} />
             {user ? (
               <>
                 <Link
@@ -106,6 +122,19 @@ export default async function PublicLayout({ children, params }: PublicLayoutPro
               </>
             )}
           </nav>
+
+          {/* Mobile nav */}
+          <div className="flex md:hidden items-center gap-2">
+            <LocaleSwitcher locale={locale} />
+            <MobileNav
+              locale={locale}
+              isLoggedIn={!!user}
+              isProvider={isProvider}
+              userRole={userRole}
+              labels={mobileLabels}
+              logoutAction={<LogoutButton />}
+            />
+          </div>
         </div>
       </header>
 
