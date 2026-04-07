@@ -9,6 +9,7 @@
  */
 
 import { Resend } from "resend";
+import { sanitizeSubject, escapeHtml } from "@/lib/email-utils";
 
 const RESEND_API_KEY = process.env.RESEND_API_KEY;
 const FROM_EMAIL = process.env.RESEND_FROM_EMAIL ?? "MAE <noreply@makeappointmentseasier.com>";
@@ -127,22 +128,6 @@ function appointmentDetailsBlock(details: EmailAppointmentDetails): string {
 
 function primaryButton(text: string, href: string): string {
   return `<a href="${href}" style="display:inline-block;margin-top:8px;padding:12px 24px;background:#18181b;color:#ffffff;font-size:14px;font-weight:600;text-decoration:none;border-radius:6px;">${escapeHtml(text)}</a>`;
-}
-
-// ─── Injection prevention ─────────────────────────────────────────────────────
-
-/** Strip CR/LF from strings used in SMTP Subject headers to prevent header injection. */
-function sanitizeSubject(str: string): string {
-  return str.replace(/[\r\n]/g, " ");
-}
-
-function escapeHtml(str: string): string {
-  return str
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;")
-    .replace(/'/g, "&#039;");
 }
 
 // ─── Types ───────────────────────────────────────────────────────────────────
