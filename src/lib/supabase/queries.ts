@@ -148,7 +148,7 @@ export async function searchProviders(
     q = q.ilike("category", `%${category}%`);
   }
 
-  const { data: providers } = await q.order("rating", { ascending: false });
+  const { data: providers } = await q.order("rating", { ascending: false }).limit(60);
 
   if (!providers || providers.length === 0) {
     return [];

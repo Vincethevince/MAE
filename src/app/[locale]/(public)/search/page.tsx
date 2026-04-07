@@ -1,4 +1,5 @@
 import Link from "next/link";
+import type { Metadata } from "next";
 import { getTranslations } from "next-intl/server";
 
 import { createClient } from "@/lib/supabase/server";
@@ -9,6 +10,17 @@ import { ProviderCard } from "@/components/features/ProviderCard";
 interface SearchPageProps {
   params: Promise<{ locale: string }>;
   searchParams: Promise<{ query?: string; city?: string; category?: string }>;
+}
+
+export async function generateMetadata({ params, searchParams }: SearchPageProps): Promise<Metadata> {
+  const { locale } = await params;
+  const { query, city, category } = await searchParams;
+  const t = await getTranslations({ locale, namespace: "search" });
+  const parts = [query, city, category].filter(Boolean);
+  const title = parts.length > 0
+    ? `${parts.join(", ")} – MAE`
+    : `${t("searchLabel")} – MAE`;
+  return { title };
 }
 
 export default async function SearchPage({ params, searchParams }: SearchPageProps) {
