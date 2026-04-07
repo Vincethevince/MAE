@@ -33,12 +33,14 @@ interface DashboardSidebarProps {
   locale: string;
   businessName: string;
   navLabels: NavLabels;
+  pendingCount: number;
 }
 
 export function DashboardSidebar({
   locale,
   businessName,
   navLabels,
+  pendingCount,
 }: DashboardSidebarProps) {
   const pathname = usePathname();
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -48,36 +50,43 @@ export function DashboardSidebar({
       href: `/${locale}/dashboard`,
       label: navLabels.dashboard,
       icon: LayoutDashboard,
+      badge: 0,
     },
     {
       href: `/${locale}/dashboard/calendar`,
       label: navLabels.calendar,
       icon: CalendarDays,
+      badge: pendingCount,
     },
     {
       href: `/${locale}/dashboard/services`,
       label: navLabels.services,
       icon: Scissors,
+      badge: 0,
     },
     {
       href: `/${locale}/dashboard/employees`,
       label: navLabels.employees,
       icon: Users,
+      badge: 0,
     },
     {
       href: `/${locale}/dashboard/reviews`,
       label: navLabels.reviews,
       icon: Star,
+      badge: 0,
     },
     {
       href: `/${locale}/dashboard/availability`,
       label: navLabels.availability,
       icon: Clock,
+      badge: 0,
     },
     {
       href: `/${locale}/dashboard/settings`,
       label: navLabels.settings,
       icon: Settings,
+      badge: 0,
     },
   ];
 
@@ -99,6 +108,7 @@ export function DashboardSidebar({
       <nav className="flex-1 px-3 py-4 space-y-1">
         {navItems.map((item) => {
           const Icon = item.icon;
+          const active = isActive(item.href);
           return (
             <Link
               key={item.href}
@@ -106,13 +116,25 @@ export function DashboardSidebar({
               onClick={() => setMobileOpen(false)}
               className={clsx(
                 "flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors",
-                isActive(item.href)
+                active
                   ? "bg-primary text-primary-foreground"
                   : "text-muted-foreground hover:bg-accent hover:text-accent-foreground"
               )}
             >
               <Icon className="h-4 w-4 shrink-0" />
-              {item.label}
+              <span className="flex-1">{item.label}</span>
+              {item.badge > 0 && (
+                <span
+                  className={clsx(
+                    "ml-auto inline-flex h-5 min-w-5 items-center justify-center rounded-full px-1.5 text-xs font-semibold",
+                    active
+                      ? "bg-primary-foreground text-primary"
+                      : "bg-destructive text-destructive-foreground"
+                  )}
+                >
+                  {item.badge > 99 ? "99+" : item.badge}
+                </span>
+              )}
             </Link>
           );
         })}

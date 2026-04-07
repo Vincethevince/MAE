@@ -39,6 +39,18 @@ export default async function DashboardLayout({
   }
 
   const provider = await getCurrentProvider(supabase);
+
+  // Fetch pending appointment count for the sidebar badge
+  let pendingCount = 0;
+  if (provider) {
+    const { count } = await (supabase as any)
+      .from("appointments")
+      .select("id", { count: "exact", head: true })
+      .eq("provider_id", provider.id)
+      .eq("status", "pending");
+    pendingCount = count ?? 0;
+  }
+
   const t = await getTranslations("dashboard");
 
   return (
@@ -46,6 +58,7 @@ export default async function DashboardLayout({
       <DashboardSidebar
         locale={locale}
         businessName={provider?.business_name ?? profile.full_name ?? ""}
+        pendingCount={pendingCount}
         navLabels={{
           dashboard: t("nav.dashboard"),
           calendar: t("nav.calendar"),
