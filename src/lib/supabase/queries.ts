@@ -46,6 +46,8 @@ interface SearchProvidersOptions {
   query?: string;
   city?: string;
   category?: string;
+  sort?: "rating" | "name";
+  minRating?: number;
 }
 
 // supabase-js 2.100+ uses a newer internal schema format; cast to any for queries
@@ -129,7 +131,7 @@ export async function getProviderAvailability(
 
 export async function searchProviders(
   supabase: TypedSupabaseClient,
-  { query, city, category }: SearchProvidersOptions
+  { query, city, category, sort = "rating", minRating }: SearchProvidersOptions
 ): Promise<ProviderSearchResult[]> {
   let q = db(supabase)
     .from("providers")
@@ -148,7 +150,16 @@ export async function searchProviders(
     q = q.ilike("category", `%${category}%`);
   }
 
-  const { data: providers } = await q.order("rating", { ascending: false }).limit(60);
+  if (minRating && minRating > 0) {
+    q = q.gte("rating", minRating);
+  }
+
+  const orderColumn = sort === "name" ? "business_name" : "rating";
+  const ascending = sort === "name";
+
+  const { data: providers } = await q
+    .order(orderColumn, { ascending })
+    .limit(60);
 
   if (!providers || providers.length === 0) {
     return [];
@@ -172,10 +183,13 @@ export async function searchProviders(
     }
   }
 
-  return (providers as ProviderRow[]).map((p) => ({
-    ...p,
-    min_price_cents: minPriceMap.get(p.id) ?? null,
-  }));
+  // Only return providers that have at least one active service (otherwise they can't be booked)
+  return (providers as ProviderRow[])
+    .filter((p) => minPriceMap.has(p.id))
+    .map((p) => ({
+      ...p,
+      min_price_cents: minPriceMap.get(p.id) ?? null,
+    }));
 }
 
 export async function getProviderById(

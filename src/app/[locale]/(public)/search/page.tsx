@@ -7,9 +7,18 @@ import { searchProviders } from "@/lib/supabase/queries";
 import { SearchForm } from "@/components/features/SearchForm";
 import { ProviderCard } from "@/components/features/ProviderCard";
 
+const VALID_SORTS = ["rating", "name"] as const;
+type SortOption = typeof VALID_SORTS[number];
+
 interface SearchPageProps {
   params: Promise<{ locale: string }>;
-  searchParams: Promise<{ query?: string; city?: string; category?: string }>;
+  searchParams: Promise<{
+    query?: string;
+    city?: string;
+    category?: string;
+    sort?: string;
+    minRating?: string;
+  }>;
 }
 
 export async function generateMetadata({ params, searchParams }: SearchPageProps): Promise<Metadata> {
@@ -25,19 +34,30 @@ export async function generateMetadata({ params, searchParams }: SearchPageProps
 
 export default async function SearchPage({ params, searchParams }: SearchPageProps) {
   const { locale } = await params;
-  const { query, city, category } = await searchParams;
+  const { query, city, category, sort: rawSort, minRating: rawMinRating } = await searchParams;
+
+  // Validate sort param
+  const sort: SortOption = VALID_SORTS.includes(rawSort as SortOption)
+    ? (rawSort as SortOption)
+    : "rating";
+
+  // Validate minRating param (1-5, integer only)
+  const minRatingNum = rawMinRating ? parseInt(rawMinRating, 10) : 0;
+  const minRating = minRatingNum >= 1 && minRatingNum <= 5 ? minRatingNum : 0;
 
   const supabase = await createClient();
   const providers = await searchProviders(supabase, {
     query,
     city,
     category,
+    sort,
+    minRating,
   });
 
   const t = await getTranslations("search");
   const tBy = await getTranslations("search.byTimeSearch");
 
-  const hasFilters = Boolean(query || city || category);
+  const hasFilters = Boolean(query || city || category || minRating);
 
   const resultsLabel =
     providers.length === 1
@@ -65,7 +85,46 @@ export default async function SearchPage({ params, searchParams }: SearchPagePro
       </div>
 
       {hasFilters && (
-        <p className="mb-4 text-sm text-muted-foreground">{resultsLabel}</p>
+        <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
+          <p className="text-sm text-muted-foreground">{resultsLabel}</p>
+          {/* Sort and filter controls — single form to keep URL params consistent */}
+          <form method="get" action={`/${locale}/search`} className="flex flex-wrap items-center gap-2 text-sm">
+            {query && <input type="hidden" name="query" value={query} />}
+            {city && <input type="hidden" name="city" value={city} />}
+            {category && <input type="hidden" name="category" value={category} />}
+            <label htmlFor="sort-order" className="text-muted-foreground whitespace-nowrap sr-only">
+              {t("sortLabel")}
+            </label>
+            <select
+              id="sort-order"
+              name="sort"
+              defaultValue={sort}
+              className="h-8 rounded-md border border-input bg-background px-2 text-sm"
+            >
+              <option value="rating">{t("sortByRating")}</option>
+              <option value="name">{t("sortByName")}</option>
+            </select>
+            <label htmlFor="min-rating" className="text-muted-foreground whitespace-nowrap sr-only">
+              {t("minRatingLabel")}
+            </label>
+            <select
+              id="min-rating"
+              name="minRating"
+              defaultValue={minRating || ""}
+              className="h-8 rounded-md border border-input bg-background px-2 text-sm"
+            >
+              <option value="">{t("minRatingAll")}</option>
+              <option value="4">4+ ★</option>
+              <option value="3">3+ ★</option>
+            </select>
+            <button
+              type="submit"
+              className="h-8 rounded-md border border-input bg-background px-3 text-sm hover:bg-accent transition-colors"
+            >
+              {t("applyFilters")}
+            </button>
+          </form>
+        </div>
       )}
 
       {providers.length > 0 ? (
