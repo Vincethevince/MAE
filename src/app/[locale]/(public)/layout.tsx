@@ -84,7 +84,7 @@ export default async function PublicLayout({ children, params }: PublicLayoutPro
             ) : (
               <>
                 <Link
-                  href={`/${locale}/register?role=provider`}
+                  href={`/${locale}/for-businesses`}
                   className={buttonVariants({ variant: "ghost", size: "sm" })}
                 >
                   {t("forBusinesses")}

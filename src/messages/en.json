@@ -20,6 +20,37 @@
     "completeSetup": "Complete setup →",
     "forBusinesses": "For businesses"
   },
+  "forBusinesses": {
+    "hero": {
+      "title": "Grow your business with MAE",
+      "subtitle": "Let customers book appointments online — 24/7, no phone calls needed. Setting up your profile is completely free.",
+      "cta": "Get started for free",
+      "ctaLogin": "Already have an account? Log in"
+    },
+    "howItWorks": {
+      "title": "How it works",
+      "step1Title": "Create your profile",
+      "step1Body": "Set up your business in minutes: name, category, address, and your available hours. No technical know-how required.",
+      "step2Title": "Customers find you",
+      "step2Body": "Customers in your city discover you via the MAE search — by category, name, or availability window.",
+      "step3Title": "You get booked",
+      "step3Body": "Customers book directly into your calendar. You see every appointment in your personal dashboard."
+    },
+    "pricing": {
+      "title": "Transparent pricing",
+      "freeTitle": "Free",
+      "freeDescription": "Your profile, unlimited bookings, calendar overview, and customer reviews — always free.",
+      "freeItems": ["Public provider profile", "Unlimited appointment bookings", "Dashboard with calendar view", "Customer reviews"],
+      "note": "No credit card required. No hidden fees."
+    },
+    "cta": {
+      "title": "Ready to get started?",
+      "subtitle": "Join MAE today and let your customers book online.",
+      "button": "Create free account"
+    },
+    "metaTitle": "For Businesses – MAE",
+    "metaDescription": "Set up your business profile on MAE for free and let customers book appointments online anytime."
+  },
   "home": {
     "hero": {
       "title": "Book appointments, made easy",

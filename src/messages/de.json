@@ -20,6 +20,37 @@
     "completeSetup": "Profil einrichten →",
     "forBusinesses": "Für Unternehmen"
   },
+  "forBusinesses": {
+    "hero": {
+      "title": "Dein Unternehmen auf MAE",
+      "subtitle": "Lass Kunden rund um die Uhr online buchen – ohne Anrufe, ohne Aufwand. Das Einrichten deines Profils ist völlig kostenlos.",
+      "cta": "Kostenlos starten",
+      "ctaLogin": "Schon ein Konto? Anmelden"
+    },
+    "howItWorks": {
+      "title": "So funktioniert es",
+      "step1Title": "Profil erstellen",
+      "step1Body": "Richte dein Unternehmen in wenigen Minuten ein: Name, Kategorie, Adresse und deine Verfügbarkeiten. Kein technisches Wissen nötig.",
+      "step2Title": "Kunden finden dich",
+      "step2Body": "Kunden in deiner Stadt entdecken dich über die MAE-Suche – nach Kategorie, Name oder freiem Zeitfenster.",
+      "step3Title": "Buchungen kommen rein",
+      "step3Body": "Kunden buchen direkt in deinen Kalender. Du siehst alle Termine in deinem persönlichen Dashboard."
+    },
+    "pricing": {
+      "title": "Transparente Preise",
+      "freeTitle": "Kostenlos",
+      "freeDescription": "Dein Profil, unbegrenzte Buchungen, Kalenderübersicht und Kundenbewertungen – immer kostenlos.",
+      "freeItems": ["Öffentliches Anbieterprofil", "Unbegrenzte Terminbuchungen", "Dashboard mit Kalenderansicht", "Kundenbewertungen"],
+      "note": "Keine Kreditkarte erforderlich. Keine versteckten Kosten."
+    },
+    "cta": {
+      "title": "Bereit loszulegen?",
+      "subtitle": "Registriere dich noch heute bei MAE und lass deine Kunden online buchen.",
+      "button": "Kostenloses Konto erstellen"
+    },
+    "metaTitle": "Für Unternehmen – MAE",
+    "metaDescription": "Richte dein Unternehmensprofil kostenlos auf MAE ein und ermögliche deinen Kunden Online-Buchungen rund um die Uhr."
+  },
   "home": {
     "hero": {
       "title": "Termine buchen, einfach gemacht",
