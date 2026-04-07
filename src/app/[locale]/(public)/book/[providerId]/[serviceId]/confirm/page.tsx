@@ -155,11 +155,26 @@ export default async function ConfirmPage({
         </CardContent>
       </Card>
 
-      <form action={confirmAndRedirect}>
+      <form action={confirmAndRedirect} className="space-y-4">
         <input type="hidden" name="locale" value={locale} />
         <input type="hidden" name="providerId" value={providerId} />
         <input type="hidden" name="serviceId" value={serviceId} />
         <input type="hidden" name="startTime" value={parsedStart.toISOString()} />
+
+        <div className="space-y-1.5">
+          <label htmlFor="notes" className="text-sm font-medium">
+            {t("notesLabel")}
+          </label>
+          <textarea
+            id="notes"
+            name="notes"
+            rows={3}
+            maxLength={500}
+            placeholder={t("notesPlaceholder")}
+            className="flex w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 resize-none"
+          />
+          <p className="text-xs text-muted-foreground">{t("notesHint")}</p>
+        </div>
 
         <Button type="submit" className="w-full" size="lg">
           {t("confirmButton")}

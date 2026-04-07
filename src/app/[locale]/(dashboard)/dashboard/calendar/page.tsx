@@ -136,6 +136,11 @@ function AppointmentRowCard({
           <dt>{timeLabel}:</dt>
           <dd className="text-foreground">{formatTime(appt.start_time, locale)}</dd>
         </dl>
+        {appt.notes && (
+          <p className="mt-2 text-sm text-muted-foreground italic">
+            &ldquo;{appt.notes}&rdquo;
+          </p>
+        )}
       </div>
 
       <div className="flex flex-wrap gap-2">
