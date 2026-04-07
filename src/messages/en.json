@@ -301,6 +301,15 @@
       "bookingsColumn": "Bookings",
       "revenueColumn": "Revenue",
       "noData": "No data yet for this month"
+    },
+    "calendar": {
+      "notes": {
+        "label": "Internal note (only visible to you)",
+        "placeholder": "e.g. Customer prefers short on sides...",
+        "saveButton": "Save",
+        "savedFeedback": "Saved",
+        "saveFailed": "Failed to save"
+      }
     }
   },
   "onboarding": {

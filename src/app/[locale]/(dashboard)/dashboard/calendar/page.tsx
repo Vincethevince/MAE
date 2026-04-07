@@ -1,3 +1,4 @@
+import React from "react";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { getTranslations } from "next-intl/server";
@@ -9,6 +10,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
+import { ProviderNoteEditor } from "@/components/features/ProviderNoteEditor";
 import {
   confirmAppointment as confirmAppointmentAction,
   cancelAppointmentAsProvider as cancelAppointmentAsProviderAction,
@@ -94,6 +96,7 @@ interface AppointmentRowCardProps {
   confirmActionLabel: string;
   cancelActionLabel: string;
   isPastView: boolean;
+  noteEditor: React.ReactNode;
 }
 
 function AppointmentRowCard({
@@ -110,6 +113,7 @@ function AppointmentRowCard({
   confirmActionLabel,
   cancelActionLabel,
   isPastView,
+  noteEditor,
 }: AppointmentRowCardProps) {
   const apptStart = new Date(appt.start_time);
   const isPast = apptStart < new Date();
@@ -120,86 +124,90 @@ function AppointmentRowCard({
   const canComplete = !isPastView && isPast && appt.status === "confirmed";
 
   return (
-    <div className="flex flex-col gap-3 rounded-lg border bg-card p-4 sm:flex-row sm:items-center sm:justify-between">
-      <div className="flex flex-col gap-1">
-        <div className="flex items-center gap-2 flex-wrap">
-          <span className="font-medium">{appt.serviceName}</span>
-          <Badge className={getStatusClassName(appt.status)} variant="outline">
-            {statusLabel}
-          </Badge>
+    <div className="flex flex-col gap-3 rounded-lg border bg-card p-4">
+      <div className="flex flex-col gap-1 sm:flex-row sm:items-start sm:justify-between">
+        <div className="flex flex-col gap-1">
+          <div className="flex items-center gap-2 flex-wrap">
+            <span className="font-medium">{appt.serviceName}</span>
+            <Badge className={getStatusClassName(appt.status)} variant="outline">
+              {statusLabel}
+            </Badge>
+          </div>
+          <dl className="grid grid-cols-[auto,1fr] gap-x-3 gap-y-0.5 text-sm text-muted-foreground">
+            <dt>{customerLabel}:</dt>
+            <dd className="text-foreground">{appt.providerName || "—"}</dd>
+            <dt>{serviceLabel}:</dt>
+            <dd className="text-foreground">{appt.serviceName}</dd>
+            <dt>{timeLabel}:</dt>
+            <dd className="text-foreground">{formatTime(appt.start_time, locale)}</dd>
+          </dl>
+          {appt.notes && (
+            <p className="mt-2 text-sm text-muted-foreground italic">
+              &ldquo;{appt.notes}&rdquo;
+            </p>
+          )}
         </div>
-        <dl className="grid grid-cols-[auto,1fr] gap-x-3 gap-y-0.5 text-sm text-muted-foreground">
-          <dt>{customerLabel}:</dt>
-          <dd className="text-foreground">{appt.providerName || "—"}</dd>
-          <dt>{serviceLabel}:</dt>
-          <dd className="text-foreground">{appt.serviceName}</dd>
-          <dt>{timeLabel}:</dt>
-          <dd className="text-foreground">{formatTime(appt.start_time, locale)}</dd>
-        </dl>
-        {appt.notes && (
-          <p className="mt-2 text-sm text-muted-foreground italic">
-            &ldquo;{appt.notes}&rdquo;
-          </p>
-        )}
+
+        <div className="flex flex-wrap gap-2">
+          {canConfirm && (
+            <form action={confirmAppointment}>
+              <input type="hidden" name="appointmentId" value={appt.id} />
+              <input type="hidden" name="locale" value={locale} />
+              <Button type="submit" size="sm" variant="default">
+                {confirmButtonLabel}
+              </Button>
+            </form>
+          )}
+          {canCancel && (
+            <form action={cancelAppointmentAsProvider}>
+              <input type="hidden" name="appointmentId" value={appt.id} />
+              <input type="hidden" name="locale" value={locale} />
+              <Button
+                type="submit"
+                size="sm"
+                variant="outline"
+                className="text-destructive hover:text-destructive border-destructive/30 hover:bg-destructive/5"
+                onClick={(e) => {
+                  if (!confirm(cancelActionLabel)) {
+                    e.preventDefault();
+                  }
+                }}
+              >
+                {cancelButtonLabel}
+              </Button>
+            </form>
+          )}
+          {canNoShow && (
+            <form action={markNoShow}>
+              <input type="hidden" name="appointmentId" value={appt.id} />
+              <input type="hidden" name="locale" value={locale} />
+              <Button
+                type="submit"
+                size="sm"
+                variant="outline"
+                onClick={(e) => {
+                  if (!confirm(confirmActionLabel)) {
+                    e.preventDefault();
+                  }
+                }}
+              >
+                {noShowButtonLabel}
+              </Button>
+            </form>
+          )}
+          {canComplete && (
+            <form action={markCompleted}>
+              <input type="hidden" name="appointmentId" value={appt.id} />
+              <input type="hidden" name="locale" value={locale} />
+              <Button type="submit" size="sm" variant="default">
+                {completeButtonLabel}
+              </Button>
+            </form>
+          )}
+        </div>
       </div>
 
-      <div className="flex flex-wrap gap-2">
-        {canConfirm && (
-          <form action={confirmAppointment}>
-            <input type="hidden" name="appointmentId" value={appt.id} />
-            <input type="hidden" name="locale" value={locale} />
-            <Button type="submit" size="sm" variant="default">
-              {confirmButtonLabel}
-            </Button>
-          </form>
-        )}
-        {canCancel && (
-          <form action={cancelAppointmentAsProvider}>
-            <input type="hidden" name="appointmentId" value={appt.id} />
-            <input type="hidden" name="locale" value={locale} />
-            <Button
-              type="submit"
-              size="sm"
-              variant="outline"
-              className="text-destructive hover:text-destructive border-destructive/30 hover:bg-destructive/5"
-              onClick={(e) => {
-                if (!confirm(cancelActionLabel)) {
-                  e.preventDefault();
-                }
-              }}
-            >
-              {cancelButtonLabel}
-            </Button>
-          </form>
-        )}
-        {canNoShow && (
-          <form action={markNoShow}>
-            <input type="hidden" name="appointmentId" value={appt.id} />
-            <input type="hidden" name="locale" value={locale} />
-            <Button
-              type="submit"
-              size="sm"
-              variant="outline"
-              onClick={(e) => {
-                if (!confirm(confirmActionLabel)) {
-                  e.preventDefault();
-                }
-              }}
-            >
-              {noShowButtonLabel}
-            </Button>
-          </form>
-        )}
-        {canComplete && (
-          <form action={markCompleted}>
-            <input type="hidden" name="appointmentId" value={appt.id} />
-            <input type="hidden" name="locale" value={locale} />
-            <Button type="submit" size="sm" variant="default">
-              {completeButtonLabel}
-            </Button>
-          </form>
-        )}
-      </div>
+      {noteEditor}
     </div>
   );
 }
@@ -342,6 +350,13 @@ export default async function CalendarPage({ params, searchParams }: CalendarPag
                         confirmActionLabel={t("noShowSuccess")}
                         cancelActionLabel={t("cancelSuccess")}
                         isPastView={isPastView}
+                        noteEditor={
+                          <ProviderNoteEditor
+                            appointmentId={appt.id}
+                            initialNote={appt.provider_notes ?? null}
+                            locale={locale}
+                          />
+                        }
                       />
                     ))}
                   </div>

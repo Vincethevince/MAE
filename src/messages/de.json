@@ -301,6 +301,15 @@
       "bookingsColumn": "Buchungen",
       "revenueColumn": "Umsatz",
       "noData": "Noch keine Daten für diesen Monat"
+    },
+    "calendar": {
+      "notes": {
+        "label": "Interne Notiz (nur für dich sichtbar)",
+        "placeholder": "z. B. Kunde mag kurze Seiten...",
+        "saveButton": "Speichern",
+        "savedFeedback": "Gespeichert",
+        "saveFailed": "Speichern fehlgeschlagen"
+      }
     }
   },
   "onboarding": {
@@ -458,7 +467,7 @@
     "passwordChanged": "Passwort erfolgreich geändert.",
     "deleteAccountTitle": "Konto löschen",
     "deleteAccountDescription": "Das Löschen deines Kontos kann nicht rückgängig gemacht werden. Bevorstehende Termine werden abgesagt und die Anbieter benachrichtigt. Deine persönlichen Daten werden gelöscht; abgeschlossene Termine bleiben anonymisiert in der Buchungshistorie der Anbieter erhalten.",
-    "deleteAccountConfirmLabel": "Tippe \u201elöschen\u201c zur Bestätigung",
+    "deleteAccountConfirmLabel": "Tippe „löschen“ zur Bestätigung",
     "deleteAccountConfirmPlaceholder": "löschen",
     "deleteAccountButton": "Konto unwiderruflich löschen",
     "errors": {
@@ -466,7 +475,7 @@
       "unauthorized": "Nicht angemeldet",
       "saveFailed": "Speichern fehlgeschlagen",
       "currentPasswordWrong": "Das aktuelle Passwort ist falsch",
-      "confirmationRequired": "Bitte tippe \u201elöschen\u201c zur Bestätigung",
+      "confirmationRequired": "Bitte tippe „löschen“ zur Bestätigung",
       "deleteFailed": "Konto konnte nicht gelöscht werden. Bitte versuche es erneut."
     }
   },

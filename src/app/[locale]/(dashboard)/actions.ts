@@ -970,3 +970,57 @@ export async function markNoShow(
   revalidatePath(`/${safeLocale}/dashboard/calendar`);
   return { success: true };
 }
+
+const UUID_REGEX_NOTES = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
+export async function saveProviderNote(formData: FormData): Promise<{ error: string } | { success: true }> {
+  const appointmentId = formData.get("appointmentId")?.toString() ?? "";
+  const noteRaw = formData.get("providerNote")?.toString() ?? "";
+  const locale = formData.get("locale")?.toString() ?? "de";
+
+  if (!UUID_REGEX_NOTES.test(appointmentId)) {
+    return { error: "notFound" };
+  }
+
+  // Limit note length to 1000 characters
+  const providerNote = noteRaw.slice(0, 1000);
+
+  const supabase = await createClient();
+  const {
+    data: { user },
+    error: authError,
+  } = await supabase.auth.getUser();
+
+  if (authError || !user) {
+    return { error: "unauthorized" };
+  }
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const db = supabase as any;
+
+  // Verify the appointment belongs to this provider (defence-in-depth: also enforced by RLS)
+  const { data: providerData } = await db
+    .from("providers")
+    .select("id")
+    .eq("profile_id", user.id)
+    .single();
+
+  if (!providerData) {
+    return { error: "unauthorized" };
+  }
+
+  const { error: updateError } = await db
+    .from("appointments")
+    .update({ provider_notes: providerNote || null })
+    .eq("id", appointmentId)
+    .eq("provider_id", providerData.id); // Defence-in-depth
+
+  if (updateError) {
+    return { error: "saveFailed" };
+  }
+
+  const { revalidatePath } = await import("next/cache");
+  const safeLocale = ["de", "en"].includes(locale) ? locale : "de";
+  revalidatePath(`/${safeLocale}/dashboard/calendar`);
+  return { success: true };
+}
