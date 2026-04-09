@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createAdminClient } from "@/lib/supabase/admin";
-import { sendAppointmentReminder } from "@/lib/email";
+import { sendAppointmentReminder, sendReviewRequest } from "@/lib/email";
 
 // Only callable by Vercel Cron (secret header). In development, CRON_SECRET may be unset.
 export async function GET(request: NextRequest): Promise<NextResponse> {
@@ -109,5 +109,86 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
   }
 
   console.log(`[cron/send-reminders] sent=${sent} failed=${failed}`);
-  return NextResponse.json({ sent, failed });
+
+  // ── Review request emails ──────────────────────────────────────────────────
+  // Find appointments that completed 24–48 h ago, have no review yet,
+  // and haven't had a review request sent.
+  const reviewFrom = new Date(now.getTime() - 48 * 60 * 60 * 1000);
+  const reviewTo = new Date(now.getTime() - 24 * 60 * 60 * 1000);
+
+  const { data: completedAppts } = (await supabase
+    .from("appointments")
+    .select("id, user_id, provider_id, service_id, start_time")
+    .eq("status", "completed")
+    .gte("start_time", reviewFrom.toISOString())
+    .lte("start_time", reviewTo.toISOString())
+    .is("review_requested_at", null)) as unknown as {
+    data: Array<{
+      id: string;
+      user_id: string;
+      provider_id: string;
+      service_id: string;
+      start_time: string;
+    }> | null;
+  };
+
+  let reviewsSent = 0;
+
+  for (const appt of completedAppts ?? []) {
+    // Check if a review already exists
+    const { data: existing } = await supabase
+      .from("reviews")
+      .select("id")
+      .eq("appointment_id", appt.id)
+      .maybeSingle();
+
+    if (existing) {
+      // Mark as requested so we don't check again
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      await (supabase as any)
+        .from("appointments")
+        .update({ review_requested_at: new Date().toISOString() })
+        .eq("id", appt.id);
+      continue;
+    }
+
+    const [customerResult, providerResult, serviceResult] = await Promise.allSettled([
+      supabase.from("profiles").select("email, full_name").eq("id", appt.user_id).single(),
+      supabase.from("providers").select("business_name").eq("id", appt.provider_id).single(),
+      supabase.from("services").select("name").eq("id", appt.service_id).single(),
+    ]);
+
+    const customerEmail =
+      customerResult.status === "fulfilled"
+        ? (customerResult.value.data as { email?: string } | null)?.email ?? null
+        : null;
+    const businessName =
+      providerResult.status === "fulfilled"
+        ? (providerResult.value.data as { business_name?: string } | null)?.business_name ?? ""
+        : "";
+    const serviceName =
+      serviceResult.status === "fulfilled"
+        ? (serviceResult.value.data as { name?: string } | null)?.name ?? ""
+        : "";
+
+    if (customerEmail) {
+      await sendReviewRequest(customerEmail, {
+        appointmentId: appt.id,
+        businessName,
+        serviceName,
+        startTime: appt.start_time,
+      });
+      reviewsSent++;
+    }
+
+    // Mark as requested regardless of email success to prevent future retries
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    await (supabase as any)
+      .from("appointments")
+      .update({ review_requested_at: new Date().toISOString() })
+      .eq("id", appt.id);
+  }
+
+  console.log(`[cron/send-reminders] sent=${sent} failed=${failed} reviewRequests=${reviewsSent}`);
+  return NextResponse.json({ sent, failed, reviewsSent });
 }

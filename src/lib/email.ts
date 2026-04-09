@@ -348,3 +348,34 @@ export async function sendProviderCancellationAlert(
 
   await sendEmail({ to: providerEmail, subject, html });
 }
+
+// ─── Review request ────────────────────────────────────────────────────────────
+
+export async function sendReviewRequest(
+  customerEmail: string,
+  details: {
+    appointmentId: string;
+    businessName: string;
+    serviceName: string;
+    startTime: string;
+    locale?: string;
+  }
+): Promise<void> {
+  const appointmentDate = formatDate(details.startTime);
+  const reviewUrl = `${APP_URL}/${details.locale ?? "de"}/appointments`;
+  const subject = `Wie war dein Besuch bei ${sanitizeSubject(details.businessName)}?`;
+  const html = baseTemplate(`
+    <h2 style="margin:0 0 8px;font-size:20px;font-weight:700;color:#18181b;">Wie war dein Termin?</h2>
+    <p style="margin:0 0 16px;font-size:14px;color:#3f3f46;">
+      Du warst am <strong>${appointmentDate}</strong> bei <strong>${escapeHtml(details.businessName)}</strong>
+      für <strong>${escapeHtml(details.serviceName)}</strong>. Hinterlasse eine Bewertung und hilf anderen Nutzern dabei,
+      den richtigen Anbieter zu finden.
+    </p>
+    ${primaryButton("Jetzt bewerten", reviewUrl)}
+    <p style="margin:16px 0 0;font-size:12px;color:#a1a1aa;">
+      Du erhältst diese E-Mail, weil du kürzlich einen Termin über MAE gebucht hast.
+    </p>
+  `);
+
+  await sendEmail({ to: customerEmail, subject, html });
+}

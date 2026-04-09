@@ -186,6 +186,7 @@ export interface Database {
           notes: string | null;
           price_cents: number;
           reminder_24h_sent_at: string | null;
+          review_requested_at: string | null;
           created_at: string;
           updated_at: string;
         };
@@ -201,6 +202,7 @@ export interface Database {
           notes?: string | null;
           price_cents: number;
           reminder_24h_sent_at?: string | null;
+          review_requested_at?: string | null;
           created_at?: string;
           updated_at?: string;
         };
@@ -211,6 +213,7 @@ export interface Database {
           status?: "pending" | "confirmed" | "cancelled" | "completed" | "no_show";
           notes?: string | null;
           reminder_24h_sent_at?: string | null;
+          review_requested_at?: string | null;
           updated_at?: string;
         };
       };
