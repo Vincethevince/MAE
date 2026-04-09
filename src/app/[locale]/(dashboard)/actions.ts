@@ -16,6 +16,34 @@ import {
 } from "@/lib/email";
 import type { Database } from "@/types/database";
 
+/** Geocode an address via Nominatim (OpenStreetMap). Returns null on failure — callers should not throw. */
+async function geocodeAddress(
+  address: string,
+  postalCode: string,
+  city: string
+): Promise<{ latitude: number; longitude: number } | null> {
+  const q = `${address}, ${postalCode} ${city}, Germany`;
+  const url = `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(q)}&format=json&limit=1&countrycodes=de`;
+  try {
+    const res = await fetch(url, {
+      headers: {
+        "User-Agent": "MAE-Booking-App/1.0 (https://mae-gilt.vercel.app)",
+        Accept: "application/json",
+      },
+      signal: AbortSignal.timeout(4000),
+    });
+    if (!res.ok) return null;
+    const results = (await res.json()) as Array<{ lat?: string; lon?: string }>;
+    if (!results.length || !results[0]?.lat || !results[0]?.lon) return null;
+    return {
+      latitude: parseFloat(results[0].lat),
+      longitude: parseFloat(results[0].lon),
+    };
+  } catch {
+    return null;
+  }
+}
+
 type ActionResult<T = undefined> =
   | { error: string; success?: never; data?: never }
   | (T extends undefined
@@ -140,6 +168,9 @@ export async function createOrUpdateProvider(
   const existing = existingRaw as { id: string; category: string } | null;
 
   if (existing) {
+    // Geocode the new address (non-blocking — save proceeds even if this fails)
+    const geo = await geocodeAddress(parsed.data.address, parsed.data.postalCode, parsed.data.city);
+
     const { error: updateError } = await db
       .from("providers")
       .update({
@@ -152,6 +183,7 @@ export async function createOrUpdateProvider(
         category: existing.category,
         description: parsed.data.description ?? null,
         website: parsed.data.website ?? null,
+        ...(geo ? { latitude: geo.latitude, longitude: geo.longitude } : {}),
       })
       .eq("id", existing.id)
       .eq("profile_id", user.id);
@@ -165,6 +197,9 @@ export async function createOrUpdateProvider(
     return { success: true, data: { providerId: existing.id } };
   }
 
+  // Geocode for new providers too
+  const geoNew = await geocodeAddress(parsed.data.address, parsed.data.postalCode, parsed.data.city);
+
   const { data: created, error: insertError } = await db
     .from("providers")
     .insert({
@@ -177,6 +212,7 @@ export async function createOrUpdateProvider(
       category: parsed.data.category,
       description: parsed.data.description ?? null,
       website: parsed.data.website ?? null,
+      ...(geoNew ? { latitude: geoNew.latitude, longitude: geoNew.longitude } : {}),
     })
     .select("id")
     .single();
