@@ -7,6 +7,15 @@ import { createClient } from "@/lib/supabase/server";
 import { headers } from "next/headers";
 import { loginSchema, registerSchema, forgotPasswordSchema, resetPasswordSchema } from "@/lib/validations/auth";
 
+function isSafeRedirectPath(path: string): boolean {
+  return (
+    typeof path === "string" &&
+    path.startsWith("/") &&
+    !path.startsWith("//") &&
+    !path.includes(":")
+  );
+}
+
 export async function login(
   _prevState: { error: string } | null,
   formData: FormData
@@ -31,7 +40,8 @@ export async function login(
     return { error: "invalidCredentials" };
   }
 
-  redirect("/");
+  const next = formData.get("next")?.toString() ?? "";
+  redirect(isSafeRedirectPath(next) ? next : "/");
 }
 
 type RegisterFieldErrors = {

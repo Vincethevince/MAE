@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useActionState } from "react";
 import { useTranslations, useLocale } from "next-intl";
+import { useSearchParams } from "next/navigation";
 
 import { login } from "../actions";
 import { Button } from "@/components/ui/button";
@@ -20,6 +21,8 @@ export default function LoginPage() {
   const t = useTranslations("auth");
   const tCommon = useTranslations("common");
   const locale = useLocale();
+  const searchParams = useSearchParams();
+  const next = searchParams.get("next") ?? "";
 
   const [state, formAction, pending] = useActionState(login, null);
 
@@ -30,6 +33,7 @@ export default function LoginPage() {
       </CardHeader>
       <CardContent>
         <form action={formAction} className="flex flex-col gap-4">
+          {next && <input type="hidden" name="next" value={next} />}
           <div className="flex flex-col gap-1.5">
             <Label htmlFor="email">{t("email")}</Label>
             <Input
