@@ -438,6 +438,10 @@
       "unauthorized": "Keine Berechtigung",
       "saveFailed": "Speichern fehlgeschlagen",
       "providerNotFound": "Anbieter nicht gefunden"
+    },
+    "notifications": {
+      "newBooking": "Neue Buchung eingegangen",
+      "newBookingBody": "Ein Kunde hat soeben einen Termin gebucht."
     }
   },
   "appointments": {

@@ -1,9 +1,11 @@
 import { redirect } from "next/navigation";
 import { getTranslations } from "next-intl/server";
+import { Toaster } from "sonner";
 
 import { createClient } from "@/lib/supabase/server";
 import { getCurrentProvider } from "@/lib/supabase/queries";
 import { DashboardSidebar } from "./DashboardSidebar";
+import { NewBookingNotifier } from "@/components/features/NewBookingNotifier";
 
 interface DashboardLayoutProps {
   children: React.ReactNode;
@@ -55,6 +57,16 @@ export default async function DashboardLayout({
 
   return (
     <div className="flex min-h-screen bg-background">
+      <Toaster position="top-right" richColors />
+      {provider && (
+        <NewBookingNotifier
+          providerId={provider.id}
+          messages={{
+            newBooking: t("notifications.newBooking"),
+            newBookingBody: t("notifications.newBookingBody"),
+          }}
+        />
+      )}
       <DashboardSidebar
         locale={locale}
         businessName={provider?.business_name ?? profile.full_name ?? ""}

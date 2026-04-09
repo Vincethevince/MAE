@@ -438,6 +438,10 @@
       "unauthorized": "Not authorized",
       "saveFailed": "Failed to save",
       "providerNotFound": "Provider not found"
+    },
+    "notifications": {
+      "newBooking": "New booking received",
+      "newBookingBody": "A customer just booked an appointment."
     }
   },
   "appointments": {
