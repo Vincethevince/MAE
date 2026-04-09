@@ -586,7 +586,8 @@
     "updatePassword": "Update password",
     "passwordUpdated": "Password updated! Redirecting to login…",
     "unauthorized": "Not signed in",
-    "updateFailed": "Failed to update password. Please try again."
+    "updateFailed": "Failed to update password. Please try again.",
+    "passwordHint": "Minimum 8 characters"
   },
   "legal": {
     "impressumLink": "Imprint",

@@ -95,6 +95,7 @@ export default function RegisterPage() {
             {state?.fieldErrors?.password && (
               <p id="password-error" className="text-sm text-destructive">{t(state.fieldErrors.password)}</p>
             )}
+            <p className="text-xs text-muted-foreground">{t("passwordHint")}</p>
           </div>
           <div className="flex flex-col gap-1.5">
             <Label htmlFor="confirmPassword">{t("confirmPassword")}</Label>

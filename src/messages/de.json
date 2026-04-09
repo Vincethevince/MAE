@@ -586,7 +586,8 @@
     "updatePassword": "Passwort aktualisieren",
     "passwordUpdated": "Passwort aktualisiert! Weiterleitung zur Anmeldung…",
     "unauthorized": "Nicht angemeldet",
-    "updateFailed": "Passwort konnte nicht aktualisiert werden. Bitte erneut versuchen."
+    "updateFailed": "Passwort konnte nicht aktualisiert werden. Bitte erneut versuchen.",
+    "passwordHint": "Mindestens 8 Zeichen"
   },
   "legal": {
     "impressumLink": "Impressum",
