@@ -1,6 +1,7 @@
 "use server";
 
 import { redirect } from "next/navigation";
+import { z } from "zod";
 
 import { createClient } from "@/lib/supabase/server";
 import { headers } from "next/headers";
@@ -33,10 +34,69 @@ export async function login(
   redirect("/");
 }
 
+type RegisterFieldErrors = {
+  email?: string;
+  password?: string;
+  confirmPassword?: string;
+  fullName?: string;
+  role?: string;
+};
+
+export type RegisterState = {
+  fieldErrors?: RegisterFieldErrors;
+  error?: string;
+} | null;
+
+function mapRegisterZodErrors(issues: z.ZodIssue[]): RegisterFieldErrors {
+  const fieldErrors: RegisterFieldErrors = {};
+  for (const issue of issues) {
+    const field = issue.path[0] as string | undefined;
+    if (!field) continue;
+    switch (field) {
+      case "email":
+        fieldErrors.email = "emailInvalid";
+        break;
+      case "password":
+        fieldErrors.password = issue.code === "too_big" ? "passwordTooLong" : "passwordTooShort";
+        break;
+      case "confirmPassword":
+        fieldErrors.confirmPassword = "passwordMismatch";
+        break;
+      case "fullName":
+        fieldErrors.fullName = "fullNameTooShort";
+        break;
+      case "role":
+        fieldErrors.role = "invalidRole";
+        break;
+    }
+  }
+  return fieldErrors;
+}
+
+function mapSupabaseRegisterError(message: string): string {
+  const msg = message.toLowerCase();
+  if (msg.includes("already registered") || msg.includes("email_exists") || msg.includes("user already")) {
+    return "emailAlreadyInUse";
+  }
+  if (msg.includes("rate limit") || msg.includes("too many requests") || msg.includes("over_email_send_rate_limit")) {
+    return "emailRateLimit";
+  }
+  if (msg.includes("signup_disabled") || msg.includes("signups not allowed")) {
+    return "signupDisabled";
+  }
+  if (msg.includes("password") && (msg.includes("weak") || msg.includes("short") || msg.includes("characters"))) {
+    return "passwordTooWeak";
+  }
+  if (msg.includes("invalid email") || msg.includes("email_address_invalid")) {
+    return "emailInvalid";
+  }
+  return "registrationFailed";
+}
+
 export async function register(
-  _prevState: { error: string } | null,
+  _prevState: RegisterState,
   formData: FormData
-): Promise<{ error: string }> {
+): Promise<RegisterState> {
   const raw = {
     email: formData.get("email")?.toString() ?? "",
     password: formData.get("password")?.toString() ?? "",
@@ -47,10 +107,7 @@ export async function register(
 
   const parsed = registerSchema.safeParse(raw);
   if (!parsed.success) {
-    const isPasswordMismatch = parsed.error.issues.some(
-      (issue) => issue.path.includes("confirmPassword") && issue.code === "custom"
-    );
-    return { error: isPasswordMismatch ? "passwordMismatch" : "validationError" };
+    return { fieldErrors: mapRegisterZodErrors(parsed.error.issues) };
   }
 
   const supabase = await createClient();
@@ -66,7 +123,7 @@ export async function register(
   });
 
   if (error) {
-    return { error: "registrationFailed" };
+    return { error: mapSupabaseRegisterError(error.message) };
   }
 
   redirect("/");

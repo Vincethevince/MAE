@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useActionState } from "react";
 import { useTranslations, useLocale } from "next-intl";
 
-import { register } from "../actions";
+import { register, type RegisterState } from "../actions";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -21,7 +21,7 @@ export default function RegisterPage() {
   const tCommon = useTranslations("common");
   const locale = useLocale();
 
-  const [state, formAction, pending] = useActionState(register, null);
+  const [state, formAction, pending] = useActionState<RegisterState, FormData>(register, null);
 
   return (
     <Card>
@@ -38,7 +38,11 @@ export default function RegisterPage() {
               type="text"
               autoComplete="name"
               required
+              aria-describedby={state?.fieldErrors?.fullName ? "fullName-error" : undefined}
             />
+            {state?.fieldErrors?.fullName && (
+              <p id="fullName-error" className="text-sm text-destructive">{t(state.fieldErrors.fullName)}</p>
+            )}
           </div>
           <div className="flex flex-col gap-1.5">
             <Label htmlFor="email">{t("email")}</Label>
@@ -49,7 +53,11 @@ export default function RegisterPage() {
               autoComplete="email"
               required
               placeholder="you@example.com"
+              aria-describedby={state?.fieldErrors?.email ? "email-error" : undefined}
             />
+            {state?.fieldErrors?.email && (
+              <p id="email-error" className="text-sm text-destructive">{t(state.fieldErrors.email)}</p>
+            )}
           </div>
           <div className="flex flex-col gap-1.5">
             <Label htmlFor="password">{t("password")}</Label>
@@ -59,7 +67,11 @@ export default function RegisterPage() {
               type="password"
               autoComplete="new-password"
               required
+              aria-describedby={state?.fieldErrors?.password ? "password-error" : undefined}
             />
+            {state?.fieldErrors?.password && (
+              <p id="password-error" className="text-sm text-destructive">{t(state.fieldErrors.password)}</p>
+            )}
           </div>
           <div className="flex flex-col gap-1.5">
             <Label htmlFor="confirmPassword">{t("confirmPassword")}</Label>
@@ -69,7 +81,11 @@ export default function RegisterPage() {
               type="password"
               autoComplete="new-password"
               required
+              aria-describedby={state?.fieldErrors?.confirmPassword ? "confirmPassword-error" : undefined}
             />
+            {state?.fieldErrors?.confirmPassword && (
+              <p id="confirmPassword-error" className="text-sm text-destructive">{t(state.fieldErrors.confirmPassword)}</p>
+            )}
           </div>
           <fieldset className="flex flex-col gap-2">
             <legend className="text-sm font-medium leading-none">
