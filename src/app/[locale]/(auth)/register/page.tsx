@@ -1,8 +1,10 @@
 "use client";
 
+import { Suspense } from "react";
 import Link from "next/link";
 import { useActionState } from "react";
 import { useTranslations, useLocale } from "next-intl";
+import { useSearchParams } from "next/navigation";
 
 import { register, type RegisterState } from "../actions";
 import { Button } from "@/components/ui/button";
@@ -16,10 +18,12 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 
-export default function RegisterPage() {
+function RegisterForm() {
   const t = useTranslations("auth");
   const tCommon = useTranslations("common");
   const locale = useLocale();
+  const searchParams = useSearchParams();
+  const preselectedRole = searchParams.get("role") === "provider" ? "provider" : "user";
 
   const [state, formAction, pending] = useActionState<RegisterState, FormData>(register, null);
 
@@ -121,7 +125,7 @@ export default function RegisterPage() {
                   type="radio"
                   name="role"
                   value="user"
-                  defaultChecked
+                  defaultChecked={preselectedRole === "user"}
                   className="accent-primary"
                 />
                 {t("registerAsUser")}
@@ -131,6 +135,7 @@ export default function RegisterPage() {
                   type="radio"
                   name="role"
                   value="provider"
+                  defaultChecked={preselectedRole === "provider"}
                   className="accent-primary"
                 />
                 {t("registerAsProvider")}
@@ -155,5 +160,13 @@ export default function RegisterPage() {
         </Link>
       </CardFooter>
     </Card>
+  );
+}
+
+export default function RegisterPage() {
+  return (
+    <Suspense>
+      <RegisterForm />
+    </Suspense>
   );
 }
