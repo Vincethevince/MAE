@@ -63,6 +63,21 @@
     "categories": {
       "title": "Kategorien entdecken",
       "subtitle": "Wähle eine Kategorie, um passende Anbieter in deiner Nähe zu finden"
+    },
+    "featured": {
+      "title": "Bestbewertet",
+      "subtitle": "Von unseren Nutzern hoch bewertet",
+      "seeAll": "Alle anzeigen"
+    },
+    "howItWorks": {
+      "title": "So funktioniert's",
+      "subtitle": "In drei einfachen Schritten zum Termin",
+      "step1Title": "Suche deinen Service",
+      "step1Body": "Gib ein, was du suchst, und deine Stadt – wir zeigen dir passende Anbieter in deiner Nähe.",
+      "step2Title": "Wähle einen freien Termin",
+      "step2Body": "Durchstöbere verfügbare Zeitfenster und wähle das aus, das zu deinem Kalender passt.",
+      "step3Title": "Buche in Sekunden",
+      "step3Body": "Bestätige deine Buchung sofort – kein Telefonieren, kein Warten, kein Stress."
     }
   },
   "search": {

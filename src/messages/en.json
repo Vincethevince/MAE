@@ -63,6 +63,21 @@
     "categories": {
       "title": "Explore categories",
       "subtitle": "Choose a category to find matching providers near you"
+    },
+    "featured": {
+      "title": "Top-rated providers",
+      "subtitle": "Highly rated by our users",
+      "seeAll": "See all"
+    },
+    "howItWorks": {
+      "title": "How it works",
+      "subtitle": "Book an appointment in three easy steps",
+      "step1Title": "Search for your service",
+      "step1Body": "Enter what you're looking for and your city to find matching providers near you.",
+      "step2Title": "Pick a free slot",
+      "step2Body": "Browse available time slots and choose the one that fits your schedule.",
+      "step3Title": "Book in seconds",
+      "step3Body": "Confirm your booking instantly — no phone calls, no waiting, no hassle."
     }
   },
   "search": {
