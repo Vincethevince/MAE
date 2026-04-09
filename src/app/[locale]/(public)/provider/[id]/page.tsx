@@ -116,8 +116,47 @@ export default async function ProviderDetailPage({ params }: ProviderDetailPageP
 
   const weekDays = [1, 2, 3, 4, 5, 6, 0] as const;
 
+  // Build JSON-LD structured data
+  const cheapestService = provider.services.length > 0
+    ? provider.services.reduce((min, s) => s.price_cents < min.price_cents ? s : min)
+    : null;
+
+  const jsonLd: Record<string, unknown> = {
+    "@context": "https://schema.org",
+    "@type": "LocalBusiness",
+    name: provider.business_name,
+    address: {
+      "@type": "PostalAddress",
+      streetAddress: provider.address,
+      addressLocality: provider.city,
+      postalCode: provider.postal_code,
+      addressCountry: "DE",
+    },
+  };
+  if (provider.description) jsonLd.description = provider.description;
+  if (provider.phone) jsonLd.telephone = provider.phone;
+  const safeUrl = safeWebsiteUrl(provider.website);
+  if (safeUrl) jsonLd.url = safeUrl;
+  if (provider.review_count > 0) {
+    jsonLd.aggregateRating = {
+      "@type": "AggregateRating",
+      ratingValue: provider.rating,
+      reviewCount: provider.review_count,
+      bestRating: 5,
+      worstRating: 1,
+    };
+  }
+  if (cheapestService) {
+    jsonLd.priceRange = `€${Math.floor(cheapestService.price_cents / 100)}`;
+  }
+
   return (
-    <div className="mx-auto max-w-4xl px-4 py-8">
+    <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
+    <div className="mx-auto max-w-4xl px-4 py-8 pb-24 sm:pb-8">
       {/* Provider header */}
       <div className="mb-8">
         <div className="flex flex-wrap items-start justify-between gap-4">
@@ -309,5 +348,15 @@ export default async function ProviderDetailPage({ params }: ProviderDetailPageP
         </aside>
       </div>
     </div>
+
+      {/* Sticky mobile book CTA */}
+      {provider.services.length > 0 && (
+        <div className="fixed bottom-0 left-0 right-0 z-40 border-t bg-background/95 backdrop-blur p-4 sm:hidden">
+          <a href={`/${locale}/book/${provider.id}`} className={buttonVariants({ className: "w-full" })}>
+            {t("bookNow")}
+          </a>
+        </div>
+      )}
+    </>
   );
 }
