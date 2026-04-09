@@ -62,6 +62,7 @@ export default async function DashboardLayout({
         navLabels={{
           dashboard: t("nav.dashboard"),
           calendar: t("nav.calendar"),
+          customers: t("nav.customers"),
           services: t("nav.services"),
           employees: t("nav.employees"),
           reviews: t("nav.reviews"),

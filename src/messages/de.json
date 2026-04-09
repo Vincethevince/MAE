@@ -204,6 +204,7 @@
       "employees": "Mitarbeiter",
       "reviews": "Bewertungen",
       "analytics": "Statistiken",
+      "customers": "Kunden",
       "settings": "Einstellungen"
     },
     "overview": {
@@ -347,6 +348,17 @@
       "bookingsColumn": "Buchungen",
       "revenueColumn": "Umsatz",
       "noData": "Noch keine Daten für diesen Monat"
+    },
+    "customers": {
+      "title": "Kunden",
+      "subtitle": "Alle Kunden, die bei dir gebucht haben",
+      "nameColumn": "Name",
+      "emailColumn": "E-Mail",
+      "appointmentsColumn": "Termine",
+      "lastAppointmentColumn": "Letzter Termin",
+      "lastServiceColumn": "Letzte Leistung",
+      "anonymous": "Anonym",
+      "noCustomers": "Noch keine Kunden. Termine erscheinen hier, sobald sie gebucht wurden."
     },
     "calendar": {
       "notes": {

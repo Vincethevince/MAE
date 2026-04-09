@@ -941,3 +941,104 @@ export async function getProviderMonthStats(
     topServices,
   };
 }
+
+// ---------------------------------------------------------------------------
+// Provider customers
+// ---------------------------------------------------------------------------
+
+export interface ProviderCustomer {
+  userId: string;
+  fullName: string | null;
+  email: string;
+  appointmentCount: number;
+  lastAppointmentDate: string; // ISO string
+  lastServiceName: string | null;
+}
+
+export async function getProviderCustomers(
+  supabase: TypedSupabaseClient,
+  providerId: string
+): Promise<ProviderCustomer[]> {
+  // 1. Fetch all non-cancelled appointments for this provider
+  const { data: apptData } = await db(supabase)
+    .from("appointments")
+    .select("id, user_id, status, start_time, service_id")
+    .eq("provider_id", providerId)
+    .neq("status", "cancelled")
+    .order("start_time", { ascending: false });
+
+  if (!apptData || apptData.length === 0) return [];
+
+  type ApptRow = { id: string; user_id: string; status: string; start_time: string; service_id: string };
+  const appointments = apptData as ApptRow[];
+
+  // 2. Aggregate per user – track count, latest appointment and its service_id
+  const userMap = new Map<string, { count: number; lastDate: string; lastServiceId: string }>();
+  for (const appt of appointments) {
+    const existing = userMap.get(appt.user_id);
+    if (!existing) {
+      userMap.set(appt.user_id, {
+        count: 1,
+        lastDate: appt.start_time,
+        lastServiceId: appt.service_id,
+      });
+    } else {
+      existing.count++;
+      // appointments are already ordered desc, so the first one we see per user is the latest
+    }
+  }
+
+  const userIds = [...userMap.keys()];
+
+  // 3. Fetch profiles for those users
+  const { data: profileData } = await db(supabase)
+    .from("profiles")
+    .select("id, full_name, email")
+    .in("id", userIds);
+
+  type ProfileRow2 = { id: string; full_name: string | null; email: string };
+  const profileMap = new Map<string, ProfileRow2>();
+  if (profileData) {
+    for (const p of profileData as ProfileRow2[]) {
+      profileMap.set(p.id, p);
+    }
+  }
+
+  // 4. Fetch service names for the most-recent service per user
+  const lastServiceIds = [...new Set([...userMap.values()].map((v) => v.lastServiceId))];
+  const serviceNameMap = new Map<string, string>();
+  if (lastServiceIds.length > 0) {
+    const { data: serviceData } = await db(supabase)
+      .from("services")
+      .select("id, name")
+      .in("id", lastServiceIds);
+
+    if (serviceData) {
+      for (const s of serviceData as { id: string; name: string }[]) {
+        serviceNameMap.set(s.id, s.name);
+      }
+    }
+  }
+
+  // 5. Build result, sorted by last appointment date descending
+  const result: ProviderCustomer[] = userIds.map((userId) => {
+    const agg = userMap.get(userId)!;
+    const profile = profileMap.get(userId);
+    return {
+      userId,
+      fullName: profile?.full_name ?? null,
+      email: profile?.email ?? "",
+      appointmentCount: agg.count,
+      lastAppointmentDate: agg.lastDate,
+      lastServiceName: serviceNameMap.get(agg.lastServiceId) ?? null,
+    };
+  });
+
+  result.sort(
+    (a, b) =>
+      new Date(b.lastAppointmentDate).getTime() -
+      new Date(a.lastAppointmentDate).getTime()
+  );
+
+  return result;
+}

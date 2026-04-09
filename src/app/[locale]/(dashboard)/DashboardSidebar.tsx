@@ -10,6 +10,7 @@ import {
   Clock,
   Settings,
   Users,
+  UserCheck,
   Star,
   BarChart2,
   Menu,
@@ -23,6 +24,7 @@ import { LogoutButton } from "@/components/features/LogoutButton";
 interface NavLabels {
   dashboard: string;
   calendar: string;
+  customers: string;
   services: string;
   employees: string;
   reviews: string;
@@ -59,6 +61,12 @@ export function DashboardSidebar({
       label: navLabels.calendar,
       icon: CalendarDays,
       badge: pendingCount,
+    },
+    {
+      href: `/${locale}/dashboard/customers`,
+      label: navLabels.customers,
+      icon: UserCheck,
+      badge: 0,
     },
     {
       href: `/${locale}/dashboard/services`,

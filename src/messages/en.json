@@ -204,6 +204,7 @@
       "employees": "Employees",
       "reviews": "Reviews",
       "analytics": "Analytics",
+      "customers": "Customers",
       "settings": "Settings"
     },
     "overview": {
@@ -347,6 +348,17 @@
       "bookingsColumn": "Bookings",
       "revenueColumn": "Revenue",
       "noData": "No data yet for this month"
+    },
+    "customers": {
+      "title": "Customers",
+      "subtitle": "All customers who have booked with you",
+      "nameColumn": "Name",
+      "emailColumn": "Email",
+      "appointmentsColumn": "Appointments",
+      "lastAppointmentColumn": "Last Appointment",
+      "lastServiceColumn": "Last Service",
+      "anonymous": "Anonymous",
+      "noCustomers": "No customers yet. Appointments will appear here once booked."
     },
     "calendar": {
       "notes": {
