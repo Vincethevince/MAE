@@ -18,11 +18,13 @@ async function queryDb(supabase: any): Promise<any> {
   return supabase;
 }
 
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
 export async function cancelAppointment(formData: FormData): Promise<ActionResult> {
   const appointmentId = formData.get("appointmentId")?.toString() ?? "";
   const locale = formData.get("locale")?.toString() ?? "de";
 
-  if (!appointmentId) {
+  if (!UUID_RE.test(appointmentId)) {
     return { error: "notFound" };
   }
 

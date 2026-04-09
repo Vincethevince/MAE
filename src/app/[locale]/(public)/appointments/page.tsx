@@ -18,6 +18,17 @@ async function cancelAppointment(formData: FormData): Promise<void> {
   await cancelAppointmentAction(formData);
 }
 
+function safeWebsiteUrl(url: string | null | undefined): string | null {
+  if (!url) return null;
+  try {
+    const parsed = new URL(url);
+    if (parsed.protocol !== "https:" && parsed.protocol !== "http:") return null;
+    return url;
+  } catch {
+    return null;
+  }
+}
+
 interface AppointmentsPageProps {
   params: Promise<{ locale: string }>;
 }
@@ -179,17 +190,20 @@ function AppointmentCard({
                 {appt.providerPhone}
               </a>
             )}
-            {appt.providerWebsite && (
-              <a
-                href={appt.providerWebsite}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex items-center gap-2 text-xs text-muted-foreground hover:text-foreground transition-colors"
-              >
-                <Globe className="h-3.5 w-3.5 shrink-0" />
-                {appt.providerWebsite.replace(/^https?:\/\//, "")}
-              </a>
-            )}
+            {(() => {
+              const safeUrl = safeWebsiteUrl(appt.providerWebsite);
+              return safeUrl ? (
+                <a
+                  href={safeUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center gap-2 text-xs text-muted-foreground hover:text-foreground transition-colors"
+                >
+                  <Globe className="h-3.5 w-3.5 shrink-0" />
+                  {safeUrl.replace(/^https?:\/\//, "")}
+                </a>
+              ) : null;
+            })()}
             <Link
               href={`/${locale}/provider/${appt.providerId}`}
               className="flex items-center gap-2 text-xs text-primary hover:underline"

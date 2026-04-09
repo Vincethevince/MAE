@@ -158,10 +158,15 @@ export async function requestPasswordReset(
   const locale = formData.get("locale")?.toString() ?? "de";
   const safeLocale = ["de", "en"].includes(locale) ? locale : "de";
 
-  const headersList = await headers();
-  const host = headersList.get("host") ?? "localhost:3000";
-  const protocol = host.startsWith("localhost") ? "http" : "https";
-  const origin = `${protocol}://${host}`;
+  // Prefer the canonical site URL from env to prevent Host header injection.
+  // In development without the env var, fall back to reading the Host header.
+  let origin = process.env.NEXT_PUBLIC_APP_URL ?? "";
+  if (!origin) {
+    const headersList = await headers();
+    const host = headersList.get("host") ?? "localhost:3000";
+    const protocol = host.startsWith("localhost") ? "http" : "https";
+    origin = `${protocol}://${host}`;
+  }
 
   const supabase = await createClient();
   // Always return success to prevent email enumeration attacks.
