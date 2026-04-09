@@ -31,6 +31,7 @@ export interface AppointmentWithProviderAndService extends AppointmentRow {
 
 export interface ProviderSearchResult extends ProviderRow {
   min_price_cents: number | null;
+  nextAvailableSlot?: string | null;
 }
 
 export interface ProviderWithDetails extends ProviderRow {
@@ -562,6 +563,121 @@ export async function searchProvidersByTimeSlot(
   }
 
   return matchingProviders;
+}
+
+/**
+ * For a batch of provider IDs, find the earliest available slot within the
+ * next `daysAhead` calendar days (today included).
+ * Returns a Map<providerId, slotStartDate>. Providers with no available slot
+ * in the window are omitted from the map.
+ */
+export async function getNextAvailableSlots(
+  supabase: TypedSupabaseClient,
+  providerIds: string[],
+  daysAhead = 7
+): Promise<Map<string, Date>> {
+  if (providerIds.length === 0) return new Map();
+
+  // Build date range: today 00:00 → today+daysAhead 23:59:59
+  const now = new Date();
+  const rangeStart = new Date(now);
+  rangeStart.setHours(0, 0, 0, 0);
+  const rangeEnd = new Date(rangeStart);
+  rangeEnd.setDate(rangeStart.getDate() + daysAhead);
+  rangeEnd.setHours(23, 59, 59, 999);
+
+  // 1. Fetch availability windows for all providers in one query
+  const { data: allAvailability } = await db(supabase)
+    .from("availability")
+    .select("*")
+    .in("provider_id", providerIds)
+    .is("employee_id", null);
+
+  const availabilityByProvider = new Map<string, AvailabilityRow[]>();
+  for (const row of (allAvailability as AvailabilityRow[] | null) ?? []) {
+    const bucket = availabilityByProvider.get(row.provider_id) ?? [];
+    bucket.push(row);
+    availabilityByProvider.set(row.provider_id, bucket);
+  }
+
+  // 2. Fetch minimum service duration per provider (shortest service → most slots)
+  const { data: allServices } = await db(supabase)
+    .from("services")
+    .select("provider_id, duration_minutes")
+    .in("provider_id", providerIds)
+    .eq("is_active", true);
+
+  const minDurationByProvider = new Map<string, number>();
+  for (const svc of (allServices as { provider_id: string; duration_minutes: number }[] | null) ?? []) {
+    const current = minDurationByProvider.get(svc.provider_id);
+    if (current === undefined || svc.duration_minutes < current) {
+      minDurationByProvider.set(svc.provider_id, svc.duration_minutes);
+    }
+  }
+
+  // 3. Fetch non-cancelled appointments in the date range for all providers
+  const { data: allAppointments } = await db(supabase)
+    .from("appointments")
+    .select("provider_id, start_time, end_time, status")
+    .in("provider_id", providerIds)
+    .neq("status", "cancelled")
+    .gte("start_time", rangeStart.toISOString())
+    .lte("start_time", rangeEnd.toISOString());
+
+  const appointmentsByProvider = new Map<string, AppointmentRow[]>();
+  for (const appt of (allAppointments as AppointmentRow[] | null) ?? []) {
+    const bucket = appointmentsByProvider.get(appt.provider_id) ?? [];
+    bucket.push(appt);
+    appointmentsByProvider.set(appt.provider_id, bucket);
+  }
+
+  // 4. Import computeAvailableSlots (dynamic import, same pattern as searchByAvailability)
+  const { computeAvailableSlots } = await import("@/lib/booking");
+
+  const result = new Map<string, Date>();
+
+  // 5. For each day, find the first slot for providers that don't have one yet
+  for (let d = 0; d < daysAhead; d++) {
+    const day = new Date(rangeStart);
+    day.setDate(rangeStart.getDate() + d);
+
+    for (const providerId of providerIds) {
+      if (result.has(providerId)) continue; // already found
+
+      const availability = availabilityByProvider.get(providerId) ?? [];
+      if (availability.length === 0) continue;
+
+      const duration = minDurationByProvider.get(providerId);
+      if (!duration) continue;
+
+      const appointments = appointmentsByProvider.get(providerId) ?? [];
+      // Filter appointments to this day only
+      const dayStart = new Date(day);
+      dayStart.setHours(0, 0, 0, 0);
+      const dayEnd = new Date(day);
+      dayEnd.setHours(23, 59, 59, 999);
+      const dayAppts = appointments.filter((a) => {
+        const t = new Date(a.start_time).getTime();
+        return t >= dayStart.getTime() && t <= dayEnd.getTime();
+      });
+
+      const slots = computeAvailableSlots(day, availability, dayAppts, duration);
+
+      // If looking at today, skip slots that have already passed
+      const validSlots = d === 0
+        ? slots.filter((s) => s.startTime > now)
+        : slots;
+
+      if (validSlots.length > 0) {
+        result.set(providerId, validSlots[0]!.startTime);
+      }
+    }
+
+    // If all providers have a slot, stop early
+    if (result.size === providerIds.length) break;
+  }
+
+  return result;
 }
 
 export async function getProviderRevenue30Days(

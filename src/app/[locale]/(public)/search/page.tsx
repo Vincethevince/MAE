@@ -3,7 +3,7 @@ import type { Metadata } from "next";
 import { getTranslations } from "next-intl/server";
 
 import { createClient } from "@/lib/supabase/server";
-import { searchProviders, getSavedProviderIds } from "@/lib/supabase/queries";
+import { searchProviders, getSavedProviderIds, getNextAvailableSlots } from "@/lib/supabase/queries";
 import { SearchForm } from "@/components/features/SearchForm";
 import { ProviderCard } from "@/components/features/ProviderCard";
 
@@ -30,6 +30,35 @@ export async function generateMetadata({ params, searchParams }: SearchPageProps
     ? `${parts.join(", ")} – MAE`
     : `${t("searchLabel")} – MAE`;
   return { title };
+}
+
+function formatNextSlot(date: Date | undefined, locale: string, todayLabel: string, tomorrowLabel: string): string | null {
+  if (!date) return null;
+  const now = new Date();
+  const today = new Date(now);
+  today.setHours(0, 0, 0, 0);
+  const tomorrow = new Date(today);
+  tomorrow.setDate(today.getDate() + 1);
+  const nextDay = new Date(today);
+  nextDay.setDate(today.getDate() + 2);
+
+  const dateDay = new Date(date);
+  dateDay.setHours(0, 0, 0, 0);
+
+  const timeStr = date.toLocaleTimeString(locale === "de" ? "de-DE" : "en-GB", {
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+
+  if (dateDay.getTime() === today.getTime()) {
+    return `${todayLabel} ${timeStr}`;
+  }
+  if (dateDay.getTime() === tomorrow.getTime()) {
+    return `${tomorrowLabel} ${timeStr}`;
+  }
+  // Otherwise show day abbreviation + time
+  const dayName = date.toLocaleDateString(locale === "de" ? "de-DE" : "en-GB", { weekday: "short" });
+  return `${dayName} ${timeStr}`;
 }
 
 export default async function SearchPage({ params, searchParams }: SearchPageProps) {
@@ -61,8 +90,16 @@ export default async function SearchPage({ params, searchParams }: SearchPagePro
     user ? getSavedProviderIds(supabase, user.id) : Promise.resolve(new Set<string>()),
   ]);
 
+  // Fetch next available slot for each provider (batched — 3 queries total)
+  const providerIds = providers.map((p) => p.id);
+  const nextSlots = providerIds.length > 0
+    ? await getNextAvailableSlots(supabase, providerIds, 7)
+    : new Map<string, Date>();
+
   const t = await getTranslations("search");
   const tBy = await getTranslations("search.byTimeSearch");
+  const todayLabel = t("today");
+  const tomorrowLabel = t("tomorrow");
 
   const hasFilters = Boolean(query || city || category || minRating);
 
@@ -143,6 +180,7 @@ export default async function SearchPage({ params, searchParams }: SearchPagePro
               locale={locale}
               isSaved={savedIds.has(provider.id)}
               showSaveButton={!!user}
+              nextAvailableSlot={formatNextSlot(nextSlots.get(provider.id), locale, todayLabel, tomorrowLabel)}
             />
           ))}
         </div>

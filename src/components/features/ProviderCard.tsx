@@ -12,6 +12,7 @@ interface ProviderCardProps {
   locale: string;
   isSaved?: boolean;
   showSaveButton?: boolean;
+  nextAvailableSlot?: string | null;
 }
 
 function formatPrice(cents: number): string {
@@ -33,6 +34,7 @@ export function ProviderCard({
   locale,
   isSaved,
   showSaveButton,
+  nextAvailableSlot,
 }: ProviderCardProps) {
   const t = useTranslations("search");
 
@@ -82,6 +84,13 @@ export function ProviderCard({
               <span className="text-foreground font-medium">
                 {t("from")} {formatPrice(provider.min_price_cents)}
               </span>
+            </p>
+          )}
+
+          {nextAvailableSlot && (
+            <p className="text-sm mt-2">
+              <span className="text-muted-foreground">{t("nextAvailable")}: </span>
+              <span className="font-medium text-green-600 dark:text-green-400">{nextAvailableSlot}</span>
             </p>
           )}
         </CardContent>
