@@ -222,6 +222,14 @@
       "customers": "Kunden",
       "settings": "Einstellungen"
     },
+    "setup": {
+      "title": "Einrichtung abschließen",
+      "subtitle": "Noch ein paar Schritte, bevor Kunden bei dir buchen können.",
+      "stepProfile": "Unternehmensprofil erstellt",
+      "stepServices": "Mindestens eine Dienstleistung hinzufügen",
+      "stepAvailability": "Verfügbarkeit festlegen",
+      "stepDescription": "Unternehmensbeschreibung hinzufügen"
+    },
     "overview": {
       "title": "Übersicht",
       "services": "Dienstleistungen",

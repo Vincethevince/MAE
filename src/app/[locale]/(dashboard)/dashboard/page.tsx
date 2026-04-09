@@ -1,5 +1,7 @@
+import Link from "next/link";
 import { redirect } from "next/navigation";
 import { getTranslations } from "next-intl/server";
+import { CheckCircle2, Circle } from "lucide-react";
 
 import { createClient } from "@/lib/supabase/server";
 import {
@@ -81,7 +83,7 @@ export default async function DashboardPage({ params }: DashboardPageProps) {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const db = supabase as any;
 
-  const [services, revenueCents, todaysAppointments, { count: upcomingCount }] =
+  const [services, revenueCents, todaysAppointments, { count: upcomingCount }, availabilityRows] =
     await Promise.all([
       getProviderServices(supabase, provider.id),
       getProviderRevenue30Days(supabase, provider.id),
@@ -92,7 +94,17 @@ export default async function DashboardPage({ params }: DashboardPageProps) {
         .eq("provider_id", provider.id)
         .gte("start_time", now.toISOString())
         .in("status", ["pending", "confirmed"]),
+      db
+        .from("availability")
+        .select("id", { count: "exact", head: true })
+        .eq("provider_id", provider.id)
+        .is("employee_id", null),
     ]);
+
+  const hasServices = services.length > 0;
+  const hasAvailability = (availabilityRows.count ?? 0) > 0;
+  const hasDescription = Boolean(provider.description);
+  const setupComplete = hasServices && hasAvailability;
 
   const t = await getTranslations("dashboard");
   const tStatus = await getTranslations("appointments");
@@ -108,6 +120,51 @@ export default async function DashboardPage({ params }: DashboardPageProps) {
         <h1 className="text-2xl font-bold">{t("overview.title")}</h1>
         <p className="text-muted-foreground">{provider.business_name}</p>
       </div>
+
+      {/* Setup checklist — only visible until all steps are done */}
+      {!setupComplete && (
+        <Card className="border-amber-200 bg-amber-50 dark:bg-amber-950/20 dark:border-amber-800">
+          <CardHeader className="pb-3">
+            <CardTitle className="text-base">{t("setup.title")}</CardTitle>
+            <p className="text-sm text-muted-foreground">{t("setup.subtitle")}</p>
+          </CardHeader>
+          <CardContent className="space-y-2">
+            {[
+              { done: true, label: t("setup.stepProfile"), href: null },
+              {
+                done: hasServices,
+                label: t("setup.stepServices"),
+                href: `/${locale}/dashboard/services`,
+              },
+              {
+                done: hasAvailability,
+                label: t("setup.stepAvailability"),
+                href: `/${locale}/dashboard/availability`,
+              },
+              {
+                done: hasDescription,
+                label: t("setup.stepDescription"),
+                href: `/${locale}/dashboard/settings`,
+              },
+            ].map((step, i) => (
+              <div key={i} className="flex items-center gap-2 text-sm">
+                {step.done ? (
+                  <CheckCircle2 className="h-4 w-4 text-green-600 shrink-0" />
+                ) : (
+                  <Circle className="h-4 w-4 text-muted-foreground shrink-0" />
+                )}
+                {step.href && !step.done ? (
+                  <Link href={step.href} className="hover:underline text-primary">
+                    {step.label}
+                  </Link>
+                ) : (
+                  <span className={step.done ? "text-muted-foreground line-through" : ""}>{step.label}</span>
+                )}
+              </div>
+            ))}
+          </CardContent>
+        </Card>
+      )}
 
       {/* Stat cards */}
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">

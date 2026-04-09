@@ -222,6 +222,14 @@
       "customers": "Customers",
       "settings": "Settings"
     },
+    "setup": {
+      "title": "Complete your setup",
+      "subtitle": "A few more steps before customers can book with you.",
+      "stepProfile": "Business profile created",
+      "stepServices": "Add at least one service",
+      "stepAvailability": "Set your availability",
+      "stepDescription": "Add a business description"
+    },
     "overview": {
       "title": "Overview",
       "services": "Services",
