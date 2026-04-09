@@ -45,6 +45,8 @@ type RegisterFieldErrors = {
 export type RegisterState = {
   fieldErrors?: RegisterFieldErrors;
   error?: string;
+  pendingConfirmation?: boolean;
+  email?: string;
 } | null;
 
 function mapRegisterZodErrors(issues: z.ZodIssue[]): RegisterFieldErrors {
@@ -111,7 +113,7 @@ export async function register(
   }
 
   const supabase = await createClient();
-  const { error } = await supabase.auth.signUp({
+  const { data, error } = await supabase.auth.signUp({
     email: parsed.data.email,
     password: parsed.data.password,
     options: {
@@ -124,6 +126,12 @@ export async function register(
 
   if (error) {
     return { error: mapSupabaseRegisterError(error.message) };
+  }
+
+  // If no session is returned the Supabase project requires email confirmation.
+  // Inform the user instead of silently redirecting to "/" as a logged-out visitor.
+  if (!data.session) {
+    return { pendingConfirmation: true, email: parsed.data.email };
   }
 
   redirect("/");

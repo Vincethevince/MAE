@@ -23,6 +23,29 @@ export default function RegisterPage() {
 
   const [state, formAction, pending] = useActionState<RegisterState, FormData>(register, null);
 
+  if (state?.pendingConfirmation) {
+    return (
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-xl">{t("checkEmailTitle")}</CardTitle>
+        </CardHeader>
+        <CardContent className="flex flex-col gap-3 text-sm text-muted-foreground">
+          <p>{t("checkEmailBody", { email: state.email ?? "" })}</p>
+          <p>{t("checkEmailSpam")}</p>
+        </CardContent>
+        <CardFooter className="justify-center gap-1 text-sm">
+          <span className="text-muted-foreground">{t("hasAccount")}</span>
+          <Link
+            href={`/${locale}/login`}
+            className="font-medium text-primary underline-offset-4 hover:underline"
+          >
+            {tCommon("login")}
+          </Link>
+        </CardFooter>
+      </Card>
+    );
+  }
+
   return (
     <Card>
       <CardHeader>
