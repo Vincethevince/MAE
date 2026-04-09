@@ -1,5 +1,6 @@
 "use client";
 
+import { Suspense } from "react";
 import Link from "next/link";
 import { useActionState } from "react";
 import { useTranslations, useLocale } from "next-intl";
@@ -17,7 +18,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 
-export default function LoginPage() {
+function LoginForm() {
   const t = useTranslations("auth");
   const tCommon = useTranslations("common");
   const locale = useLocale();
@@ -81,5 +82,13 @@ export default function LoginPage() {
         </Link>
       </CardFooter>
     </Card>
+  );
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense>
+      <LoginForm />
+    </Suspense>
   );
 }
