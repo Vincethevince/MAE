@@ -33,6 +33,12 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       priority: 0.8,
     },
     {
+      url: `${APP_URL}/de/for-businesses`,
+      alternates: { languages: { de: `${APP_URL}/de/for-businesses`, en: `${APP_URL}/en/for-businesses` } },
+      changeFrequency: "monthly",
+      priority: 0.7,
+    },
+    {
       url: `${APP_URL}/de/impressum`,
       changeFrequency: "monthly",
       priority: 0.2,
