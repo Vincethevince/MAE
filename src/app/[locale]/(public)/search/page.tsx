@@ -21,6 +21,7 @@ interface SearchPageProps {
     minRating?: string;
     lat?: string;
     lng?: string;
+    availableToday?: string;
   }>;
 }
 
@@ -74,7 +75,8 @@ function formatNextSlot(date: Date | undefined, locale: string, todayLabel: stri
 
 export default async function SearchPage({ params, searchParams }: SearchPageProps) {
   const { locale } = await params;
-  const { query, city, category, sort: rawSort, minRating: rawMinRating, lat: rawLat, lng: rawLng } = await searchParams;
+  const { query, city, category, sort: rawSort, minRating: rawMinRating, lat: rawLat, lng: rawLng, availableToday: rawAvailableToday } = await searchParams;
+  const filterAvailableToday = rawAvailableToday === "1";
 
   // Validate sort param
   const sort: SortOption = VALID_SORTS.includes(rawSort as SortOption)
@@ -142,12 +144,25 @@ export default async function SearchPage({ params, searchParams }: SearchPagePro
   const todayLabel = t("today");
   const tomorrowLabel = t("tomorrow");
 
-  const hasFilters = Boolean(query || city || category || minRating || hasValidGeo);
+  // Apply "available today" filter after slot computation
+  const todayStart = new Date();
+  todayStart.setHours(0, 0, 0, 0);
+  const todayEnd = new Date(todayStart);
+  todayEnd.setDate(todayStart.getDate() + 1);
+
+  const displayedProviders = filterAvailableToday
+    ? sortedProviders.filter((p) => {
+        const slot = nextSlots.get(p.id);
+        return slot !== undefined && slot >= todayStart && slot < todayEnd;
+      })
+    : sortedProviders;
+
+  const hasFilters = Boolean(query || city || category || minRating || hasValidGeo || filterAvailableToday);
 
   const resultsLabel =
-    providers.length === 1
-      ? t("resultsCount", { count: providers.length })
-      : t("resultsCountPlural", { count: providers.length });
+    displayedProviders.length === 1
+      ? t("resultsCount", { count: displayedProviders.length })
+      : t("resultsCountPlural", { count: displayedProviders.length });
 
   // Build currentParams for GeoSearchButton (all active params as strings)
   const currentParams: Record<string, string> = {};
@@ -160,6 +175,7 @@ export default async function SearchPage({ params, searchParams }: SearchPagePro
     currentParams.lat = rawLat;
     currentParams.lng = rawLng;
   }
+  if (filterAvailableToday) currentParams.availableToday = "1";
 
   return (
     <div className="mx-auto max-w-6xl px-4 py-8">
@@ -192,6 +208,16 @@ export default async function SearchPage({ params, searchParams }: SearchPagePro
             {category && <input type="hidden" name="category" value={category} />}
             {hasValidGeo && rawLat && <input type="hidden" name="lat" value={rawLat} />}
             {hasValidGeo && rawLng && <input type="hidden" name="lng" value={rawLng} />}
+            <label className="flex items-center gap-1.5 cursor-pointer whitespace-nowrap text-foreground">
+              <input
+                type="checkbox"
+                name="availableToday"
+                value="1"
+                defaultChecked={filterAvailableToday}
+                className="accent-primary"
+              />
+              {t("availableToday")}
+            </label>
             <label htmlFor="sort-order" className="text-muted-foreground whitespace-nowrap sr-only">
               {t("sortLabel")}
             </label>
@@ -227,9 +253,9 @@ export default async function SearchPage({ params, searchParams }: SearchPagePro
         </div>
       )}
 
-      {sortedProviders.length > 0 ? (
+      {displayedProviders.length > 0 ? (
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {sortedProviders.map((provider) => (
+          {displayedProviders.map((provider) => (
             <ProviderCard
               key={provider.id}
               provider={provider}

@@ -120,6 +120,7 @@
     "locationDenied": "Location access denied. Please allow location access in your browser settings.",
     "kmAway": "{distance} km away",
     "clearLocation": "Clear location",
+    "availableToday": "Available today",
     "categories": {
       "friseur": "Hairdresser",
       "kosmetik": "Cosmetics",
