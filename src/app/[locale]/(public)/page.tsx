@@ -5,6 +5,7 @@ import { Search, Calendar, Zap } from "lucide-react";
 import { SearchForm } from "@/components/features/SearchForm";
 import { ByTimeSearchForm } from "@/components/features/ByTimeSearchForm";
 import { ProviderCard } from "@/components/features/ProviderCard";
+import { GeoSearchButton } from "@/components/features/GeoSearchButton";
 import { PROVIDER_CATEGORIES } from "@/lib/validations/provider";
 import { createClient } from "@/lib/supabase/server";
 import type { ProviderSearchResult } from "@/lib/supabase/queries";
@@ -62,6 +63,9 @@ export default async function HomePage({ params }: HomePageProps) {
 
         <div className="w-full max-w-3xl">
           <SearchForm locale={locale} />
+          <div className="mt-3 flex justify-center">
+            <GeoSearchButton locale={locale} currentParams={{}} />
+          </div>
         </div>
       </section>
 
