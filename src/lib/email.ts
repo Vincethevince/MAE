@@ -387,6 +387,46 @@ export async function sendProviderCancellationAlert(
   await sendEmail({ to: providerEmail, subject, html });
 }
 
+/**
+ * Sent to the provider ~24 hours before an upcoming appointment as a reminder.
+ */
+export async function sendProviderAppointmentReminder(
+  providerEmail: string,
+  details: EmailAppointmentDetails
+): Promise<void> {
+  const appointmentTime = formatDateTime(details.startTime);
+  const subject = `Morgen: Termin mit ${details.customerName ? sanitizeSubject(details.customerName) : "Kunde"} – ${sanitizeSubject(details.serviceName)}`;
+  const html = baseTemplate(`
+    <h2 style="margin:0 0 8px;font-size:20px;font-weight:700;color:#18181b;">Erinnerung: Termin morgen</h2>
+    <p style="margin:0 0 4px;font-size:14px;color:#3f3f46;">
+      Du hast morgen folgenden Termin:
+    </p>
+    <table style="width:100%;background:#f9fafb;border-radius:6px;border:1px solid #e4e4e7;border-collapse:collapse;margin:20px 0;">
+      <tr>
+        <td style="padding:16px 20px;">
+          <table style="width:100%;border-collapse:collapse;">
+            <tr>
+              <td style="padding:4px 0;font-size:13px;color:#71717a;width:100px;">Kunde</td>
+              <td style="padding:4px 0;font-size:13px;font-weight:600;color:#18181b;">${details.customerName ? escapeHtml(details.customerName) : "—"}</td>
+            </tr>
+            <tr>
+              <td style="padding:4px 0;font-size:13px;color:#71717a;">Leistung</td>
+              <td style="padding:4px 0;font-size:13px;color:#18181b;">${escapeHtml(details.serviceName)}</td>
+            </tr>
+            <tr>
+              <td style="padding:4px 0;font-size:13px;color:#71717a;">Uhrzeit</td>
+              <td style="padding:4px 0;font-size:13px;color:#18181b;">${appointmentTime} Uhr</td>
+            </tr>
+          </table>
+        </td>
+      </tr>
+    </table>
+    ${primaryButton("Kalender öffnen", `${APP_URL}/de/dashboard/calendar`)}
+  `);
+
+  await sendEmail({ to: providerEmail, subject, html });
+}
+
 // ─── Review request ────────────────────────────────────────────────────────────
 
 export async function sendReviewRequest(

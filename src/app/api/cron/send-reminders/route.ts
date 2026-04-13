@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createAdminClient } from "@/lib/supabase/admin";
-import { sendAppointmentReminder, sendReviewRequest } from "@/lib/email";
+import { sendAppointmentReminder, sendProviderAppointmentReminder, sendReviewRequest } from "@/lib/email";
 
 // Only callable by Vercel Cron (secret header). In development, CRON_SECRET may be unset.
 export async function GET(request: NextRequest): Promise<NextResponse> {
@@ -52,7 +52,7 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
   let failed = 0;
 
   for (const appt of appointments ?? []) {
-    // Fetch customer email + name, provider details, service name in parallel
+    // Fetch customer, provider, service and provider profile in parallel
     const [customerResult, providerResult, serviceResult] = await Promise.allSettled([
       (supabase
         .from("profiles")
@@ -63,10 +63,10 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
       }>,
       (supabase
         .from("providers")
-        .select("business_name, address, city")
+        .select("business_name, address, city, profile_id")
         .eq("id", appt.provider_id)
         .single()) as unknown as Promise<{
-        data: { business_name: string; address: string; city: string } | null;
+        data: { business_name: string; address: string; city: string; profile_id: string } | null;
       }>,
       (supabase
         .from("services")
@@ -86,7 +86,7 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
       continue;
     }
 
-    await sendAppointmentReminder(customer.email, {
+    const emailDetails = {
       appointmentId: appt.id,
       businessName: provider.business_name,
       serviceName: service?.name ?? "Termin",
@@ -97,7 +97,22 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
           ? `${provider.address}, ${provider.city}`
           : provider.address ?? null,
       customerName: customer.full_name ?? null,
-    });
+    };
+
+    await sendAppointmentReminder(customer.email, emailDetails);
+
+    // Also remind the provider (non-blocking — never fail the batch on email error)
+    if (provider.profile_id) {
+      const providerProfileResult = await (supabase
+        .from("profiles")
+        .select("email")
+        .eq("id", provider.profile_id)
+        .single()) as unknown as { data: { email: string } | null };
+      const providerEmail = providerProfileResult.data?.email ?? null;
+      if (providerEmail) {
+        await sendProviderAppointmentReminder(providerEmail, emailDetails);
+      }
+    }
 
     // Mark reminder as sent
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
