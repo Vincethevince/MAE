@@ -604,6 +604,8 @@
     "checkEmailTitle": "Check your inbox",
     "checkEmailBody": "We've sent a confirmation link to {email}. Click it to activate your account.",
     "checkEmailSpam": "Don't see the email? Check your spam folder.",
+    "resendEmail": "Resend confirmation email",
+    "resendSuccess": "Confirmation email has been resent.",
     "invalidCredentials": "Invalid credentials",
     "registrationFailed": "Registration failed. Please try again later.",
     "emailAlreadyInUse": "An account with this email already exists. Try signing in instead.",

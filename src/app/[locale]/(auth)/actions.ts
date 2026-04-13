@@ -171,6 +171,21 @@ export async function register(
   redirect("/");
 }
 
+export async function resendConfirmationEmail(
+  _prevState: { error?: string; success?: boolean } | null,
+  formData: FormData
+): Promise<{ error?: string; success?: boolean }> {
+  const raw = { email: formData.get("email")?.toString() ?? "" };
+  const parsed = forgotPasswordSchema.safeParse(raw); // reuses email schema
+  if (!parsed.success) return { error: "emailInvalid" };
+
+  const supabase = await createClient();
+  // Always return success to prevent email enumeration.
+  // Supabase rate-limits this endpoint server-side.
+  await supabase.auth.resend({ type: "signup", email: parsed.data.email });
+  return { success: true };
+}
+
 export async function requestPasswordReset(
   _prevState: { error?: string; success?: boolean } | null,
   formData: FormData

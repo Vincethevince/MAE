@@ -6,7 +6,7 @@ import { useActionState } from "react";
 import { useTranslations, useLocale } from "next-intl";
 import { useSearchParams } from "next/navigation";
 
-import { register, type RegisterState } from "../actions";
+import { register, resendConfirmationEmail, type RegisterState } from "../actions";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -26,6 +26,10 @@ function RegisterForm() {
   const preselectedRole = searchParams.get("role") === "provider" ? "provider" : "user";
 
   const [state, formAction, pending] = useActionState<RegisterState, FormData>(register, null);
+  const [resendState, resendAction, resendPending] = useActionState<
+    { error?: string; success?: boolean } | null,
+    FormData
+  >(resendConfirmationEmail, null);
 
   if (state?.pendingConfirmation) {
     return (
@@ -36,6 +40,23 @@ function RegisterForm() {
         <CardContent className="flex flex-col gap-3 text-sm text-muted-foreground">
           <p>{t("checkEmailBody", { email: state.email ?? "" })}</p>
           <p>{t("checkEmailSpam")}</p>
+          {resendState?.success ? (
+            <p className="text-sm text-green-600">{t("resendSuccess")}</p>
+          ) : (
+            <form action={resendAction} className="mt-1">
+              <input type="hidden" name="email" value={state.email ?? ""} />
+              <button
+                type="submit"
+                disabled={resendPending}
+                className="text-sm text-primary underline-offset-4 hover:underline disabled:opacity-50"
+              >
+                {resendPending ? tCommon("loading") : t("resendEmail")}
+              </button>
+            </form>
+          )}
+          {resendState?.error && (
+            <p className="text-sm text-destructive">{t(resendState.error)}</p>
+          )}
         </CardContent>
         <CardFooter className="justify-center gap-1 text-sm">
           <span className="text-muted-foreground">{t("hasAccount")}</span>

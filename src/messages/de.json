@@ -604,6 +604,8 @@
     "checkEmailTitle": "E-Mail überprüfen",
     "checkEmailBody": "Wir haben einen Bestätigungslink an {email} gesendet. Klicke darauf, um dein Konto zu aktivieren.",
     "checkEmailSpam": "Keine E-Mail erhalten? Schaue in deinen Spam-Ordner.",
+    "resendEmail": "E-Mail erneut senden",
+    "resendSuccess": "Bestätigungs-E-Mail wurde erneut gesendet.",
     "invalidCredentials": "Ungültige Anmeldedaten",
     "registrationFailed": "Registrierung fehlgeschlagen. Bitte versuche es später erneut.",
     "emailAlreadyInUse": "Ein Konto mit dieser E-Mail-Adresse existiert bereits. Bitte melde dich stattdessen an.",
