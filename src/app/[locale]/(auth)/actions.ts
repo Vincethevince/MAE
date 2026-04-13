@@ -85,8 +85,27 @@ function mapRegisterZodErrors(issues: z.ZodIssue[]): RegisterFieldErrors {
   return fieldErrors;
 }
 
-function mapSupabaseRegisterError(message: string): string {
-  const msg = message.toLowerCase();
+function mapSupabaseRegisterError(error: { message: string; code?: string; status?: number }): string {
+  // Check structured error codes first (Supabase JS v2 AuthApiError.code)
+  const code = error.code ?? "";
+  if (code === "user_already_exists" || code === "email_exists") {
+    return "emailAlreadyInUse";
+  }
+  if (code === "over_email_send_rate_limit" || code === "over_request_rate_limit") {
+    return "emailRateLimit";
+  }
+  if (code === "signup_disabled") {
+    return "signupDisabled";
+  }
+  if (code === "weak_password") {
+    return "passwordTooWeak";
+  }
+  if (code === "email_address_invalid" || code === "email_address_not_authorized") {
+    return "emailInvalid";
+  }
+
+  // Fall back to message-based matching for older SDK versions / unexpected formats
+  const msg = error.message.toLowerCase();
   if (msg.includes("already registered") || msg.includes("email_exists") || msg.includes("user already")) {
     return "emailAlreadyInUse";
   }
@@ -135,7 +154,12 @@ export async function register(
   });
 
   if (error) {
-    return { error: mapSupabaseRegisterError(error.message) };
+    console.error("[register] Supabase signUp error:", {
+      message: error.message,
+      code: (error as { code?: string }).code,
+      status: error.status,
+    });
+    return { error: mapSupabaseRegisterError(error) };
   }
 
   // If no session is returned the Supabase project requires email confirmation.
