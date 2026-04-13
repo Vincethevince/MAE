@@ -145,6 +145,11 @@
       "morning": "Vormittag",
       "afternoon": "Nachmittag",
       "evening": "Abend"
+    },
+    "badges": {
+      "topRated": "⭐ Top-bewertet",
+      "popular": "🔥 Beliebt",
+      "new": "✨ Neu"
     }
   },
   "booking": {

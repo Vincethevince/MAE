@@ -7,6 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { RatingStars } from "@/components/features/RatingStars";
 import { SaveProviderButton } from "@/components/features/SaveProviderButton";
 import type { ProviderSearchResult } from "@/lib/supabase/queries";
+import { getProviderBadges } from "@/lib/provider-badges";
 
 interface ProviderCardProps {
   provider: ProviderSearchResult;
@@ -46,6 +47,8 @@ export function ProviderCard({
       ? t("reviewCount", { count: provider.review_count })
       : t("reviewCountPlural", { count: provider.review_count });
 
+  const badges = getProviderBadges(provider);
+
   return (
     <Link href={`/${locale}/provider/${provider.id}`} className="block group">
       <Card className="h-full transition-shadow group-hover:shadow-md">
@@ -69,6 +72,26 @@ export function ProviderCard({
               )}
             </div>
           </div>
+
+          {badges.length > 0 && (
+            <div className="flex flex-wrap gap-1.5 mb-3">
+              {badges.includes("topRated") && (
+                <Badge variant="outline" className="text-amber-600 border-amber-300 bg-amber-50">
+                  {t("badges.topRated")}
+                </Badge>
+              )}
+              {badges.includes("popular") && (
+                <Badge variant="outline" className="text-orange-600 border-orange-300 bg-orange-50">
+                  {t("badges.popular")}
+                </Badge>
+              )}
+              {badges.includes("new") && (
+                <Badge variant="outline" className="text-blue-600 border-blue-300 bg-blue-50">
+                  {t("badges.new")}
+                </Badge>
+              )}
+            </div>
+          )}
 
           <div className="flex items-center gap-2 mb-3">
             <p className="text-sm text-muted-foreground">{provider.city}</p>

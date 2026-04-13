@@ -5,6 +5,7 @@ import { cache } from "react";
 
 import { createClient } from "@/lib/supabase/server";
 import { getProviderById, getProviderReviews, getSavedProviderIds } from "@/lib/supabase/queries";
+import { getProviderBadges } from "@/lib/provider-badges";
 import { Badge } from "@/components/ui/badge";
 import { buttonVariants } from "@/lib/button-variants";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -106,6 +107,8 @@ export default async function ProviderDetailPage({ params }: ProviderDetailPageP
   const tSearch = await getTranslations("search");
   const tProvider = await getTranslations("provider");
 
+  const badges = getProviderBadges(provider);
+
   // Group availability by day
   const availabilityByDay = new Map<number, { start: string; end: string }[]>();
   for (const slot of provider.availability) {
@@ -174,6 +177,25 @@ export default async function ProviderDetailPage({ params }: ProviderDetailPageP
                 />
               )}
             </div>
+            {badges.length > 0 && (
+              <div className="flex flex-wrap gap-1.5 mb-2">
+                {badges.includes("topRated") && (
+                  <Badge variant="outline" className="text-amber-600 border-amber-300 bg-amber-50">
+                    {tSearch("badges.topRated")}
+                  </Badge>
+                )}
+                {badges.includes("popular") && (
+                  <Badge variant="outline" className="text-orange-600 border-orange-300 bg-orange-50">
+                    {tSearch("badges.popular")}
+                  </Badge>
+                )}
+                {badges.includes("new") && (
+                  <Badge variant="outline" className="text-blue-600 border-blue-300 bg-blue-50">
+                    {tSearch("badges.new")}
+                  </Badge>
+                )}
+              </div>
+            )}
             <div className="flex items-center gap-2 mb-2">
               <RatingStars rating={provider.rating} size="md" />
               <span className="font-medium">{formatRating(provider.rating)}</span>
