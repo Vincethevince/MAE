@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { getTranslations } from "next-intl/server";
-import { CalendarPlus } from "lucide-react";
+import { CalendarPlus, MessageCircle } from "lucide-react";
 
 import { createClient } from "@/lib/supabase/server";
 import { getAppointmentById } from "@/lib/supabase/queries";
@@ -107,16 +107,39 @@ export default async function SuccessPage({
       )}
 
       <div className="flex flex-col gap-3">
-        {appointment && (
-          <a
-            href={`/api/appointments/${appointment.id}/ics`}
-            download
-            className={buttonVariants({ variant: "outline", className: "w-full" })}
-          >
-            <CalendarPlus className="mr-2 h-4 w-4" />
-            {t("addToCalendar")}
-          </a>
-        )}
+        {appointment && (() => {
+          const dateStr = formatDateTime(appointment.start_time, locale);
+          const addressPart = appointment.provider.address && appointment.provider.city
+            ? ` – ${appointment.provider.address}, ${appointment.provider.city}`
+            : "";
+          const waText = `${t("whatsappShareText", {
+            service: appointment.service.name,
+            provider: appointment.provider.business_name,
+            dateTime: dateStr,
+          })}${addressPart}`;
+          const waUrl = `https://wa.me/?text=${encodeURIComponent(waText)}`;
+          return (
+            <>
+              <a
+                href={`/api/appointments/${appointment.id}/ics`}
+                download
+                className={buttonVariants({ variant: "outline", className: "w-full" })}
+              >
+                <CalendarPlus className="mr-2 h-4 w-4" />
+                {t("addToCalendar")}
+              </a>
+              <a
+                href={waUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className={buttonVariants({ variant: "outline", className: "w-full text-green-600 border-green-300 hover:bg-green-50" })}
+              >
+                <MessageCircle className="mr-2 h-4 w-4" />
+                {t("shareWhatsApp")}
+              </a>
+            </>
+          );
+        })()}
         <Link
           href={`/${locale}/appointments`}
           className={buttonVariants({ className: "w-full" })}

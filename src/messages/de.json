@@ -184,6 +184,8 @@
     "statusPending": "Ausstehend",
     "viewAppointments": "Meine Termine ansehen",
     "addToCalendar": "Zum Kalender hinzufügen",
+    "shareWhatsApp": "Per WhatsApp teilen",
+    "whatsappShareText": "📅 Mein Termin: {service} bei {provider} am {dateTime}",
     "backToSearch": "Zurück zur Suche"
   },
   "provider": {
