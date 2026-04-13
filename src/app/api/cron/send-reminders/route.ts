@@ -70,10 +70,10 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
       }>,
       (supabase
         .from("services")
-        .select("name")
+        .select("name, duration_minutes")
         .eq("id", appt.service_id)
         .single()) as unknown as Promise<{
-        data: { name: string } | null;
+        data: { name: string; duration_minutes: number } | null;
       }>,
     ]);
 
@@ -91,6 +91,7 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
       businessName: provider.business_name,
       serviceName: service?.name ?? "Termin",
       startTime: appt.start_time,
+      durationMinutes: service?.duration_minutes ?? undefined,
       address:
         provider.address && provider.city
           ? `${provider.address}, ${provider.city}`

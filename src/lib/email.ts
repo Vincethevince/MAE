@@ -137,8 +137,38 @@ export interface EmailAppointmentDetails {
   businessName: string;
   serviceName: string;
   startTime: string; // ISO string
+  durationMinutes?: number;
   address?: string | null;
   customerName?: string | null;
+}
+
+/**
+ * Builds a Google Calendar "add event" URL from appointment details.
+ * Returns null if the start time cannot be parsed.
+ * All values are encoded via URLSearchParams — no XSS risk.
+ */
+function buildGoogleCalendarUrl(details: EmailAppointmentDetails): string | null {
+  const start = new Date(details.startTime);
+  if (isNaN(start.getTime())) return null;
+  const end = new Date(start.getTime() + (details.durationMinutes ?? 60) * 60_000);
+
+  // Google Calendar format: YYYYMMDDTHHmmssZ
+  const fmt = (d: Date) =>
+    d.toISOString().replace(/[-:]/g, "").split(".")[0] + "Z";
+
+  const params = new URLSearchParams({
+    action: "TEMPLATE",
+    text: `${details.serviceName} bei ${details.businessName}`,
+    dates: `${fmt(start)}/${fmt(end)}`,
+    details: `Termin gebucht über MAE – Make Appointments Easier\n${APP_URL}/de/appointments`,
+    location: details.address ?? "",
+  });
+
+  return `https://calendar.google.com/calendar/render?${params.toString()}`;
+}
+
+function secondaryButton(text: string, href: string): string {
+  return `<a href="${escapeHtml(href)}" style="display:inline-block;margin-top:8px;margin-left:8px;padding:12px 24px;background:#ffffff;color:#18181b;font-size:14px;font-weight:600;text-decoration:none;border-radius:6px;border:1.5px solid #18181b;">${escapeHtml(text)}</a>`;
 }
 
 // ─── Send helper ─────────────────────────────────────────────────────────────
@@ -198,12 +228,16 @@ export async function sendAppointmentConfirmed(
   details: EmailAppointmentDetails
 ): Promise<void> {
   const subject = `Termin bestätigt – ${sanitizeSubject(details.businessName)}`;
+  const calUrl = buildGoogleCalendarUrl(details);
   const html = baseTemplate(`
     <h2 style="margin:0 0 8px;font-size:20px;font-weight:700;color:#18181b;">Dein Termin wurde bestätigt</h2>
     <p style="margin:0 0 4px;font-size:14px;color:#3f3f46;">${escapeHtml(details.businessName)} hat deinen Termin bestätigt. Wir freuen uns auf deinen Besuch!</p>
     ${appointmentDetailsBlock(details)}
     <p style="margin:16px 0 4px;font-size:14px;color:#3f3f46;">Bitte erscheine pünktlich. Bei Absagen bis 24 Stunden vorher ist eine kostenlose Stornierung möglich.</p>
-    ${primaryButton("Meine Termine anzeigen", `${APP_URL}/de/appointments`)}
+    <div style="margin-top:16px;">
+      ${primaryButton("Meine Termine anzeigen", `${APP_URL}/de/appointments`)}
+      ${calUrl ? secondaryButton("In Google Kalender eintragen", calUrl) : ""}
+    </div>
   `);
 
   await sendEmail({ to: customerEmail, subject, html });
@@ -255,12 +289,16 @@ export async function sendAppointmentReminder(
   details: EmailAppointmentDetails
 ): Promise<void> {
   const subject = `Erinnerung: Dein Termin morgen bei ${sanitizeSubject(details.businessName)}`;
+  const calUrl = buildGoogleCalendarUrl(details);
   const html = baseTemplate(`
     <h2 style="margin:0 0 8px;font-size:20px;font-weight:700;color:#18181b;">Terminerinnerung</h2>
     <p style="margin:0 0 4px;font-size:14px;color:#3f3f46;">Dein Termin bei ${escapeHtml(details.businessName)} findet morgen statt.</p>
     ${appointmentDetailsBlock(details)}
     <p style="margin:16px 0 4px;font-size:14px;color:#3f3f46;">Bitte erscheine pünktlich. Bei Absagen bis 24 Stunden vorher ist eine kostenlose Stornierung möglich.</p>
-    ${primaryButton("Meine Termine anzeigen", `${APP_URL}/de/appointments`)}
+    <div style="margin-top:16px;">
+      ${primaryButton("Meine Termine anzeigen", `${APP_URL}/de/appointments`)}
+      ${calUrl ? secondaryButton("In Google Kalender eintragen", calUrl) : ""}
+    </div>
   `);
 
   await sendEmail({ to: customerEmail, subject, html });

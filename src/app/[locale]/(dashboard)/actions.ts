@@ -763,10 +763,10 @@ async function fetchEmailData(
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   db: any,
   appt: Pick<AppointmentRow, "user_id" | "service_id">
-): Promise<{ customerEmail: string | null; customerName: string | null; serviceName: string }> {
+): Promise<{ customerEmail: string | null; customerName: string | null; serviceName: string; durationMinutes: number | null }> {
   const [customerProfileResult, serviceResult] = await Promise.allSettled([
     db.from("profiles").select("email, full_name").eq("id", appt.user_id).single(),
-    db.from("services").select("name").eq("id", appt.service_id).single(),
+    db.from("services").select("name, duration_minutes").eq("id", appt.service_id).single(),
   ]);
 
   const customerProfile =
@@ -774,15 +774,16 @@ async function fetchEmailData(
       ? (customerProfileResult.value.data as { email?: string; full_name?: string } | null)
       : null;
 
-  const serviceName =
+  const serviceData =
     serviceResult.status === "fulfilled"
-      ? (serviceResult.value.data as { name?: string } | null)?.name ?? "Service"
-      : "Service";
+      ? (serviceResult.value.data as { name?: string; duration_minutes?: number } | null)
+      : null;
 
   return {
     customerEmail: customerProfile?.email ?? null,
     customerName: customerProfile?.full_name ?? null,
-    serviceName,
+    serviceName: serviceData?.name ?? "Service",
+    durationMinutes: serviceData?.duration_minutes ?? null,
   };
 }
 
@@ -827,13 +828,14 @@ export async function confirmAppointment(
   revalidatePath(`/${locale}/dashboard/calendar`);
 
   // Send confirmation email to customer (never throws)
-  const { customerEmail, customerName, serviceName } = await fetchEmailData(db, appt);
+  const { customerEmail, customerName, serviceName, durationMinutes } = await fetchEmailData(db, appt);
   if (customerEmail) {
     await sendAppointmentConfirmed(customerEmail, {
       appointmentId,
       businessName: provider.business_name,
       serviceName,
       startTime: appt.start_time,
+      durationMinutes: durationMinutes ?? undefined,
       address: provider.address && provider.city
         ? `${provider.address}, ${provider.city}`
         : provider.address ?? null,

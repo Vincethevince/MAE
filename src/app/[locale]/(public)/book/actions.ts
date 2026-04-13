@@ -154,6 +154,7 @@ export async function createAppointment(
     businessName: provider.business_name,
     serviceName: service.name,
     startTime: requestedStart.toISOString(),
+    durationMinutes: service.duration_minutes,
     address: provider.address && provider.city
       ? `${provider.address}, ${provider.city}`
       : provider.address ?? null,
