@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { useTranslations } from "next-intl";
+import { Navigation } from "lucide-react";
 
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -13,6 +14,7 @@ interface ProviderCardProps {
   isSaved?: boolean;
   showSaveButton?: boolean;
   nextAvailableSlot?: string | null;
+  distanceKm?: number;
 }
 
 function formatPrice(cents: number): string {
@@ -35,6 +37,7 @@ export function ProviderCard({
   isSaved,
   showSaveButton,
   nextAvailableSlot,
+  distanceKm,
 }: ProviderCardProps) {
   const t = useTranslations("search");
 
@@ -67,7 +70,15 @@ export function ProviderCard({
             </div>
           </div>
 
-          <p className="text-sm text-muted-foreground mb-3">{provider.city}</p>
+          <div className="flex items-center gap-2 mb-3">
+            <p className="text-sm text-muted-foreground">{provider.city}</p>
+            {distanceKm !== undefined && (
+              <span className="flex items-center gap-0.5 text-xs text-muted-foreground">
+                <Navigation className="h-3 w-3 shrink-0" />
+                {t("kmAway", { distance: distanceKm.toFixed(1) })}
+              </span>
+            )}
+          </div>
 
           <div className="flex items-center gap-2 mb-3">
             <RatingStars rating={provider.rating} size="sm" />

@@ -114,6 +114,12 @@
     "tomorrow": "Morgen",
     "saveProvider": "Anbieter speichern",
     "unsaveProvider": "Aus Gespeicherten entfernen",
+    "nearMe": "In meiner Nähe",
+    "nearMeActive": "In meiner Nähe ✓",
+    "gettingLocation": "Standort wird ermittelt…",
+    "locationDenied": "Standortzugriff verweigert. Bitte erlaube den Zugriff in deinen Browsereinstellungen.",
+    "kmAway": "{distance} km entfernt",
+    "clearLocation": "Standort entfernen",
     "categories": {
       "friseur": "Friseur",
       "kosmetik": "Kosmetik",

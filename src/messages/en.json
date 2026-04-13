@@ -114,6 +114,12 @@
     "tomorrow": "Tomorrow",
     "saveProvider": "Save provider",
     "unsaveProvider": "Remove from saved",
+    "nearMe": "Near me",
+    "nearMeActive": "Near me ✓",
+    "gettingLocation": "Getting your location…",
+    "locationDenied": "Location access denied. Please allow location access in your browser settings.",
+    "kmAway": "{distance} km away",
+    "clearLocation": "Clear location",
     "categories": {
       "friseur": "Hairdresser",
       "kosmetik": "Cosmetics",

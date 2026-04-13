@@ -6,6 +6,7 @@ import { createClient } from "@/lib/supabase/server";
 import { searchProviders, getSavedProviderIds, getNextAvailableSlots } from "@/lib/supabase/queries";
 import { SearchForm } from "@/components/features/SearchForm";
 import { ProviderCard } from "@/components/features/ProviderCard";
+import { GeoSearchButton } from "@/components/features/GeoSearchButton";
 
 const VALID_SORTS = ["rating", "name"] as const;
 type SortOption = typeof VALID_SORTS[number];
@@ -18,7 +19,17 @@ interface SearchPageProps {
     category?: string;
     sort?: string;
     minRating?: string;
+    lat?: string;
+    lng?: string;
   }>;
+}
+
+function haversineKm(lat1: number, lon1: number, lat2: number, lon2: number): number {
+  const R = 6371;
+  const dLat = (lat2 - lat1) * Math.PI / 180;
+  const dLon = (lon2 - lon1) * Math.PI / 180;
+  const a = Math.sin(dLat/2)**2 + Math.cos(lat1 * Math.PI/180) * Math.cos(lat2 * Math.PI/180) * Math.sin(dLon/2)**2;
+  return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
 }
 
 export async function generateMetadata({ params, searchParams }: SearchPageProps): Promise<Metadata> {
@@ -63,7 +74,7 @@ function formatNextSlot(date: Date | undefined, locale: string, todayLabel: stri
 
 export default async function SearchPage({ params, searchParams }: SearchPageProps) {
   const { locale } = await params;
-  const { query, city, category, sort: rawSort, minRating: rawMinRating } = await searchParams;
+  const { query, city, category, sort: rawSort, minRating: rawMinRating, lat: rawLat, lng: rawLng } = await searchParams;
 
   // Validate sort param
   const sort: SortOption = VALID_SORTS.includes(rawSort as SortOption)
@@ -73,6 +84,16 @@ export default async function SearchPage({ params, searchParams }: SearchPagePro
   // Validate minRating param (1-5, integer only)
   const minRatingNum = rawMinRating ? parseInt(rawMinRating, 10) : 0;
   const minRating = minRatingNum >= 1 && minRatingNum <= 5 ? minRatingNum : 0;
+
+  // Validate lat/lng params (never pass raw strings to any DB query)
+  const parsedLat = rawLat ? parseFloat(rawLat) : NaN;
+  const parsedLng = rawLng ? parseFloat(rawLng) : NaN;
+  const hasValidGeo =
+    !isNaN(parsedLat) && !isNaN(parsedLng) &&
+    parsedLat >= -90 && parsedLat <= 90 &&
+    parsedLng >= -180 && parsedLng <= 180;
+  const userLat = hasValidGeo ? parsedLat : undefined;
+  const userLng = hasValidGeo ? parsedLng : undefined;
 
   const supabase = await createClient();
   const {
@@ -96,17 +117,49 @@ export default async function SearchPage({ params, searchParams }: SearchPagePro
     ? await getNextAvailableSlots(supabase, providerIds, 7)
     : new Map<string, Date>();
 
+  // Compute distances and sort by distance when geo filter is active
+  type ProviderWithDistance = (typeof providers)[number] & { distanceKm?: number };
+  let sortedProviders: ProviderWithDistance[];
+  if (userLat !== undefined && userLng !== undefined) {
+    sortedProviders = providers.map((p) => {
+      const dist =
+        p.latitude != null && p.longitude != null
+          ? haversineKm(userLat, userLng, p.latitude, p.longitude)
+          : Infinity;
+      return { ...p, distanceKm: dist === Infinity ? undefined : Math.round(dist * 10) / 10 };
+    });
+    sortedProviders.sort((a, b) => {
+      const da = a.distanceKm ?? Infinity;
+      const db = b.distanceKm ?? Infinity;
+      return da - db;
+    });
+  } else {
+    sortedProviders = providers;
+  }
+
   const t = await getTranslations("search");
   const tBy = await getTranslations("search.byTimeSearch");
   const todayLabel = t("today");
   const tomorrowLabel = t("tomorrow");
 
-  const hasFilters = Boolean(query || city || category || minRating);
+  const hasFilters = Boolean(query || city || category || minRating || hasValidGeo);
 
   const resultsLabel =
     providers.length === 1
       ? t("resultsCount", { count: providers.length })
       : t("resultsCountPlural", { count: providers.length });
+
+  // Build currentParams for GeoSearchButton (all active params as strings)
+  const currentParams: Record<string, string> = {};
+  if (query) currentParams.query = query;
+  if (city) currentParams.city = city;
+  if (category) currentParams.category = category;
+  if (rawSort) currentParams.sort = rawSort;
+  if (rawMinRating) currentParams.minRating = rawMinRating;
+  if (hasValidGeo && rawLat && rawLng) {
+    currentParams.lat = rawLat;
+    currentParams.lng = rawLng;
+  }
 
   return (
     <div className="mx-auto max-w-6xl px-4 py-8">
@@ -119,7 +172,8 @@ export default async function SearchPage({ params, searchParams }: SearchPagePro
         />
       </div>
 
-      <div className="mb-8">
+      <div className="mb-4 flex items-center gap-3 flex-wrap">
+        <GeoSearchButton locale={locale} currentParams={currentParams} />
         <Link
           href={`/${locale}/search/by-time`}
           className="text-sm text-muted-foreground hover:text-foreground transition-colors"
@@ -136,6 +190,8 @@ export default async function SearchPage({ params, searchParams }: SearchPagePro
             {query && <input type="hidden" name="query" value={query} />}
             {city && <input type="hidden" name="city" value={city} />}
             {category && <input type="hidden" name="category" value={category} />}
+            {hasValidGeo && rawLat && <input type="hidden" name="lat" value={rawLat} />}
+            {hasValidGeo && rawLng && <input type="hidden" name="lng" value={rawLng} />}
             <label htmlFor="sort-order" className="text-muted-foreground whitespace-nowrap sr-only">
               {t("sortLabel")}
             </label>
@@ -171,9 +227,9 @@ export default async function SearchPage({ params, searchParams }: SearchPagePro
         </div>
       )}
 
-      {providers.length > 0 ? (
+      {sortedProviders.length > 0 ? (
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {providers.map((provider) => (
+          {sortedProviders.map((provider) => (
             <ProviderCard
               key={provider.id}
               provider={provider}
@@ -181,6 +237,7 @@ export default async function SearchPage({ params, searchParams }: SearchPagePro
               isSaved={savedIds.has(provider.id)}
               showSaveButton={!!user}
               nextAvailableSlot={formatNextSlot(nextSlots.get(provider.id), locale, todayLabel, tomorrowLabel)}
+              distanceKm={provider.distanceKm}
             />
           ))}
         </div>
