@@ -18,6 +18,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { CopyLinkButton } from "@/components/features/CopyLinkButton";
 
 interface DashboardPageProps {
   params: Promise<{ locale: string }>;
@@ -218,6 +219,26 @@ export default async function DashboardPage({ params }: DashboardPageProps) {
           </CardContent>
         </Card>
       </div>
+
+      {/* Share booking link */}
+      <Card>
+        <CardHeader className="pb-3">
+          <CardTitle className="text-base">{t("overview.shareTitle")}</CardTitle>
+          <p className="text-sm text-muted-foreground">{t("overview.shareSubtitle")}</p>
+        </CardHeader>
+        <CardContent>
+          <div className="flex items-center gap-2">
+            <code className="flex-1 rounded-md bg-muted px-3 py-2 text-sm font-mono truncate select-all">
+              {`${process.env.NEXT_PUBLIC_APP_URL ?? "https://makeappointmentseasier.com"}/${locale}/provider/${provider.id}`}
+            </code>
+            <CopyLinkButton
+              url={`${process.env.NEXT_PUBLIC_APP_URL ?? "https://makeappointmentseasier.com"}/${locale}/provider/${provider.id}`}
+              label={t("overview.copyLink")}
+              copiedLabel={t("overview.linkCopied")}
+            />
+          </div>
+        </CardContent>
+      </Card>
 
       {/* Today's appointments */}
       <Card>

@@ -242,7 +242,11 @@
       "customerColumn": "Customer",
       "serviceColumn": "Service",
       "timeColumn": "Time",
-      "statusColumn": "Status"
+      "statusColumn": "Status",
+      "shareTitle": "Your booking link",
+      "shareSubtitle": "Share this link with your customers – e.g. in your Instagram bio or via WhatsApp.",
+      "copyLink": "Copy link",
+      "linkCopied": "Copied!"
     },
     "availability": {
       "title": "Availability",

@@ -242,7 +242,11 @@
       "customerColumn": "Kunde",
       "serviceColumn": "Dienstleistung",
       "timeColumn": "Uhrzeit",
-      "statusColumn": "Status"
+      "statusColumn": "Status",
+      "shareTitle": "Dein Buchungslink",
+      "shareSubtitle": "Teile diesen Link mit deinen Kunden – z.B. in deiner Instagram-Bio oder per WhatsApp.",
+      "copyLink": "Link kopieren",
+      "linkCopied": "Kopiert!"
     },
     "availability": {
       "title": "Verfügbarkeit",
