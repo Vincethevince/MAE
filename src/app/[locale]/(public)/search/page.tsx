@@ -11,6 +11,9 @@ import { GeoSearchButton } from "@/components/features/GeoSearchButton";
 const VALID_SORTS = ["rating", "name"] as const;
 type SortOption = typeof VALID_SORTS[number];
 
+const VALID_RADII = [5, 10, 20, 50] as const;
+type RadiusOption = typeof VALID_RADII[number];
+
 interface SearchPageProps {
   params: Promise<{ locale: string }>;
   searchParams: Promise<{
@@ -21,6 +24,7 @@ interface SearchPageProps {
     minRating?: string;
     lat?: string;
     lng?: string;
+    radius?: string;
     availableToday?: string;
   }>;
 }
@@ -75,7 +79,7 @@ function formatNextSlot(date: Date | undefined, locale: string, todayLabel: stri
 
 export default async function SearchPage({ params, searchParams }: SearchPageProps) {
   const { locale } = await params;
-  const { query, city, category, sort: rawSort, minRating: rawMinRating, lat: rawLat, lng: rawLng, availableToday: rawAvailableToday } = await searchParams;
+  const { query, city, category, sort: rawSort, minRating: rawMinRating, lat: rawLat, lng: rawLng, radius: rawRadius, availableToday: rawAvailableToday } = await searchParams;
   const filterAvailableToday = rawAvailableToday === "1";
 
   // Validate sort param
@@ -86,6 +90,12 @@ export default async function SearchPage({ params, searchParams }: SearchPagePro
   // Validate minRating param (1-5, integer only)
   const minRatingNum = rawMinRating ? parseInt(rawMinRating, 10) : 0;
   const minRating = minRatingNum >= 1 && minRatingNum <= 5 ? minRatingNum : 0;
+
+  // Validate radius param (5, 10, 20, 50 km — anything else means "all")
+  const parsedRadius = rawRadius ? parseInt(rawRadius, 10) : NaN;
+  const activeRadius: RadiusOption | null = VALID_RADII.includes(parsedRadius as RadiusOption)
+    ? (parsedRadius as RadiusOption)
+    : null;
 
   // Validate lat/lng params (never pass raw strings to any DB query)
   const parsedLat = rawLat ? parseFloat(rawLat) : NaN;
@@ -139,6 +149,13 @@ export default async function SearchPage({ params, searchParams }: SearchPagePro
     sortedProviders = providers;
   }
 
+  // Apply radius filter when geo-search is active and a radius is selected
+  if (hasValidGeo && activeRadius !== null) {
+    sortedProviders = sortedProviders.filter(
+      (p) => p.distanceKm !== undefined && p.distanceKm <= activeRadius
+    );
+  }
+
   const t = await getTranslations("search");
   const tBy = await getTranslations("search.byTimeSearch");
   const todayLabel = t("today");
@@ -157,7 +174,7 @@ export default async function SearchPage({ params, searchParams }: SearchPagePro
       })
     : sortedProviders;
 
-  const hasFilters = Boolean(query || city || category || minRating || hasValidGeo || filterAvailableToday);
+  const hasFilters = Boolean(query || city || category || minRating || hasValidGeo || activeRadius || filterAvailableToday);
 
   const resultsLabel =
     displayedProviders.length === 1
@@ -175,6 +192,7 @@ export default async function SearchPage({ params, searchParams }: SearchPagePro
     currentParams.lat = rawLat;
     currentParams.lng = rawLng;
   }
+  if (hasValidGeo && activeRadius) currentParams.radius = String(activeRadius);
   if (filterAvailableToday) currentParams.availableToday = "1";
 
   return (
@@ -208,6 +226,24 @@ export default async function SearchPage({ params, searchParams }: SearchPagePro
             {category && <input type="hidden" name="category" value={category} />}
             {hasValidGeo && rawLat && <input type="hidden" name="lat" value={rawLat} />}
             {hasValidGeo && rawLng && <input type="hidden" name="lng" value={rawLng} />}
+            {hasValidGeo && (
+              <>
+                <label htmlFor="radius-filter" className="text-muted-foreground whitespace-nowrap sr-only">
+                  {t("radiusLabel")}
+                </label>
+                <select
+                  id="radius-filter"
+                  name="radius"
+                  defaultValue={activeRadius ?? ""}
+                  className="h-8 rounded-md border border-input bg-background px-2 text-sm"
+                >
+                  <option value="">{t("radiusAll")}</option>
+                  {VALID_RADII.map((r) => (
+                    <option key={r} value={r}>{t("radiusKm", { radius: r })}</option>
+                  ))}
+                </select>
+              </>
+            )}
             <label className="flex items-center gap-1.5 cursor-pointer whitespace-nowrap text-foreground">
               <input
                 type="checkbox"

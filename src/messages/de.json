@@ -120,6 +120,9 @@
     "locationDenied": "Standortzugriff verweigert. Bitte erlaube den Zugriff in deinen Browsereinstellungen.",
     "kmAway": "{distance} km entfernt",
     "clearLocation": "Standort entfernen",
+    "radiusLabel": "Umkreis",
+    "radiusAll": "Alle Entfernungen",
+    "radiusKm": "{radius} km",
     "availableToday": "Heute verfügbar",
     "categories": {
       "friseur": "Friseur",
