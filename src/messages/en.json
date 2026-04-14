@@ -583,6 +583,7 @@
     "passwordChanged": "Password changed successfully.",
     "deleteAccountTitle": "Delete account",
     "deleteAccountDescription": "Deleting your account cannot be undone. Upcoming appointments will be cancelled and providers notified. Your personal data will be removed; completed appointments remain anonymised in the providers' booking history.",
+    "deleteAccountPasswordLabel": "Current password",
     "deleteAccountConfirmLabel": "Type \"löschen\" to confirm",
     "deleteAccountConfirmPlaceholder": "löschen",
     "deleteAccountButton": "Permanently delete account",
@@ -591,6 +592,7 @@
       "saveFailed": "Failed to save. Please try again later.",
       "unauthorized": "You are not authorized to perform this action.",
       "currentPasswordWrong": "Current password is incorrect",
+      "passwordRequired": "Please enter your password",
       "confirmationRequired": "Please type \"löschen\" to confirm",
       "deleteFailed": "Failed to delete account. Please try again."
     }

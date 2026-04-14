@@ -81,6 +81,21 @@ export default async function ProfilePage({ params }: ProfilePageProps) {
             <input type="hidden" name="locale" value={locale} />
             <div className="space-y-1">
               <label
+                htmlFor="delete-password"
+                className="text-sm font-medium"
+              >
+                {t("deleteAccountPasswordLabel")}
+              </label>
+              <input
+                id="delete-password"
+                name="password"
+                type="password"
+                autoComplete="current-password"
+                className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+              />
+            </div>
+            <div className="space-y-1">
+              <label
                 htmlFor="delete-confirmation"
                 className="text-sm font-medium"
               >

@@ -98,10 +98,15 @@ export async function changePassword(formData: FormData): Promise<ActionResult> 
 
 export async function deleteAccount(formData: FormData): Promise<ActionResult> {
   const confirmation = formData.get("confirmation")?.toString() ?? "";
+  const password = formData.get("password")?.toString() ?? "";
 
   // Require the user to type "löschen" to confirm
   if (confirmation.toLowerCase().trim() !== "löschen") {
     return { error: "confirmationRequired" };
+  }
+
+  if (!password) {
+    return { error: "passwordRequired" };
   }
 
   const supabase = await createClient();
@@ -111,14 +116,23 @@ export async function deleteAccount(formData: FormData): Promise<ActionResult> {
     error: authError,
   } = await supabase.auth.getUser();
 
-  if (authError || !user) {
+  if (authError || !user || !user.email) {
     return { error: "unauthorized" };
+  }
+
+  // Re-authenticate before deletion to prevent session-hijacking attacks
+  const { error: signInError } = await supabase.auth.signInWithPassword({
+    email: user.email,
+    password,
+  });
+  if (signInError) {
+    return { error: "currentPasswordWrong" };
   }
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const db = supabase as any;
 
-  // 1. Cancel all upcoming pending/confirmed appointments
+  // 1. Cancel all upcoming pending/confirmed appointments (capped at 50 to prevent serverless timeout)
   // (historical/completed ones remain, anonymized by the FK SET NULL cascade)
   const now = new Date().toISOString();
   const { data: upcomingAppts } = await db
@@ -126,7 +140,8 @@ export async function deleteAccount(formData: FormData): Promise<ActionResult> {
     .select("id, provider_id, service_id, start_time")
     .eq("user_id", user.id)
     .in("status", ["pending", "confirmed"])
-    .gt("start_time", now);
+    .gt("start_time", now)
+    .limit(50);
 
   if (upcomingAppts && upcomingAppts.length > 0) {
     await db
@@ -136,24 +151,26 @@ export async function deleteAccount(formData: FormData): Promise<ActionResult> {
       .in("status", ["pending", "confirmed"])
       .gt("start_time", now);
 
-    // Notify providers of cancellations (best-effort, non-blocking)
+    // Notify providers of cancellations in parallel (best-effort, non-blocking)
     const { sendProviderCancellationAlert } = await import("@/lib/email");
 
-    for (const appt of upcomingAppts) {
-      const [providerResult, serviceResult] = await Promise.allSettled([
-        db.from("providers").select("business_name, address, city, profile_id").eq("id", appt.provider_id).single(),
-        db.from("services").select("name").eq("id", appt.service_id).single(),
-      ]);
+    await Promise.allSettled(
+      upcomingAppts.map(async (appt: { id: string; provider_id: string; service_id: string; start_time: string }) => {
+        const [providerResult, serviceResult] = await Promise.allSettled([
+          db.from("providers").select("business_name, address, city, profile_id").eq("id", appt.provider_id).single(),
+          db.from("services").select("name").eq("id", appt.service_id).single(),
+        ]);
 
-      const providerData = providerResult.status === "fulfilled"
-        ? (providerResult.value.data as { business_name?: string; address?: string | null; city?: string | null; profile_id?: string } | null)
-        : null;
+        const providerData = providerResult.status === "fulfilled"
+          ? (providerResult.value.data as { business_name?: string; address?: string | null; city?: string | null; profile_id?: string } | null)
+          : null;
 
-      const serviceName = serviceResult.status === "fulfilled"
-        ? (serviceResult.value.data as { name?: string } | null)?.name ?? "Service"
-        : "Service";
+        const serviceName = serviceResult.status === "fulfilled"
+          ? (serviceResult.value.data as { name?: string } | null)?.name ?? "Service"
+          : "Service";
 
-      if (providerData?.profile_id) {
+        if (!providerData?.profile_id) return;
+
         const profileResult = await db.from("profiles").select("email").eq("id", providerData.profile_id).single();
         const providerEmail = (profileResult.data as { email?: string } | null)?.email ?? null;
 
@@ -166,11 +183,11 @@ export async function deleteAccount(formData: FormData): Promise<ActionResult> {
             address: providerData.address && providerData.city
               ? `${providerData.address}, ${providerData.city}`
               : providerData.address ?? null,
-            customerName: null, // already deleting the account
+            customerName: null, // account is being deleted
           });
         }
-      }
-    }
+      })
+    );
   }
 
   // 2. Delete the auth user via admin client (this cascades to profile,
