@@ -452,7 +452,8 @@ export async function sendReviewRequest(
   }
 ): Promise<void> {
   const appointmentDate = formatDate(details.startTime);
-  const reviewUrl = `${APP_URL}/${details.locale ?? "de"}/appointments`;
+  const safeLocale = ["de", "en"].includes(details.locale ?? "") ? details.locale : "de";
+  const reviewUrl = `${APP_URL}/${safeLocale}/appointments`;
   const subject = `Wie war dein Besuch bei ${sanitizeSubject(details.businessName)}?`;
   const html = baseTemplate(`
     <h2 style="margin:0 0 8px;font-size:20px;font-weight:700;color:#18181b;">Wie war dein Termin?</h2>
@@ -480,11 +481,16 @@ export async function sendProviderNewReview(
     businessName: string;
     serviceName: string;
     customerName: string | null;
-    rating: number;            // 1–5
+    rating: number;        // 1–5
     comment: string | null;
-    reviewsUrl: string;        // absolute URL to provider's dashboard reviews page
+    locale?: string;       // used to build the dashboard link — always validated internally
   }
 ): Promise<void> {
+  // Build the dashboard link from APP_URL + a validated locale path — never
+  // accept an arbitrary URL from callers to prevent open-redirect / JS-URI risks.
+  const safeLocale = ["de", "en"].includes(details.locale ?? "") ? details.locale : "de";
+  const reviewsUrl = `${APP_URL}/${safeLocale}/dashboard/reviews`;
+
   const stars = "★".repeat(Math.max(1, Math.min(5, details.rating))) +
                 "☆".repeat(Math.max(0, 5 - details.rating));
   const subject = `Neue Bewertung für ${sanitizeSubject(details.businessName)} – ${details.rating}/5 Sterne`;
@@ -514,7 +520,7 @@ export async function sendProviderNewReview(
         </td>
       </tr>
     </table>
-    ${primaryButton("Bewertung ansehen & antworten", details.reviewsUrl)}
+    ${primaryButton("Bewertung ansehen & antworten", reviewsUrl)}
     <p style="margin:16px 0 0;font-size:12px;color:#a1a1aa;">
       Du kannst direkt in deinem Dashboard auf die Bewertung antworten.
     </p>

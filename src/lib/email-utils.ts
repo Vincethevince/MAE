@@ -1,6 +1,6 @@
-/** Strip CR and LF to prevent SMTP header injection. */
+/** Strip CR, LF, and null bytes to prevent SMTP header injection. */
 export function sanitizeSubject(str: string): string {
-  return str.replace(/[\r\n]/g, "");
+  return str.replace(/[\r\n\0]/g, "");
 }
 
 /** Escape HTML special characters for safe inclusion in email templates. */

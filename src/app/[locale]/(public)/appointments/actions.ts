@@ -261,14 +261,13 @@ export async function submitReview(formData: FormData): Promise<ActionResult> {
       (profileResult.data as { email?: string } | null)?.email ?? null;
 
     if (providerEmail) {
-      const safeLocale = ["de", "en"].includes(locale) ? locale : "de";
       await sendProviderNewReview(providerEmail, {
         businessName: providerData.business_name ?? "",
         serviceName,
         customerName,
         rating: parsed.data.rating,
         comment: parsed.data.comment || null,
-        reviewsUrl: `${process.env.NEXT_PUBLIC_APP_URL ?? "https://makeappointmentseasier.com"}/${safeLocale}/dashboard/reviews`,
+        locale,
       });
     }
   }
