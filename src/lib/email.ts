@@ -141,6 +141,7 @@ export interface EmailAppointmentDetails {
   address?: string | null;
   customerName?: string | null;
   customerPhone?: string | null;
+  customerNotes?: string | null;
 }
 
 /**
@@ -312,8 +313,10 @@ export async function sendAppointmentReminder(
  */
 export async function sendProviderNewBooking(
   providerEmail: string,
-  details: EmailAppointmentDetails
+  details: EmailAppointmentDetails,
+  locale = "de"
 ): Promise<void> {
+  const safeLocale = ["de", "en"].includes(locale) ? locale : "de";
   const subject = `Neue Buchungsanfrage – ${sanitizeSubject(details.serviceName)}`;
   const appointmentTime = formatDateTime(details.startTime);
   const html = baseTemplate(`
@@ -326,27 +329,31 @@ export async function sendProviderNewBooking(
         <td style="padding:16px 20px;">
           <table style="width:100%;border-collapse:collapse;">
             <tr>
-              <td style="padding:4px 0;font-size:13px;color:#71717a;width:100px;">Kunde</td>
+              <td style="padding:4px 0;font-size:13px;color:#71717a;width:100px;vertical-align:top;">Kunde</td>
               <td style="padding:4px 0;font-size:13px;font-weight:600;color:#18181b;">${details.customerName ? escapeHtml(details.customerName) : "—"}</td>
             </tr>
             ${details.customerPhone ? `<tr>
-              <td style="padding:4px 0;font-size:13px;color:#71717a;">Telefon</td>
+              <td style="padding:4px 0;font-size:13px;color:#71717a;vertical-align:top;">Telefon</td>
               <td style="padding:4px 0;font-size:13px;color:#18181b;">${escapeHtml(details.customerPhone)}</td>
             </tr>` : ""}
             <tr>
-              <td style="padding:4px 0;font-size:13px;color:#71717a;">Leistung</td>
+              <td style="padding:4px 0;font-size:13px;color:#71717a;vertical-align:top;">Leistung</td>
               <td style="padding:4px 0;font-size:13px;color:#18181b;">${escapeHtml(details.serviceName)}</td>
             </tr>
             <tr>
-              <td style="padding:4px 0;font-size:13px;color:#71717a;">Termin</td>
+              <td style="padding:4px 0;font-size:13px;color:#71717a;vertical-align:top;">Termin</td>
               <td style="padding:4px 0;font-size:13px;color:#18181b;">${appointmentTime} Uhr</td>
             </tr>
+            ${details.customerNotes ? `<tr>
+              <td style="padding:4px 0;font-size:13px;color:#71717a;vertical-align:top;">Notiz</td>
+              <td style="padding:4px 0;font-size:13px;color:#18181b;font-style:italic;">&ldquo;${escapeHtml(details.customerNotes)}&rdquo;</td>
+            </tr>` : ""}
           </table>
         </td>
       </tr>
     </table>
     <p style="margin:0 0 12px;font-size:14px;color:#3f3f46;">Bitte bestätige oder lehne den Termin in deinem Dashboard ab.</p>
-    ${primaryButton("Zum Dashboard", `${APP_URL}/de/dashboard/calendar`)}
+    ${primaryButton("Zum Dashboard", `${APP_URL}/${safeLocale}/dashboard/calendar`)}
   `);
 
   await sendEmail({ to: providerEmail, subject, html });

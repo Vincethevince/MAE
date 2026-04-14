@@ -28,6 +28,11 @@ type AppointmentRow = Database["public"]["Tables"]["appointments"]["Row"];
 export async function createAppointment(
   formData: FormData
 ): Promise<ActionResult> {
+  const rawLocale = formData.get("locale")?.toString() ?? "de";
+  const locale = VALID_LOCALES.includes(rawLocale as typeof VALID_LOCALES[number])
+    ? rawLocale
+    : "de";
+
   const raw = {
     providerId: formData.get("providerId")?.toString() ?? "",
     serviceId: formData.get("serviceId")?.toString() ?? "",
@@ -158,6 +163,7 @@ export async function createAppointment(
     address: provider.address && provider.city
       ? `${provider.address}, ${provider.city}`
       : provider.address ?? null,
+    customerNotes: notes ?? null,
   };
 
   // Fetch customer name/phone and provider email in parallel for notifications
@@ -195,7 +201,7 @@ export async function createAppointment(
       ? sendBookingConfirmation(user.email, { ...emailDetails, customerName })
       : Promise.resolve(),
     providerEmail
-      ? sendProviderNewBooking(providerEmail, { ...emailDetails, customerName, customerPhone })
+      ? sendProviderNewBooking(providerEmail, { ...emailDetails, customerName, customerPhone }, locale)
       : Promise.resolve(),
   ]);
 
