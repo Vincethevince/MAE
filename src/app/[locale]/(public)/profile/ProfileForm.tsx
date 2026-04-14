@@ -11,10 +11,11 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 interface ProfileFormProps {
   fullName: string;
+  phone?: string | null;
   locale: string;
 }
 
-export function ProfileForm({ fullName, locale }: ProfileFormProps) {
+export function ProfileForm({ fullName, phone, locale }: ProfileFormProps) {
   const t = useTranslations("profile");
   const tCommon = useTranslations("common");
   const [isPending, startTransition] = useTransition();
@@ -39,7 +40,7 @@ export function ProfileForm({ fullName, locale }: ProfileFormProps) {
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="text-base">{t("fullNameLabel")}</CardTitle>
+        <CardTitle className="text-base">{t("personalInfoTitle")}</CardTitle>
       </CardHeader>
       <CardContent>
         <form action={handleSubmit} className="space-y-4">
@@ -56,6 +57,20 @@ export function ProfileForm({ fullName, locale }: ProfileFormProps) {
               minLength={2}
               maxLength={100}
             />
+          </div>
+
+          <div className="space-y-1.5">
+            <Label htmlFor="phone">{t("phoneLabel")}</Label>
+            <Input
+              id="phone"
+              name="phone"
+              type="tel"
+              defaultValue={phone ?? ""}
+              maxLength={30}
+              placeholder={t("phonePlaceholder")}
+              autoComplete="tel"
+            />
+            <p className="text-xs text-muted-foreground">{t("phoneHint")}</p>
           </div>
 
           <Button type="submit" disabled={isPending}>

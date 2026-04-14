@@ -26,11 +26,11 @@ export default async function ProfilePage({ params }: ProfilePageProps) {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const { data: profileData } = await (supabase as any)
     .from("profiles")
-    .select("full_name, email")
+    .select("full_name, email, phone")
     .eq("id", user.id)
     .single();
 
-  const profile = profileData as { full_name: string | null; email: string } | null;
+  const profile = profileData as { full_name: string | null; email: string; phone: string | null } | null;
 
   const t = await getTranslations("profile");
 
@@ -60,6 +60,7 @@ export default async function ProfilePage({ params }: ProfilePageProps) {
       <div className="mt-6">
         <ProfileForm
           fullName={profile?.full_name ?? ""}
+          phone={profile?.phone ?? null}
           locale={locale}
         />
       </div>

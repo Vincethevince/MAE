@@ -36,3 +36,18 @@ export type LoginInput = z.infer<typeof loginSchema>;
 export type RegisterInput = z.infer<typeof registerSchema>;
 export type ForgotPasswordInput = z.infer<typeof forgotPasswordSchema>;
 export type ResetPasswordInput = z.infer<typeof resetPasswordSchema>;
+
+export const phoneSchema = z
+  .string()
+  .max(30, "phoneTooLong")
+  .regex(
+    /^[+\d][\d\s\-().]{5,28}$|^$/,
+    "phoneInvalid"
+  )
+  .optional()
+  .or(z.literal(""));
+
+export const updateProfileSchema = z.object({
+  fullName: z.string().min(2).max(100),
+  phone: phoneSchema,
+});

@@ -4,10 +4,7 @@ import { revalidatePath } from "next/cache";
 import { z } from "zod";
 
 import { createClient } from "@/lib/supabase/server";
-
-const updateProfileSchema = z.object({
-  fullName: z.string().min(2).max(100),
-});
+import { updateProfileSchema } from "@/lib/validations/auth";
 
 const changePasswordSchema = z
   .object({
@@ -25,6 +22,7 @@ type ActionResult = { error: string } | { success: true };
 export async function updateProfile(formData: FormData): Promise<ActionResult> {
   const raw = {
     fullName: formData.get("fullName")?.toString() ?? "",
+    phone: formData.get("phone")?.toString() ?? "",
   };
 
   const parsed = updateProfileSchema.safeParse(raw);
@@ -46,7 +44,10 @@ export async function updateProfile(formData: FormData): Promise<ActionResult> {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const { error: updateError } = await (supabase as any)
     .from("profiles")
-    .update({ full_name: parsed.data.fullName })
+    .update({
+      full_name: parsed.data.fullName,
+      phone: parsed.data.phone || null,
+    })
     .eq("id", user.id);
 
   if (updateError) {

@@ -27,6 +27,7 @@ export interface AppointmentWithProviderAndService extends AppointmentRow {
   serviceName: string;
   serviceDurationMinutes: number;
   servicePriceCents: number;
+  customerPhone: string | null;
 }
 
 export interface ProviderSearchResult extends ProviderRow {
@@ -349,6 +350,7 @@ export async function getUserAppointments(
       serviceName: serviceMap.get(appt.service_id)?.name ?? "",
       serviceDurationMinutes: serviceMap.get(appt.service_id)?.duration_minutes ?? 0,
       servicePriceCents: serviceMap.get(appt.service_id)?.price_cents ?? 0,
+      customerPhone: null,
     };
   });
 }
@@ -376,19 +378,19 @@ export async function getProviderAppointmentsRange(
 
   const [{ data: profiles }, { data: services }] = await Promise.all([
     db(supabase)
-      .from("public_profiles")
-      .select("id, full_name")
-      .in("id", userIds),
+      .from("profiles")
+      .select("id, full_name, phone")
+      .in("id", userIds.filter(Boolean)),
     db(supabase)
       .from("services")
       .select("id, name, duration_minutes, price_cents")
       .in("id", serviceIds),
   ]);
 
-  const profileMap = new Map<string, string | null>();
+  const profileMap = new Map<string, { name: string | null; phone: string | null }>();
   if (profiles) {
-    for (const p of profiles as Pick<ProfileRow, "id" | "full_name">[]) {
-      profileMap.set(p.id, p.full_name);
+    for (const p of profiles as { id: string; full_name: string | null; phone: string | null }[]) {
+      profileMap.set(p.id, { name: p.full_name, phone: p.phone });
     }
   }
 
@@ -403,8 +405,9 @@ export async function getProviderAppointmentsRange(
   return appts.map((appt) => ({
     ...appt,
     // For provider calendar view, providerName holds the customer's name
-    providerName: appt.user_id != null ? (profileMap.get(appt.user_id) ?? "") : "",
+    providerName: appt.user_id != null ? (profileMap.get(appt.user_id)?.name ?? "") : "",
     providerId: appt.provider_id,
+    customerPhone: appt.user_id != null ? (profileMap.get(appt.user_id)?.phone ?? null) : null,
     // Provider contact fields not needed in the provider's own calendar view
     providerAddress: null,
     providerCity: null,

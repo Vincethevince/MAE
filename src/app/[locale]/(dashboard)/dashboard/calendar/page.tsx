@@ -97,6 +97,8 @@ interface AppointmentRowCardProps {
   cancelActionLabel: string;
   isPastView: boolean;
   noteEditor: React.ReactNode;
+  customerPhone: string | null;
+  phoneLabel: string;
 }
 
 function AppointmentRowCard({
@@ -114,6 +116,8 @@ function AppointmentRowCard({
   cancelActionLabel,
   isPastView,
   noteEditor,
+  customerPhone,
+  phoneLabel,
 }: AppointmentRowCardProps) {
   const apptStart = new Date(appt.start_time);
   const isPast = apptStart < new Date();
@@ -140,6 +144,19 @@ function AppointmentRowCard({
             <dd className="text-foreground">{appt.serviceName}</dd>
             <dt>{timeLabel}:</dt>
             <dd className="text-foreground">{formatTime(appt.start_time, locale)}</dd>
+            {customerPhone && (
+              <>
+                <dt>{phoneLabel}:</dt>
+                <dd className="text-foreground">
+                  <a
+                    href={`tel:${customerPhone}`}
+                    className="hover:underline text-primary"
+                  >
+                    {customerPhone}
+                  </a>
+                </dd>
+              </>
+            )}
           </dl>
           {appt.notes && (
             <p className="mt-2 text-sm text-muted-foreground italic">
@@ -366,6 +383,8 @@ export default async function CalendarPage({ params, searchParams }: CalendarPag
                         confirmActionLabel={t("noShowSuccess")}
                         cancelActionLabel={t("cancelSuccess")}
                         isPastView={isPastView}
+                        customerPhone={appt.customerPhone ?? null}
+                        phoneLabel={t("phoneLabel")}
                         noteEditor={
                           <ProviderNoteEditor
                             key={appt.id}

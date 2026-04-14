@@ -160,11 +160,11 @@ export async function createAppointment(
       : provider.address ?? null,
   };
 
-  // Fetch customer name and provider email in parallel for notifications
+  // Fetch customer name/phone and provider email in parallel for notifications
   const [customerProfileResult, providerProfileResult] = await Promise.allSettled([
     db
       .from("profiles")
-      .select("full_name")
+      .select("full_name, phone")
       .eq("id", user.id)
       .single(),
     db
@@ -176,7 +176,12 @@ export async function createAppointment(
 
   const customerName =
     customerProfileResult.status === "fulfilled"
-      ? (customerProfileResult.value.data as { full_name?: string } | null)?.full_name ?? null
+      ? (customerProfileResult.value.data as { full_name?: string; phone?: string | null } | null)?.full_name ?? null
+      : null;
+
+  const customerPhone =
+    customerProfileResult.status === "fulfilled"
+      ? (customerProfileResult.value.data as { full_name?: string; phone?: string | null } | null)?.phone ?? null
       : null;
 
   const providerEmail =
@@ -190,7 +195,7 @@ export async function createAppointment(
       ? sendBookingConfirmation(user.email, { ...emailDetails, customerName })
       : Promise.resolve(),
     providerEmail
-      ? sendProviderNewBooking(providerEmail, { ...emailDetails, customerName })
+      ? sendProviderNewBooking(providerEmail, { ...emailDetails, customerName, customerPhone })
       : Promise.resolve(),
   ]);
 

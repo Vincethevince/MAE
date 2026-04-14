@@ -140,6 +140,7 @@ export interface EmailAppointmentDetails {
   durationMinutes?: number;
   address?: string | null;
   customerName?: string | null;
+  customerPhone?: string | null;
 }
 
 /**
@@ -328,6 +329,10 @@ export async function sendProviderNewBooking(
               <td style="padding:4px 0;font-size:13px;color:#71717a;width:100px;">Kunde</td>
               <td style="padding:4px 0;font-size:13px;font-weight:600;color:#18181b;">${details.customerName ? escapeHtml(details.customerName) : "—"}</td>
             </tr>
+            ${details.customerPhone ? `<tr>
+              <td style="padding:4px 0;font-size:13px;color:#71717a;">Telefon</td>
+              <td style="padding:4px 0;font-size:13px;color:#18181b;">${escapeHtml(details.customerPhone)}</td>
+            </tr>` : ""}
             <tr>
               <td style="padding:4px 0;font-size:13px;color:#71717a;">Leistung</td>
               <td style="padding:4px 0;font-size:13px;color:#18181b;">${escapeHtml(details.serviceName)}</td>
