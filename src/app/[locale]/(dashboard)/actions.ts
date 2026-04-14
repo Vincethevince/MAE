@@ -718,7 +718,7 @@ async function getProviderForAppointment(
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   db: any;
   provider: ProviderRow | null;
-  appt: Pick<AppointmentRow, "id" | "provider_id" | "status" | "start_time" | "user_id" | "service_id"> | null;
+  appt: (Pick<AppointmentRow, "id" | "provider_id" | "status" | "start_time" | "user_id" | "service_id"> & { locale?: string }) | null;
 }> {
   const supabase = await createClient();
   const db = await queryDb(supabase);
@@ -746,14 +746,14 @@ async function getProviderForAppointment(
 
   const { data: apptData } = await db
     .from("appointments")
-    .select("id, provider_id, status, start_time, user_id, service_id")
+    .select("id, provider_id, status, start_time, user_id, service_id, locale")
     .eq("id", appointmentId)
     .single();
 
-  const appt = apptData as Pick<
+  const appt = apptData as (Pick<
     AppointmentRow,
     "id" | "provider_id" | "status" | "start_time" | "user_id" | "service_id"
-  > | null;
+  > & { locale?: string }) | null;
 
   return { db, provider, appt };
 }
@@ -840,7 +840,7 @@ export async function confirmAppointment(
         ? `${provider.address}, ${provider.city}`
         : provider.address ?? null,
       customerName,
-    });
+    }, appt.locale ?? "de");
   }
 
   return { success: true };
@@ -898,7 +898,7 @@ export async function cancelAppointmentAsProvider(
         ? `${provider.address}, ${provider.city}`
         : provider.address ?? null,
       customerName,
-    });
+    }, appt.locale ?? "de");
   }
 
   return { success: true };

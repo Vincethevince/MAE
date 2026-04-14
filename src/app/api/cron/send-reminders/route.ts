@@ -27,7 +27,7 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
 
   const { data: appointments, error } = (await supabase
     .from("appointments")
-    .select("id, user_id, provider_id, service_id, start_time, status")
+    .select("id, user_id, provider_id, service_id, start_time, status, locale")
     .in("status", ["pending", "confirmed"])
     .gte("start_time", from.toISOString())
     .lte("start_time", to.toISOString())
@@ -39,6 +39,7 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
       service_id: string;
       start_time: string;
       status: string;
+      locale: string;
     }> | null;
     error: { message: string } | null;
   };
@@ -99,7 +100,7 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
       customerName: customer.full_name ?? null,
     };
 
-    await sendAppointmentReminder(customer.email, emailDetails);
+    await sendAppointmentReminder(customer.email, emailDetails, appt.locale ?? "de");
 
     // Also remind the provider (non-blocking — never fail the batch on email error)
     if (provider.profile_id) {
@@ -134,7 +135,7 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
 
   const { data: completedAppts } = (await supabase
     .from("appointments")
-    .select("id, user_id, provider_id, service_id, start_time")
+    .select("id, user_id, provider_id, service_id, start_time, locale")
     .eq("status", "completed")
     .gte("start_time", reviewFrom.toISOString())
     .lte("start_time", reviewTo.toISOString())
@@ -145,6 +146,7 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
       provider_id: string;
       service_id: string;
       start_time: string;
+      locale: string;
     }> | null;
   };
 
@@ -193,6 +195,7 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
         businessName,
         serviceName,
         startTime: appt.start_time,
+        locale: appt.locale ?? "de",
       });
       reviewsSent++;
     }

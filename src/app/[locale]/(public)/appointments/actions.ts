@@ -132,7 +132,7 @@ export async function cancelAppointment(formData: FormData): Promise<ActionResul
 
   await Promise.all([
     user.email
-      ? sendCancellationByCustomer(user.email, emailDetails)
+      ? sendCancellationByCustomer(user.email, emailDetails, safeLocale)
       : Promise.resolve(),
     providerEmail
       ? sendProviderCancellationAlert(providerEmail, emailDetails)

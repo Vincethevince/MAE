@@ -143,6 +143,7 @@ export async function createAppointment(
       status: "pending",
       notes: notes ?? null,
       price_cents: priceCents,
+      locale,
     })
     .select("id")
     .single();
@@ -198,7 +199,7 @@ export async function createAppointment(
   // Send emails — awaited to ensure delivery on serverless (sendEmail never throws)
   await Promise.all([
     user.email
-      ? sendBookingConfirmation(user.email, { ...emailDetails, customerName })
+      ? sendBookingConfirmation(user.email, { ...emailDetails, customerName }, locale)
       : Promise.resolve(),
     providerEmail
       ? sendProviderNewBooking(providerEmail, { ...emailDetails, customerName, customerPhone }, locale)
