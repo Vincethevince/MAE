@@ -6,6 +6,7 @@ import { z } from "zod";
 import { createClient } from "@/lib/supabase/server";
 import { headers } from "next/headers";
 import { loginSchema, registerSchema, forgotPasswordSchema, resetPasswordSchema } from "@/lib/validations/auth";
+import { mapSupabaseRegisterError } from "@/lib/auth-error-map";
 
 function isSafeRedirectPath(path: string): boolean {
   return (
@@ -85,44 +86,6 @@ function mapRegisterZodErrors(issues: z.ZodIssue[]): RegisterFieldErrors {
   return fieldErrors;
 }
 
-function mapSupabaseRegisterError(error: { message: string; code?: string; status?: number }): string {
-  // Check structured error codes first (Supabase JS v2 AuthApiError.code)
-  const code = error.code ?? "";
-  if (code === "user_already_exists" || code === "email_exists") {
-    return "emailAlreadyInUse";
-  }
-  if (code === "over_email_send_rate_limit" || code === "over_request_rate_limit") {
-    return "emailRateLimit";
-  }
-  if (code === "signup_disabled") {
-    return "signupDisabled";
-  }
-  if (code === "weak_password") {
-    return "passwordTooWeak";
-  }
-  if (code === "email_address_invalid" || code === "email_address_not_authorized") {
-    return "emailInvalid";
-  }
-
-  // Fall back to message-based matching for older SDK versions / unexpected formats
-  const msg = error.message.toLowerCase();
-  if (msg.includes("already registered") || msg.includes("email_exists") || msg.includes("user already")) {
-    return "emailAlreadyInUse";
-  }
-  if (msg.includes("rate limit") || msg.includes("too many requests") || msg.includes("over_email_send_rate_limit")) {
-    return "emailRateLimit";
-  }
-  if (msg.includes("signup_disabled") || msg.includes("signups not allowed")) {
-    return "signupDisabled";
-  }
-  if (msg.includes("password") && (msg.includes("weak") || msg.includes("short") || msg.includes("characters"))) {
-    return "passwordTooWeak";
-  }
-  if (msg.includes("invalid email") || msg.includes("email_address_invalid")) {
-    return "emailInvalid";
-  }
-  return "registrationFailed";
-}
 
 export async function register(
   _prevState: RegisterState,

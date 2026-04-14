@@ -610,6 +610,7 @@
     "resendSuccess": "Bestätigungs-E-Mail wurde erneut gesendet.",
     "invalidCredentials": "Ungültige Anmeldedaten",
     "registrationFailed": "Registrierung fehlgeschlagen. Bitte versuche es später erneut.",
+    "registrationServerError": "Es ist ein Serverfehler aufgetreten. Bitte versuche es in wenigen Sekunden erneut oder kontaktiere den Support.",
     "emailAlreadyInUse": "Ein Konto mit dieser E-Mail-Adresse existiert bereits. Bitte melde dich stattdessen an.",
     "emailRateLimit": "Zu viele Versuche. Bitte warte einige Minuten und versuche es erneut.",
     "signupDisabled": "Neue Registrierungen sind derzeit deaktiviert. Bitte versuche es später erneut.",

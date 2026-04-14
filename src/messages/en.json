@@ -610,6 +610,7 @@
     "resendSuccess": "Confirmation email has been resent.",
     "invalidCredentials": "Invalid credentials",
     "registrationFailed": "Registration failed. Please try again later.",
+    "registrationServerError": "A server error occurred. Please try again in a few seconds or contact support.",
     "emailAlreadyInUse": "An account with this email already exists. Try signing in instead.",
     "emailRateLimit": "Too many attempts. Please wait a few minutes and try again.",
     "signupDisabled": "New registrations are currently disabled. Please try again later.",
