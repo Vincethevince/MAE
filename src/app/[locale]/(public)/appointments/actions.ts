@@ -7,6 +7,7 @@ import { reviewSchema } from "@/lib/validations/booking";
 import {
   sendCancellationByCustomer,
   sendProviderCancellationAlert,
+  sendProviderNewReview,
 } from "@/lib/email";
 import type { Database } from "@/types/database";
 
@@ -167,13 +168,13 @@ export async function submitReview(formData: FormData): Promise<ActionResult> {
 
   const { data: apptData } = await db
     .from("appointments")
-    .select("id, user_id, status, provider_id")
+    .select("id, user_id, status, provider_id, service_id")
     .eq("id", parsed.data.appointmentId)
     .single();
 
   const appt = apptData as Pick<
     AppointmentRow,
-    "id" | "user_id" | "status" | "provider_id"
+    "id" | "user_id" | "status" | "provider_id" | "service_id"
   > | null;
 
   if (!appt) {
@@ -219,5 +220,58 @@ export async function submitReview(formData: FormData): Promise<ActionResult> {
   const rawLocale = formData.get("locale")?.toString() ?? "de";
   const locale = ["de", "en"].includes(rawLocale) ? rawLocale : "de";
   revalidatePath(`/${locale}/appointments`);
+
+  // Notify the provider of the new review (non-blocking — never fail the review on email error)
+  // Fetch provider info and customer name in parallel
+  const [providerResult, serviceResult, customerResult] = await Promise.allSettled([
+    db.from("providers")
+      .select("business_name, profile_id")
+      .eq("id", appt.provider_id)
+      .single(),
+    db.from("services")
+      .select("name")
+      .eq("id", appt.service_id)
+      .single(),
+    db.from("profiles")
+      .select("full_name")
+      .eq("id", user.id)
+      .single(),
+  ]);
+
+  const providerData =
+    providerResult.status === "fulfilled"
+      ? (providerResult.value.data as { business_name?: string; profile_id?: string } | null)
+      : null;
+  const serviceName =
+    serviceResult.status === "fulfilled"
+      ? (serviceResult.value.data as { name?: string } | null)?.name ?? "Service"
+      : "Service";
+  const customerName =
+    customerResult.status === "fulfilled"
+      ? (customerResult.value.data as { full_name?: string | null } | null)?.full_name ?? null
+      : null;
+
+  if (providerData?.profile_id) {
+    const profileResult = await db
+      .from("profiles")
+      .select("email")
+      .eq("id", providerData.profile_id)
+      .single();
+    const providerEmail =
+      (profileResult.data as { email?: string } | null)?.email ?? null;
+
+    if (providerEmail) {
+      const safeLocale = ["de", "en"].includes(locale) ? locale : "de";
+      await sendProviderNewReview(providerEmail, {
+        businessName: providerData.business_name ?? "",
+        serviceName,
+        customerName,
+        rating: parsed.data.rating,
+        comment: parsed.data.comment || null,
+        reviewsUrl: `${process.env.NEXT_PUBLIC_APP_URL ?? "https://makeappointmentseasier.com"}/${safeLocale}/dashboard/reviews`,
+      });
+    }
+  }
+
   return { success: true };
 }

@@ -462,3 +462,56 @@ export async function sendReviewRequest(
 
   await sendEmail({ to: customerEmail, subject, html });
 }
+
+/**
+ * Sent to the provider when a customer submits a new review.
+ * Allows providers to react quickly — especially to negative feedback.
+ */
+export async function sendProviderNewReview(
+  providerEmail: string,
+  details: {
+    businessName: string;
+    serviceName: string;
+    customerName: string | null;
+    rating: number;            // 1–5
+    comment: string | null;
+    reviewsUrl: string;        // absolute URL to provider's dashboard reviews page
+  }
+): Promise<void> {
+  const stars = "★".repeat(Math.max(1, Math.min(5, details.rating))) +
+                "☆".repeat(Math.max(0, 5 - details.rating));
+  const subject = `Neue Bewertung für ${sanitizeSubject(details.businessName)} – ${details.rating}/5 Sterne`;
+  const html = baseTemplate(`
+    <h2 style="margin:0 0 8px;font-size:20px;font-weight:700;color:#18181b;">Neue Kundenbewertung</h2>
+    <p style="margin:0 0 20px;font-size:14px;color:#3f3f46;">
+      ${details.customerName ? `<strong>${escapeHtml(details.customerName)}</strong> hat` : "Ein Kunde hat"}
+      eine neue Bewertung für <strong>${escapeHtml(details.businessName)}</strong> abgegeben.
+    </p>
+    <table style="width:100%;background:#f9fafb;border-radius:6px;border:1px solid #e4e4e7;border-collapse:collapse;margin:0 0 20px;">
+      <tr>
+        <td style="padding:16px 20px;">
+          <table style="width:100%;border-collapse:collapse;">
+            <tr>
+              <td style="padding:4px 0;font-size:13px;color:#71717a;width:100px;vertical-align:top;">Leistung</td>
+              <td style="padding:4px 0;font-size:13px;color:#18181b;">${escapeHtml(details.serviceName)}</td>
+            </tr>
+            <tr>
+              <td style="padding:4px 0;font-size:13px;color:#71717a;vertical-align:top;">Bewertung</td>
+              <td style="padding:4px 0;font-size:16px;color:#f59e0b;">${stars} <span style="font-size:13px;color:#18181b;">(${details.rating}/5)</span></td>
+            </tr>
+            ${details.comment ? `<tr>
+              <td style="padding:4px 0;font-size:13px;color:#71717a;vertical-align:top;">Kommentar</td>
+              <td style="padding:4px 0;font-size:13px;color:#18181b;font-style:italic;">&ldquo;${escapeHtml(details.comment)}&rdquo;</td>
+            </tr>` : ""}
+          </table>
+        </td>
+      </tr>
+    </table>
+    ${primaryButton("Bewertung ansehen & antworten", details.reviewsUrl)}
+    <p style="margin:16px 0 0;font-size:12px;color:#a1a1aa;">
+      Du kannst direkt in deinem Dashboard auf die Bewertung antworten.
+    </p>
+  `);
+
+  await sendEmail({ to: providerEmail, subject, html });
+}
