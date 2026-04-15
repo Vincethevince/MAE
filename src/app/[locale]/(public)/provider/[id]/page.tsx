@@ -27,6 +27,8 @@ const getProvider = cache(async (id: string) => {
   return getProviderById(supabase, id);
 });
 
+const APP_URL = process.env.NEXT_PUBLIC_APP_URL ?? "https://makeappointmentseasier.com";
+
 export async function generateMetadata({
   params,
 }: ProviderDetailPageProps): Promise<Metadata> {
@@ -41,6 +43,10 @@ export async function generateMetadata({
     ? provider.description.slice(0, 160)
     : `${provider.business_name} – ${provider.category} in ${provider.city}. Jetzt Termin buchen auf MAE.`;
 
+  // Use slug for the OG image URL if available, otherwise UUID
+  const idOrSlug = provider.slug ?? id;
+  const ogImageUrl = `${APP_URL}/api/og/provider/${encodeURIComponent(idOrSlug)}`;
+
   return {
     title,
     description,
@@ -48,6 +54,20 @@ export async function generateMetadata({
       title,
       description,
       type: "website",
+      images: [
+        {
+          url: ogImageUrl,
+          width: 1200,
+          height: 630,
+          alt: title,
+        },
+      ],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title,
+      description,
+      images: [ogImageUrl],
     },
   };
 }
