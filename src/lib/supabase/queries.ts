@@ -1048,3 +1048,71 @@ export async function getProviderCustomers(
 
   return result;
 }
+
+// ─── Customer Stats ──────────────────────────────────────────────────────────
+
+export interface CustomerStats {
+  totalAppointments: number;
+  completedAppointments: number;
+  totalSpentCents: number;
+  memberSince: string; // ISO date string
+  favoriteProviderName: string | null;
+}
+
+/**
+ * Returns aggregate booking statistics for a customer.
+ * Used on the profile page to display loyalty info.
+ */
+export async function getCustomerStats(
+  supabase: TypedSupabaseClient,
+  userId: string,
+  memberSince: string
+): Promise<CustomerStats> {
+  const { data: apptData } = await db(supabase)
+    .from("appointments")
+    .select("status, price_cents, provider_id")
+    .eq("user_id", userId)
+    .neq("status", "cancelled");
+
+  const appts = (apptData ?? []) as {
+    status: AppointmentRow["status"];
+    price_cents: number | null;
+    provider_id: string;
+  }[];
+
+  const totalAppointments = appts.length;
+  const completed = appts.filter((a) => a.status === "completed");
+  const completedAppointments = completed.length;
+  const totalSpentCents = completed.reduce(
+    (sum, a) => sum + (a.price_cents ?? 0),
+    0
+  );
+
+  // Find most-booked provider
+  const providerCounts = new Map<string, number>();
+  for (const a of appts) {
+    providerCounts.set(a.provider_id, (providerCounts.get(a.provider_id) ?? 0) + 1);
+  }
+
+  let favoriteProviderName: string | null = null;
+  if (providerCounts.size > 0) {
+    const topProviderId = [...providerCounts.entries()].sort(
+      (a, b) => b[1] - a[1]
+    )[0]![0];
+    const { data: providerData } = await db(supabase)
+      .from("providers")
+      .select("business_name")
+      .eq("id", topProviderId)
+      .single();
+    favoriteProviderName =
+      (providerData as { business_name?: string } | null)?.business_name ?? null;
+  }
+
+  return {
+    totalAppointments,
+    completedAppointments,
+    totalSpentCents,
+    memberSince,
+    favoriteProviderName,
+  };
+}

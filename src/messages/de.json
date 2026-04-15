@@ -626,7 +626,16 @@
     "phoneLabel": "Telefonnummer",
     "phonePlaceholder": "+49 123 456789",
     "phoneHint": "Optional. Nur für deine Anbietenden sichtbar.",
-    "deleteAccountPasswordLabel": "Aktuelles Passwort"
+    "deleteAccountPasswordLabel": "Aktuelles Passwort",
+    "stats": {
+      "title": "Deine Statistiken",
+      "totalAppointments": "Termine gesamt",
+      "completedAppointments": "Abgeschlossen",
+      "totalSpent": "Ausgegeben",
+      "memberSince": "Dabei seit",
+      "favoriteProvider": "Lieblings-Anbieter",
+      "noBookingsYet": "Noch keine Buchungen"
+    }
   },
   "auth": {
     "email": "E-Mail",

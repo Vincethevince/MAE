@@ -2,6 +2,7 @@ import { redirect } from "next/navigation";
 import { getTranslations } from "next-intl/server";
 
 import { createClient } from "@/lib/supabase/server";
+import { getCustomerStats } from "@/lib/supabase/queries";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ProfileForm } from "./ProfileForm";
 import { ChangePasswordForm } from "./ChangePasswordForm";
@@ -26,13 +27,21 @@ export default async function ProfilePage({ params }: ProfilePageProps) {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const { data: profileData } = await (supabase as any)
     .from("profiles")
-    .select("full_name, email, phone")
+    .select("full_name, email, phone, created_at")
     .eq("id", user.id)
     .single();
 
-  const profile = profileData as { full_name: string | null; email: string; phone: string | null } | null;
+  const profile = profileData as {
+    full_name: string | null;
+    email: string;
+    phone: string | null;
+    created_at: string;
+  } | null;
 
-  const t = await getTranslations("profile");
+  const [t, stats] = await Promise.all([
+    getTranslations("profile"),
+    profile ? getCustomerStats(supabase, user.id, profile.created_at) : null,
+  ]);
 
   async function handleDeleteAccount(formData: FormData): Promise<void> {
     "use server";
@@ -56,6 +65,57 @@ export default async function ProfilePage({ params }: ProfilePageProps) {
           <p className="text-sm text-muted-foreground">{profile?.email ?? user.email}</p>
         </CardContent>
       </Card>
+
+      {/* Customer stats */}
+      {stats && (
+        <div className="mt-6">
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-base">{t("stats.title")}</CardTitle>
+            </CardHeader>
+            <CardContent>
+              {stats.totalAppointments === 0 ? (
+                <p className="text-sm text-muted-foreground">{t("stats.noBookingsYet")}</p>
+              ) : (
+                <dl className="grid grid-cols-2 gap-x-6 gap-y-3 text-sm sm:grid-cols-3">
+                  <div>
+                    <dt className="text-muted-foreground">{t("stats.totalAppointments")}</dt>
+                    <dd className="mt-0.5 text-lg font-semibold">{stats.totalAppointments}</dd>
+                  </div>
+                  <div>
+                    <dt className="text-muted-foreground">{t("stats.completedAppointments")}</dt>
+                    <dd className="mt-0.5 text-lg font-semibold">{stats.completedAppointments}</dd>
+                  </div>
+                  <div>
+                    <dt className="text-muted-foreground">{t("stats.totalSpent")}</dt>
+                    <dd className="mt-0.5 text-lg font-semibold">
+                      {new Intl.NumberFormat(locale === "de" ? "de-DE" : "en-GB", {
+                        style: "currency",
+                        currency: "EUR",
+                      }).format(stats.totalSpentCents / 100)}
+                    </dd>
+                  </div>
+                  <div>
+                    <dt className="text-muted-foreground">{t("stats.memberSince")}</dt>
+                    <dd className="mt-0.5 font-medium">
+                      {new Date(stats.memberSince).toLocaleDateString(
+                        locale === "de" ? "de-DE" : "en-GB",
+                        { year: "numeric", month: "long" }
+                      )}
+                    </dd>
+                  </div>
+                  {stats.favoriteProviderName && (
+                    <div className="col-span-2 sm:col-span-2">
+                      <dt className="text-muted-foreground">{t("stats.favoriteProvider")}</dt>
+                      <dd className="mt-0.5 font-medium">{stats.favoriteProviderName}</dd>
+                    </div>
+                  )}
+                </dl>
+              )}
+            </CardContent>
+          </Card>
+        </div>
+      )}
 
       <div className="mt-6">
         <ProfileForm

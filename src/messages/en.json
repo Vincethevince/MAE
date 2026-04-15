@@ -626,6 +626,15 @@
       "passwordRequired": "Please enter your password",
       "confirmationRequired": "Please type \"löschen\" to confirm",
       "deleteFailed": "Failed to delete account. Please try again."
+    },
+    "stats": {
+      "title": "Your stats",
+      "totalAppointments": "Total appointments",
+      "completedAppointments": "Completed",
+      "totalSpent": "Total spent",
+      "memberSince": "Member since",
+      "favoriteProvider": "Favourite provider",
+      "noBookingsYet": "No bookings yet"
     }
   },
   "auth": {
