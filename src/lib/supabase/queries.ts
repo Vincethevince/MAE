@@ -1116,3 +1116,64 @@ export async function getCustomerStats(
     favoriteProviderName,
   };
 }
+
+// ─── Revenue History ──────────────────────────────────────────────────────────
+
+export interface MonthlyRevenue {
+  year: number;
+  month: number; // 1-12
+  revenueCents: number;
+  completedCount: number;
+}
+
+/**
+ * Returns completed appointment revenue for each of the last N calendar months
+ * (including the current month), ordered oldest → newest.
+ */
+export async function getProviderRevenueHistory(
+  supabase: TypedSupabaseClient,
+  providerId: string,
+  months = 6
+): Promise<MonthlyRevenue[]> {
+  const now = new Date();
+
+  // Build the start boundary = first day of (current month - (months-1))
+  const rangeStart = new Date(now.getFullYear(), now.getMonth() - (months - 1), 1, 0, 0, 0, 0);
+  const rangeEnd = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59, 999);
+
+  const { data } = await db(supabase)
+    .from("appointments")
+    .select("start_time, price_cents")
+    .eq("provider_id", providerId)
+    .eq("status", "completed")
+    .gte("start_time", rangeStart.toISOString())
+    .lte("start_time", rangeEnd.toISOString());
+
+  const appts = (data ?? []) as { start_time: string; price_cents: number | null }[];
+
+  // Aggregate by year-month
+  const map = new Map<string, { revenueCents: number; completedCount: number }>();
+
+  for (const a of appts) {
+    const d = new Date(a.start_time);
+    const key = `${d.getFullYear()}-${d.getMonth() + 1}`;
+    const existing = map.get(key) ?? { revenueCents: 0, completedCount: 0 };
+    map.set(key, {
+      revenueCents: existing.revenueCents + (a.price_cents ?? 0),
+      completedCount: existing.completedCount + 1,
+    });
+  }
+
+  // Fill in all months (including zeros)
+  const result: MonthlyRevenue[] = [];
+  for (let i = months - 1; i >= 0; i--) {
+    const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+    const year = d.getFullYear();
+    const month = d.getMonth() + 1;
+    const key = `${year}-${month}`;
+    const agg = map.get(key) ?? { revenueCents: 0, completedCount: 0 };
+    result.push({ year, month, revenueCents: agg.revenueCents, completedCount: agg.completedCount });
+  }
+
+  return result;
+}

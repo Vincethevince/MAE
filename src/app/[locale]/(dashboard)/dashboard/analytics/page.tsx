@@ -3,9 +3,11 @@ import { getTranslations } from "next-intl/server";
 
 import { createClient } from "@/lib/supabase/server";
 import { ExportAppointmentsButton } from "@/components/features/ExportAppointmentsButton";
+import { RevenueBarChart } from "@/components/features/RevenueBarChart";
 import {
   getCurrentProvider,
   getProviderMonthStats,
+  getProviderRevenueHistory,
 } from "@/lib/supabase/queries";
 import type { ProviderMonthStats } from "@/lib/supabase/queries";
 import {
@@ -60,8 +62,9 @@ export default async function AnalyticsPage({ params }: AnalyticsPageProps) {
     redirect(`/${locale}/dashboard/onboarding`);
   }
 
-  const [stats, t, tStatus] = await Promise.all([
+  const [stats, revenueHistory, t, tStatus] = await Promise.all([
     getProviderMonthStats(supabase, provider.id),
+    getProviderRevenueHistory(supabase, provider.id, 6),
     getTranslations("dashboard.analytics"),
     getTranslations("appointments"),
   ]);
@@ -149,6 +152,20 @@ export default async function AnalyticsPage({ params }: AnalyticsPageProps) {
           </CardContent>
         </Card>
       </div>
+
+      {/* 6-month revenue trend */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-base">{t("revenueTrend")}</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <RevenueBarChart
+            data={revenueHistory}
+            locale={locale}
+            noDataLabel={t("noData")}
+          />
+        </CardContent>
+      </Card>
 
       {/* Status breakdown */}
       <Card>

@@ -399,7 +399,8 @@
       "revenueColumn": "Revenue",
       "noData": "No data yet for this month",
       "exportCsv": "Export appointments (CSV)",
-      "exportCsvLoading": "Exporting…"
+      "exportCsvLoading": "Exporting…",
+      "revenueTrend": "Revenue trend (6 months)"
     },
     "customers": {
       "title": "Customers",

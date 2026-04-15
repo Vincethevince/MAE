@@ -399,7 +399,8 @@
       "revenueColumn": "Umsatz",
       "noData": "Noch keine Daten für diesen Monat",
       "exportCsv": "Termine exportieren (CSV)",
-      "exportCsvLoading": "Wird exportiert…"
+      "exportCsvLoading": "Wird exportiert…",
+      "revenueTrend": "Umsatzentwicklung (6 Monate)"
     },
     "customers": {
       "title": "Kunden",
