@@ -2,6 +2,7 @@ import { redirect } from "next/navigation";
 import { getTranslations } from "next-intl/server";
 
 import { createClient } from "@/lib/supabase/server";
+import { ExportAppointmentsButton } from "@/components/features/ExportAppointmentsButton";
 import {
   getCurrentProvider,
   getProviderMonthStats,
@@ -81,9 +82,15 @@ export default async function AnalyticsPage({ params }: AnalyticsPageProps) {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-bold">{t("title")}</h1>
-        <p className="text-muted-foreground">{t("subtitle")}</p>
+      <div className="flex items-start justify-between gap-4">
+        <div>
+          <h1 className="text-2xl font-bold">{t("title")}</h1>
+          <p className="text-muted-foreground">{t("subtitle")}</p>
+        </div>
+        <ExportAppointmentsButton
+          label={t("exportCsv")}
+          loadingLabel={t("exportCsvLoading")}
+        />
       </div>
 
       {/* Month comparison KPI cards */}

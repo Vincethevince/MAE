@@ -391,7 +391,9 @@
       "serviceColumn": "Service",
       "bookingsColumn": "Bookings",
       "revenueColumn": "Revenue",
-      "noData": "No data yet for this month"
+      "noData": "No data yet for this month",
+      "exportCsv": "Export appointments (CSV)",
+      "exportCsvLoading": "Exporting…"
     },
     "customers": {
       "title": "Customers",
