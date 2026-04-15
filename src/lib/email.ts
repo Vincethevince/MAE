@@ -645,3 +645,128 @@ export async function sendProviderNewReview(
 
   await sendEmail({ to: providerEmail, subject, html });
 }
+
+// ─── Reschedule notifications ─────────────────────────────────────────────────
+
+/**
+ * Sent to the customer when they reschedule their appointment.
+ * Shows the old time and the new time side by side.
+ */
+export async function sendRescheduleConfirmation(
+  to: string,
+  details: EmailAppointmentDetails & { oldStartTime: string },
+  locale?: string
+): Promise<void> {
+  const safeLocale = ["de", "en"].includes(locale ?? "") ? (locale as string) : "de";
+
+  const translations = safeLocale === "en" ? {
+    subject: `Appointment rescheduled – ${sanitizeSubject(details.businessName)}`,
+    heading: "Appointment rescheduled",
+    p1: "Your appointment has been successfully rescheduled.",
+    oldLabel: "Previous time",
+    newLabel: "New time",
+    p2: "Your appointment is pending re-confirmation by the provider.",
+    button: "View my appointments",
+  } : {
+    subject: `Termin umgebucht – ${sanitizeSubject(details.businessName)}`,
+    heading: "Termin erfolgreich umgebucht",
+    p1: "Ihr Termin wurde erfolgreich umgebucht.",
+    oldLabel: "Alter Termin",
+    newLabel: "Neuer Termin",
+    p2: "Ihr Termin wartet auf erneute Bestätigung durch den Dienstleister.",
+    button: "Meine Termine anzeigen",
+  };
+
+  const oldTimeDisplay = safeLocale === "en"
+    ? formatDateTime(details.oldStartTime, "en")
+    : `${formatDateTime(details.oldStartTime, "de")} Uhr`;
+  const newTimeDisplay = safeLocale === "en"
+    ? formatDateTime(details.startTime, "en")
+    : `${formatDateTime(details.startTime, "de")} Uhr`;
+
+  const url = `${APP_URL}/${safeLocale}/appointments`;
+  const html = baseTemplate(`
+    <h2 style="margin:0 0 8px;font-size:20px;font-weight:700;color:#18181b;">${translations.heading}</h2>
+    <p style="margin:0 0 16px;font-size:14px;color:#3f3f46;">${translations.p1}</p>
+    <table style="width:100%;background:#f9fafb;border-radius:6px;border:1px solid #e4e4e7;border-collapse:collapse;margin:0 0 16px;">
+      <tr>
+        <td style="padding:16px 20px;">
+          <table style="width:100%;border-collapse:collapse;">
+            <tr>
+              <td style="padding:4px 0;font-size:13px;color:#71717a;width:120px;vertical-align:top;">${translations.oldLabel}</td>
+              <td style="padding:4px 0;font-size:13px;color:#71717a;text-decoration:line-through;">${oldTimeDisplay}</td>
+            </tr>
+            <tr>
+              <td style="padding:4px 0;font-size:13px;color:#71717a;vertical-align:top;">${translations.newLabel}</td>
+              <td style="padding:4px 0;font-size:13px;font-weight:600;color:#18181b;">${newTimeDisplay}</td>
+            </tr>
+            <tr>
+              <td style="padding:4px 0;font-size:13px;color:#71717a;vertical-align:top;">${safeLocale === "en" ? "Provider" : "Dienstleister"}</td>
+              <td style="padding:4px 0;font-size:13px;color:#18181b;">${escapeHtml(details.businessName)}</td>
+            </tr>
+            <tr>
+              <td style="padding:4px 0;font-size:13px;color:#71717a;vertical-align:top;">${safeLocale === "en" ? "Service" : "Leistung"}</td>
+              <td style="padding:4px 0;font-size:13px;color:#18181b;">${escapeHtml(details.serviceName)}</td>
+            </tr>
+            ${details.address ? `<tr>
+              <td style="padding:4px 0;font-size:13px;color:#71717a;vertical-align:top;">${safeLocale === "en" ? "Address" : "Adresse"}</td>
+              <td style="padding:4px 0;font-size:13px;color:#18181b;">${escapeHtml(details.address)}</td>
+            </tr>` : ""}
+          </table>
+        </td>
+      </tr>
+    </table>
+    <p style="margin:0 0 16px;font-size:14px;color:#3f3f46;">${translations.p2}</p>
+    ${primaryButton(translations.button, url)}
+  `, safeLocale);
+
+  await sendEmail({ to, subject: translations.subject, html });
+}
+
+/**
+ * Sent to the provider when a customer reschedules an appointment.
+ */
+export async function sendProviderRescheduleAlert(
+  to: string,
+  details: EmailAppointmentDetails & { oldStartTime: string; customerName: string | null }
+): Promise<void> {
+  const oldTimeDisplay = formatDateTime(details.oldStartTime, "de");
+  const newTimeDisplay = formatDateTime(details.startTime, "de");
+  const customerDisplay = details.customerName ? sanitizeSubject(details.customerName) : "Kunde";
+  const subject = `Termin umgebucht – ${customerDisplay}`;
+
+  const html = baseTemplate(`
+    <h2 style="margin:0 0 8px;font-size:20px;font-weight:700;color:#18181b;">Termin wurde umgebucht</h2>
+    <p style="margin:0 0 16px;font-size:14px;color:#3f3f46;">
+      ${details.customerName ? `<strong>${escapeHtml(details.customerName)}</strong> hat` : "Ein Kunde hat"} einen Termin umgebucht.
+    </p>
+    <table style="width:100%;background:#f9fafb;border-radius:6px;border:1px solid #e4e4e7;border-collapse:collapse;margin:0 0 16px;">
+      <tr>
+        <td style="padding:16px 20px;">
+          <table style="width:100%;border-collapse:collapse;">
+            <tr>
+              <td style="padding:4px 0;font-size:13px;color:#71717a;width:120px;vertical-align:top;">Kunde</td>
+              <td style="padding:4px 0;font-size:13px;font-weight:600;color:#18181b;">${details.customerName ? escapeHtml(details.customerName) : "—"}</td>
+            </tr>
+            <tr>
+              <td style="padding:4px 0;font-size:13px;color:#71717a;vertical-align:top;">Leistung</td>
+              <td style="padding:4px 0;font-size:13px;color:#18181b;">${escapeHtml(details.serviceName)}</td>
+            </tr>
+            <tr>
+              <td style="padding:4px 0;font-size:13px;color:#71717a;vertical-align:top;">Alter Termin</td>
+              <td style="padding:4px 0;font-size:13px;color:#71717a;text-decoration:line-through;">${oldTimeDisplay} Uhr</td>
+            </tr>
+            <tr>
+              <td style="padding:4px 0;font-size:13px;color:#71717a;vertical-align:top;">Neuer Termin</td>
+              <td style="padding:4px 0;font-size:13px;font-weight:600;color:#18181b;">${newTimeDisplay} Uhr</td>
+            </tr>
+          </table>
+        </td>
+      </tr>
+    </table>
+    <p style="margin:0 0 12px;font-size:14px;color:#3f3f46;">Bitte bestätige den neuen Termin in deinem Dashboard.</p>
+    ${primaryButton("Zum Dashboard", `${APP_URL}/de/dashboard/calendar`)}
+  `);
+
+  await sendEmail({ to, subject, html });
+}

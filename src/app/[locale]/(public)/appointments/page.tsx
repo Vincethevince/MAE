@@ -97,6 +97,8 @@ interface AppointmentCardProps {
   showAddToCalendar: boolean;
   bookAgainLabel?: string;
   showBookAgain?: boolean;
+  showReschedule?: boolean;
+  rescheduleLabel?: string;
 }
 
 function AppointmentCard({
@@ -118,6 +120,8 @@ function AppointmentCard({
   showAddToCalendar,
   bookAgainLabel,
   showBookAgain,
+  showReschedule,
+  rescheduleLabel,
 }: AppointmentCardProps) {
   const startDate = new Date(appt.start_time);
   const dateStr = startDate.toLocaleDateString(locale === "de" ? "de-DE" : "en-GB", {
@@ -224,12 +228,24 @@ function AppointmentCard({
           </div>
         )}
 
-        {showCancel && (
-          <CancelAppointmentButton
-            appointmentId={appt.id}
-            locale={locale}
-            onCancel={onCancel}
-          />
+        {(showCancel || showReschedule) && (
+          <div className="mt-4 flex flex-wrap items-center gap-2">
+            {showCancel && (
+              <CancelAppointmentButton
+                appointmentId={appt.id}
+                locale={locale}
+                onCancel={onCancel}
+              />
+            )}
+            {showReschedule && rescheduleLabel && (
+              <Link
+                href={`/${locale}/appointments/${appt.id}/reschedule`}
+                className={buttonVariants({ variant: "outline", size: "sm" })}
+              >
+                {rescheduleLabel}
+              </Link>
+            )}
+          </div>
         )}
         {isCancelBlockedByTime && (
           <p className="mt-3 text-xs text-muted-foreground">{cancelTooLateLabel}</p>
@@ -328,6 +344,8 @@ export default async function AppointmentsPage({ params }: AppointmentsPageProps
                   getDirectionsLabel={t("getDirections")}
                   addToCalendarLabel={t("addToCalendar")}
                   showAddToCalendar={isCancellableStatus}
+                  showReschedule={isCancellableStatus && !withinCutoff}
+                  rescheduleLabel={t("reschedule")}
                 />
               );
             })}

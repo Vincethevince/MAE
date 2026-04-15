@@ -506,6 +506,26 @@
       "cancelTooLate": "Appointments cannot be cancelled within 24 hours of the start time",
       "cancelFailed": "Failed to cancel appointment"
     },
+    "reschedule": "Reschedule",
+    "reschedulePage": {
+      "title": "Reschedule Appointment",
+      "currentAppointment": "Current Appointment",
+      "newTime": "Choose a new time",
+      "confirmButton": "Confirm Reschedule",
+      "selectSlotFirst": "Please select a time slot first",
+      "successMessage": "Appointment successfully rescheduled!",
+      "cannotReschedule": "This appointment can no longer be rescheduled.",
+      "backToAppointments": "Back to my appointments",
+      "errors": {
+        "notFound": "Appointment not found.",
+        "unauthorized": "Not authorized.",
+        "cannotReschedule": "This appointment cannot be rescheduled.",
+        "rescheduleTooLate": "Rescheduling is only possible up to 24 hours before the appointment.",
+        "invalidSlot": "Invalid time slot.",
+        "slotUnavailable": "This time slot is no longer available.",
+        "unknown": "An error occurred. Please try again."
+      }
+    },
     "review": {
       "title": "Leave a review",
       "ratingLabel": "Rating",

@@ -120,9 +120,6 @@
     "locationDenied": "Standortzugriff verweigert. Bitte erlaube den Zugriff in deinen Browsereinstellungen.",
     "kmAway": "{distance} km entfernt",
     "clearLocation": "Standort entfernen",
-    "radiusLabel": "Umkreis",
-    "radiusAll": "Alle Entfernungen",
-    "radiusKm": "{radius} km",
     "availableToday": "Heute verfügbar",
     "categories": {
       "friseur": "Friseur",
@@ -154,7 +151,10 @@
       "topRated": "⭐ Top-bewertet",
       "popular": "🔥 Beliebt",
       "new": "✨ Neu"
-    }
+    },
+    "radiusLabel": "Umkreis",
+    "radiusAll": "Alle",
+    "radiusKm": "km"
   },
   "booking": {
     "selectTime": "Wähle einen Termin",
@@ -522,6 +522,26 @@
         "alreadyReviewed": "Du hast diesen Termin bereits bewertet",
         "saveFailed": "Speichern fehlgeschlagen"
       }
+    },
+    "reschedule": "Umbuchen",
+    "reschedulePage": {
+      "title": "Termin umbuchen",
+      "currentAppointment": "Aktueller Termin",
+      "newTime": "Neuen Termin wählen",
+      "confirmButton": "Termin umbuchen",
+      "selectSlotFirst": "Bitte zuerst einen Zeitslot wählen",
+      "successMessage": "Termin erfolgreich umgebucht!",
+      "cannotReschedule": "Dieser Termin kann nicht mehr umgebucht werden.",
+      "backToAppointments": "Zurück zu meinen Terminen",
+      "errors": {
+        "notFound": "Termin nicht gefunden.",
+        "unauthorized": "Nicht autorisiert.",
+        "cannotReschedule": "Dieser Termin kann nicht umgebucht werden.",
+        "rescheduleTooLate": "Umbuchungen sind nur bis 24 Stunden vor dem Termin möglich.",
+        "invalidSlot": "Ungültiger Zeitslot.",
+        "slotUnavailable": "Dieser Zeitslot ist leider nicht mehr verfügbar.",
+        "unknown": "Ein Fehler ist aufgetreten. Bitte versuche es erneut."
+      }
     }
   },
   "reviews": {
@@ -544,7 +564,6 @@
     "customerLabel": "Kunde",
     "serviceLabel": "Dienstleistung",
     "timeLabel": "Uhrzeit",
-    "phoneLabel": "Telefon",
     "statusLabel": "Status",
     "confirmSuccess": "Termin bestätigt.",
     "cancelSuccess": "Termin abgesagt.",
@@ -563,7 +582,8 @@
       "notFound": "Termin nicht gefunden",
       "invalidStatus": "Ungültiger Status für diese Aktion",
       "actionFailed": "Aktion fehlgeschlagen"
-    }
+    },
+    "phoneLabel": "Telefon"
   },
   "errors": {
     "notFound": "Seite nicht gefunden",
@@ -573,34 +593,34 @@
     "backHome": "Zur Startseite",
     "tryAgain": "Erneut versuchen"
   },
-  “profile”: {
-    “title”: “Mein Profil”,
-    “navLabel”: “Profil”,
-    “emailLabel”: “E-Mail”,
-    “fullNameLabel”: “Name”,
-    “personalInfoTitle”: “Persönliche Informationen”,
-    “phoneLabel”: “Telefonnummer”,
-    “phonePlaceholder”: “+49 123 456789”,
-    “phoneHint”: “Optional. Nur für deine Anbietenden sichtbar.”,
-    “saveSuccess”: “Profil gespeichert”,
-    “changePasswordTitle”: “Passwort ändern”,
-    “currentPasswordLabel”: “Aktuelles Passwort”,
-    “passwordChanged”: “Passwort erfolgreich geändert.”,
-    “deleteAccountTitle”: “Konto löschen”,
-    “deleteAccountDescription”: “Das Löschen deines Kontos kann nicht rückgängig gemacht werden. Bevorstehende Termine werden abgesagt und die Anbieter benachrichtigt. Deine persönlichen Daten werden gelöscht; abgeschlossene Termine bleiben anonymisiert in der Buchungshistorie der Anbieter erhalten.”,
-    “deleteAccountPasswordLabel”: “Aktuelles Passwort”,
-    “deleteAccountConfirmLabel”: “Tippe „löschen” zur Bestätigung”,
-    “deleteAccountConfirmPlaceholder”: “löschen”,
-    “deleteAccountButton”: “Konto unwiderruflich löschen”,
-    “errors”: {
-      “validationError”: “Bitte überprüfe deine Eingaben.”,
-      “saveFailed”: “Speichern fehlgeschlagen. Bitte versuche es später erneut.”,
-      “unauthorized”: “Du bist nicht berechtigt, diese Aktion auszuführen.”,
-      “currentPasswordWrong”: “Das aktuelle Passwort ist falsch”,
-      “passwordRequired”: “Bitte gib dein Passwort ein”,
-      “confirmationRequired”: “Bitte tippe „löschen” zur Bestätigung”,
-      “deleteFailed”: “Konto konnte nicht gelöscht werden. Bitte versuche es erneut.”
-    }
+  "profile": {
+    "title": "Mein Profil",
+    "navLabel": "Profil",
+    "emailLabel": "E-Mail",
+    "fullNameLabel": "Name",
+    "saveSuccess": "Profil gespeichert",
+    "changePasswordTitle": "Passwort ändern",
+    "currentPasswordLabel": "Aktuelles Passwort",
+    "passwordChanged": "Passwort erfolgreich geändert.",
+    "deleteAccountTitle": "Konto löschen",
+    "deleteAccountDescription": "Das Löschen deines Kontos kann nicht rückgängig gemacht werden. Bevorstehende Termine werden abgesagt und die Anbieter benachrichtigt. Deine persönlichen Daten werden gelöscht; abgeschlossene Termine bleiben anonymisiert in der Buchungshistorie der Anbieter erhalten.",
+    "deleteAccountConfirmLabel": "Tippe „löschen“ zur Bestätigung",
+    "deleteAccountConfirmPlaceholder": "löschen",
+    "deleteAccountButton": "Konto unwiderruflich löschen",
+    "errors": {
+      "validationError": "Bitte überprüfe deine Eingaben",
+      "unauthorized": "Nicht angemeldet",
+      "saveFailed": "Speichern fehlgeschlagen",
+      "currentPasswordWrong": "Das aktuelle Passwort ist falsch",
+      "confirmationRequired": "Bitte tippe „löschen“ zur Bestätigung",
+      "deleteFailed": "Konto konnte nicht gelöscht werden. Bitte versuche es erneut.",
+      "passwordRequired": "Bitte gib dein aktuelles Passwort ein."
+    },
+    "personalInfoTitle": "Persönliche Informationen",
+    "phoneLabel": "Telefonnummer",
+    "phonePlaceholder": "+49 123 456789",
+    "phoneHint": "Optional. Nur für deine Anbietenden sichtbar.",
+    "deleteAccountPasswordLabel": "Aktuelles Passwort"
   },
   "auth": {
     "email": "E-Mail",
