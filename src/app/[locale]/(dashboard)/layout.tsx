@@ -6,6 +6,7 @@ import { createClient } from "@/lib/supabase/server";
 import { getCurrentProvider } from "@/lib/supabase/queries";
 import { DashboardSidebar } from "./DashboardSidebar";
 import { NewBookingNotifier } from "@/components/features/NewBookingNotifier";
+import { sendProviderWelcome } from "@/lib/email";
 
 interface DashboardLayoutProps {
   children: React.ReactNode;
@@ -51,6 +52,38 @@ export default async function DashboardLayout({
       .eq("provider_id", provider.id)
       .eq("status", "pending");
     pendingCount = count ?? 0;
+  }
+
+  // Fire-and-forget: send welcome email on first dashboard visit
+  if (provider && provider.welcome_email_sent_at === null) {
+    void (async () => {
+      try {
+        // Mark first — prevents duplicate sends if the layout renders twice
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        await (supabase as any)
+          .from("providers")
+          .update({ welcome_email_sent_at: new Date().toISOString() })
+          .eq("id", provider.id);
+
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const { data: profileRow } = await (supabase as any)
+          .from("profiles")
+          .select("email")
+          .eq("id", provider.profile_id)
+          .single();
+
+        const providerEmail = (profileRow as { email: string } | null)?.email;
+        if (providerEmail) {
+          const dashboardUrl = `${process.env.NEXT_PUBLIC_APP_URL ?? ""}/de/dashboard`;
+          await sendProviderWelcome(providerEmail, {
+            businessName: provider.business_name,
+            dashboardUrl,
+          });
+        }
+      } catch (err) {
+        console.error("[welcome-email] Failed to send provider welcome email:", err);
+      }
+    })();
   }
 
   const t = await getTranslations("dashboard");

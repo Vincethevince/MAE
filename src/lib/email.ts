@@ -770,3 +770,35 @@ export async function sendProviderRescheduleAlert(
 
   await sendEmail({ to, subject, html });
 }
+
+// ─── Provider onboarding ──────────────────────────────────────────────────────
+
+/**
+ * Sent once when a provider accesses their dashboard for the first time.
+ * German-only — providers are German-market-focused.
+ */
+export async function sendProviderWelcome(
+  to: string,
+  details: {
+    businessName: string;
+    dashboardUrl: string;
+  }
+): Promise<void> {
+  const subject = `Willkommen bei MAE – ${sanitizeSubject(details.businessName)}`;
+  const safeName = escapeHtml(details.businessName);
+  const html = baseTemplate(`
+    <h2 style="margin:0 0 8px;font-size:20px;font-weight:700;color:#18181b;">Herzlich willkommen bei MAE!</h2>
+    <p style="margin:0 0 16px;font-size:14px;color:#3f3f46;">
+      Dein Anbieterprofil <strong>${safeName}</strong> ist jetzt aktiv. Folge diesen Schritten, um deinen ersten Termin zu erhalten:
+    </p>
+    <ol style="margin:0 0 20px;padding-left:20px;font-size:14px;color:#3f3f46;line-height:1.8;">
+      <li style="margin-bottom:8px;"><strong>Profil vervollständigen</strong> — Füge dein Logo, eine Beschreibung und deine Adresse hinzu</li>
+      <li style="margin-bottom:8px;"><strong>Dienstleistungen anlegen</strong> — Definiere deine Angebote mit Preis und Dauer</li>
+      <li style="margin-bottom:8px;"><strong>Verfügbarkeit eintragen</strong> — Lege deine Öffnungszeiten fest</li>
+      <li style="margin-bottom:8px;"><strong>Sichtbar werden</strong> — Dein Profil erscheint in der Suche, sobald du mindestens eine Dienstleistung und Verfügbarkeit hast</li>
+    </ol>
+    ${primaryButton("Zum Dashboard", details.dashboardUrl)}
+  `);
+
+  await sendEmail({ to, subject, html });
+}
