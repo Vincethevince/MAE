@@ -39,7 +39,7 @@ export default async function SettingsPage({ params }: SettingsPageProps) {
           <p className="text-muted-foreground mt-1">{provider.business_name}</p>
         </div>
         <Link
-          href={`/${locale}/provider/${provider.id}`}
+          href={`/${locale}/provider/${provider.slug ?? provider.id}`}
           target="_blank"
           rel="noopener noreferrer"
           className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors shrink-0 mt-1"
@@ -59,6 +59,7 @@ export default async function SettingsPage({ params }: SettingsPageProps) {
           category: provider.category,
           description: provider.description,
           website: provider.website,
+          slug: provider.slug,
         }}
       />
     </div>

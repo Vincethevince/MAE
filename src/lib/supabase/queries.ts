@@ -196,26 +196,29 @@ export async function searchProviders(
     }));
 }
 
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
 export async function getProviderById(
   supabase: TypedSupabaseClient,
-  id: string
+  idOrSlug: string
 ): Promise<ProviderWithDetails | null> {
-  const { data: provider } = await db(supabase)
-    .from("providers")
-    .select("*")
-    .eq("id", id)
-    .eq("is_active", true)
-    .single();
+  const query = db(supabase).from("providers").select("*").eq("is_active", true);
+  const { data: provider } = await (
+    UUID_RE.test(idOrSlug)
+      ? query.eq("id", idOrSlug)
+      : query.eq("slug", idOrSlug)
+  ).single();
 
   if (!provider) return null;
 
+  const providerRow = provider as ProviderRow;
   const [services, availability] = await Promise.all([
-    getProviderServices(supabase, id),
-    getProviderAvailability(supabase, id),
+    getProviderServices(supabase, providerRow.id),
+    getProviderAvailability(supabase, providerRow.id),
   ]);
 
   return {
-    ...(provider as ProviderRow),
+    ...providerRow,
     services,
     availability,
   };

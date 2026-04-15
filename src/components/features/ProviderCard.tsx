@@ -50,7 +50,7 @@ export function ProviderCard({
   const badges = getProviderBadges(provider);
 
   return (
-    <Link href={`/${locale}/provider/${provider.id}`} className="block group">
+    <Link href={`/${locale}/provider/${provider.slug ?? provider.id}`} className="block group">
       <Card className="h-full transition-shadow group-hover:shadow-md">
         <CardContent className="p-5">
           <div className="flex items-start justify-between gap-2 mb-3">

@@ -56,16 +56,16 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
   const { data: rawProviders } = await supabase
     .from("providers")
-    .select("id, updated_at")
+    .select("id, slug, updated_at")
     .eq("is_active", true)
     .order("updated_at", { ascending: false })
     .limit(1000); // Cap at 1000 for sitemap performance
 
-  const providers = rawProviders as Array<{ id: string; updated_at: string }> | null;
+  const providers = rawProviders as Array<{ id: string; slug: string | null; updated_at: string }> | null;
 
   const providerRoutes: MetadataRoute.Sitemap =
     (providers ?? []).map((p) => ({
-      url: `${APP_URL}/de/provider/${p.id}`,
+      url: `${APP_URL}/de/provider/${p.slug ?? p.id}`,
       lastModified: p.updated_at ? new Date(p.updated_at) : undefined,
       changeFrequency: "weekly" as const,
       priority: 0.7,

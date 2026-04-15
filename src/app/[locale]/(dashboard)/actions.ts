@@ -1054,6 +1054,71 @@ export async function saveProviderNote(formData: FormData): Promise<{ error: str
   return { success: true };
 }
 
+const SLUG_PATTERN = /^[a-z0-9][a-z0-9-]{1,48}[a-z0-9]$|^[a-z0-9]{3,50}$/;
+
+export async function updateProviderSlug(
+  formData: FormData
+): Promise<ActionResult> {
+  const slug = formData.get("slug")?.toString().trim() ?? "";
+
+  if (!SLUG_PATTERN.test(slug)) {
+    return { error: "slugInvalid" };
+  }
+
+  const supabase = await createClient();
+  const db = await queryDb(supabase);
+
+  const {
+    data: { user },
+    error: authError,
+  } = await supabase.auth.getUser();
+
+  if (authError || !user) {
+    return { error: "unauthorized" };
+  }
+
+  const { data: profileData } = await db
+    .from("profiles")
+    .select("role")
+    .eq("id", user.id)
+    .single();
+
+  const profile = profileData as { role: string } | null;
+  if (!profile || profile.role !== "provider") {
+    return { error: "unauthorized" };
+  }
+
+  const { data: existingRaw } = await db
+    .from("providers")
+    .select("id")
+    .eq("profile_id", user.id)
+    .single();
+
+  const existing = existingRaw as { id: string } | null;
+  if (!existing) {
+    return { error: "providerNotFound" };
+  }
+
+  const { error: updateError } = await db
+    .from("providers")
+    .update({ slug })
+    .eq("id", existing.id)
+    .eq("profile_id", user.id);
+
+  if (updateError) {
+    // Unique constraint violation
+    if ((updateError as { code?: string }).code === "23505") {
+      return { error: "slugTaken" };
+    }
+    return { error: "saveFailed" };
+  }
+
+  revalidatePath(`/provider/${slug}`);
+  revalidatePath(`/provider/${existing.id}`);
+
+  return { success: true };
+}
+
 export async function saveReviewReply(formData: FormData): Promise<void> {
   "use server";
   const reviewId = formData.get("reviewId");

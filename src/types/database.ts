@@ -62,6 +62,7 @@ export interface Database {
           created_at: string;
           updated_at: string;
           welcome_email_sent_at: string | null;
+          slug: string | null;
         };
         Insert: {
           id?: string;
@@ -82,6 +83,7 @@ export interface Database {
           created_at?: string;
           updated_at?: string;
           welcome_email_sent_at?: string | null;
+          slug?: string | null;
         };
         Update: {
           business_name?: string;
@@ -97,6 +99,7 @@ export interface Database {
           is_active?: boolean;
           updated_at?: string;
           welcome_email_sent_at?: string | null;
+          slug?: string | null;
         };
       };
       employees: {

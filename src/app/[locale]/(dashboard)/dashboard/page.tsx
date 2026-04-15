@@ -229,10 +229,10 @@ export default async function DashboardPage({ params }: DashboardPageProps) {
         <CardContent>
           <div className="flex items-center gap-2">
             <code className="flex-1 rounded-md bg-muted px-3 py-2 text-sm font-mono truncate select-all">
-              {`${process.env.NEXT_PUBLIC_APP_URL ?? "https://makeappointmentseasier.com"}/${locale}/provider/${provider.id}`}
+              {`${process.env.NEXT_PUBLIC_APP_URL ?? "https://makeappointmentseasier.com"}/${locale}/provider/${provider.slug ?? provider.id}`}
             </code>
             <CopyLinkButton
-              url={`${process.env.NEXT_PUBLIC_APP_URL ?? "https://makeappointmentseasier.com"}/${locale}/provider/${provider.id}`}
+              url={`${process.env.NEXT_PUBLIC_APP_URL ?? "https://makeappointmentseasier.com"}/${locale}/provider/${provider.slug ?? provider.id}`}
               label={t("overview.copyLink")}
               copiedLabel={t("overview.linkCopied")}
             />

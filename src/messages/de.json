@@ -309,6 +309,10 @@
       "categoryNote": "Die Kategorie kann nach der Registrierung nicht mehr geändert werden",
       "saveSuccess": "Änderungen erfolgreich gespeichert",
       "viewPublicProfile": "Öffentliches Profil ansehen",
+      "slugLabel": "Profillink",
+      "slugHint": "Nur Kleinbuchstaben, Zahlen und Bindestriche",
+      "slugPlaceholder": "mein-friseursalon",
+      "slugPreviewLabel": "Dein Profillink:",
       "fields": {
         "businessName": "Unternehmensname",
         "category": "Kategorie",
@@ -323,7 +327,9 @@
         "validationError": "Bitte überprüfe deine Eingaben",
         "unauthorized": "Keine Berechtigung",
         "saveFailed": "Speichern fehlgeschlagen",
-        "providerNotFound": "Anbieter nicht gefunden"
+        "providerNotFound": "Anbieter nicht gefunden",
+        "slugInvalid": "Ungültiger Profillink. Nur Kleinbuchstaben, Zahlen und Bindestriche (3–50 Zeichen).",
+        "slugTaken": "Dieser Profillink ist bereits vergeben."
       }
     },
     "services": {

@@ -309,6 +309,10 @@
       "categoryNote": "The category cannot be changed after registration",
       "saveSuccess": "Changes saved successfully",
       "viewPublicProfile": "View public profile",
+      "slugLabel": "Profile link",
+      "slugHint": "Lowercase letters, numbers and hyphens only",
+      "slugPlaceholder": "my-hair-salon",
+      "slugPreviewLabel": "Your profile link:",
       "fields": {
         "businessName": "Business name",
         "category": "Category",
@@ -323,7 +327,9 @@
         "validationError": "Please check your input",
         "unauthorized": "Not authorized",
         "saveFailed": "Failed to save",
-        "providerNotFound": "Provider not found"
+        "providerNotFound": "Provider not found",
+        "slugInvalid": "Invalid profile link. Use only lowercase letters, numbers and hyphens (3–50 characters).",
+        "slugTaken": "This profile link is already taken."
       }
     },
     "services": {

@@ -15,6 +15,7 @@ import { SaveProviderButton } from "@/components/features/SaveProviderButton";
 
 const UUID_REGEX =
   /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+const SLUG_REGEX = /^[a-z0-9][a-z0-9-]{1,48}[a-z0-9]$/;
 
 interface ProviderDetailPageProps {
   params: Promise<{ locale: string; id: string }>;
@@ -30,7 +31,7 @@ export async function generateMetadata({
   params,
 }: ProviderDetailPageProps): Promise<Metadata> {
   const { id } = await params;
-  if (!UUID_REGEX.test(id)) return {};
+  if (!UUID_REGEX.test(id) && !SLUG_REGEX.test(id)) return {};
 
   const provider = await getProvider(id);
   if (!provider) return {};
@@ -84,7 +85,7 @@ function safeWebsiteUrl(url: string | null): string | null {
 export default async function ProviderDetailPage({ params }: ProviderDetailPageProps) {
   const { locale, id } = await params;
 
-  if (!UUID_REGEX.test(id)) {
+  if (!UUID_REGEX.test(id) && !SLUG_REGEX.test(id)) {
     notFound();
   }
 
