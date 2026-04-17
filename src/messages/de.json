@@ -649,6 +649,17 @@
       "memberSince": "Dabei seit",
       "favoriteProvider": "Lieblings-Anbieter",
       "noBookingsYet": "Noch keine Buchungen"
+    },
+    "exportData": {
+      "title": "Meine Daten herunterladen",
+      "description": "Lade alle deine bei MAE gespeicherten Daten als JSON-Datei herunter (DSGVO Art. 20). Bitte bestätige mit deinem Passwort.",
+      "passwordLabel": "Passwort",
+      "passwordPlaceholder": "Dein aktuelles Passwort",
+      "submitButton": "Daten exportieren",
+      "loadingButton": "Wird vorbereitet …",
+      "successMessage": "Deine Daten wurden erfolgreich heruntergeladen.",
+      "errorWrongPassword": "Falsches Passwort.",
+      "errorGeneric": "Export fehlgeschlagen. Bitte versuche es erneut."
     }
   },
   "auth": {

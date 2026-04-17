@@ -649,6 +649,17 @@
       "memberSince": "Member since",
       "favoriteProvider": "Favourite provider",
       "noBookingsYet": "No bookings yet"
+    },
+    "exportData": {
+      "title": "Download my data",
+      "description": "Download all your personal data stored on MAE as a JSON file (GDPR Art. 20). Please confirm with your password.",
+      "passwordLabel": "Password",
+      "passwordPlaceholder": "Your current password",
+      "submitButton": "Export my data",
+      "loadingButton": "Preparing …",
+      "successMessage": "Your data has been downloaded successfully.",
+      "errorWrongPassword": "Incorrect password.",
+      "errorGeneric": "Export failed. Please try again."
     }
   },
   "auth": {

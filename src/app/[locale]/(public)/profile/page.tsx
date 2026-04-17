@@ -6,6 +6,7 @@ import { getCustomerStats } from "@/lib/supabase/queries";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ProfileForm } from "./ProfileForm";
 import { ChangePasswordForm } from "./ChangePasswordForm";
+import { ExportDataForm } from "./ExportDataForm";
 import { deleteAccount } from "./actions";
 
 interface ProfilePageProps {
@@ -127,6 +128,18 @@ export default async function ProfilePage({ params }: ProfilePageProps) {
 
       <div className="mt-6">
         <ChangePasswordForm />
+      </div>
+
+      <div className="mt-6">
+        <div className="rounded-lg border border-border p-6">
+          <h2 className="mb-2 text-base font-semibold">
+            {t("exportData.title")}
+          </h2>
+          <p className="mb-4 text-sm text-muted-foreground">
+            {t("exportData.description")}
+          </p>
+          <ExportDataForm />
+        </div>
       </div>
 
       <div className="mt-10">
