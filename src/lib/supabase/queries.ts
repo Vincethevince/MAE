@@ -1177,3 +1177,93 @@ export async function getProviderRevenueHistory(
 
   return result;
 }
+
+// ---------------------------------------------------------------------------
+// Peak hours / peak days analytics
+// ---------------------------------------------------------------------------
+
+export interface PeakHourData {
+  hour: number; // 0-23
+  bookingCount: number;
+}
+
+export interface PeakDayData {
+  dayOfWeek: number; // 0=Sunday, 1=Monday, ..., 6=Saturday
+  bookingCount: number;
+}
+
+export interface ProviderPeakStats {
+  peakHours: PeakHourData[]; // 24 entries, one per hour (0-23)
+  peakDays: PeakDayData[]; // 7 entries, one per day (0-6)
+}
+
+export async function getProviderPeakStats(
+  supabase: TypedSupabaseClient,
+  providerId: string
+): Promise<ProviderPeakStats> {
+  function getHourInBerlin(isoString: string): number {
+    const d = new Date(isoString);
+    const berlinHour = parseInt(
+      new Intl.DateTimeFormat("de-DE", {
+        hour: "2-digit",
+        hour12: false,
+        timeZone: "Europe/Berlin",
+      }).format(d),
+      10
+    );
+    return isNaN(berlinHour) ? d.getUTCHours() : berlinHour % 24;
+  }
+
+  function getDayOfWeekInBerlin(isoString: string): number {
+    const d = new Date(isoString);
+    const parts = new Intl.DateTimeFormat("en-US", {
+      weekday: "short",
+      timeZone: "Europe/Berlin",
+    }).formatToParts(d);
+    const weekday = parts.find((p) => p.type === "weekday")?.value;
+    const MAP: Record<string, number> = {
+      Sun: 0,
+      Mon: 1,
+      Tue: 2,
+      Wed: 3,
+      Thu: 4,
+      Fri: 5,
+      Sat: 6,
+    };
+    return MAP[weekday ?? "Mon"] ?? 1;
+  }
+
+  const ninetyDaysAgo = new Date(Date.now() - 90 * 24 * 60 * 60 * 1000);
+
+  const { data } = await db(supabase)
+    .from("appointments")
+    .select("start_time")
+    .eq("provider_id", providerId)
+    .neq("status", "cancelled")
+    .gte("start_time", ninetyDaysAgo.toISOString());
+
+  const appts = (data ?? []) as { start_time: string }[];
+
+  // Accumulate counts
+  const hourCounts = new Array<number>(24).fill(0);
+  const dayCounts = new Array<number>(7).fill(0);
+
+  for (const a of appts) {
+    const h = getHourInBerlin(a.start_time);
+    const dow = getDayOfWeekInBerlin(a.start_time);
+    if (h >= 0 && h < 24) hourCounts[h]++;
+    if (dow >= 0 && dow < 7) dayCounts[dow]++;
+  }
+
+  const peakHours: PeakHourData[] = hourCounts.map((bookingCount, hour) => ({
+    hour,
+    bookingCount,
+  }));
+
+  const peakDays: PeakDayData[] = dayCounts.map((bookingCount, dayOfWeek) => ({
+    dayOfWeek,
+    bookingCount,
+  }));
+
+  return { peakHours, peakDays };
+}

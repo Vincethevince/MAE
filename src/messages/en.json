@@ -400,7 +400,20 @@
       "noData": "No data yet for this month",
       "exportCsv": "Export appointments (CSV)",
       "exportCsvLoading": "Exporting…",
-      "revenueTrend": "Revenue trend (6 months)"
+      "revenueTrend": "Revenue trend (6 months)",
+      "peakHours": "Peak hours (last 90 days)",
+      "peakHoursSubtitle": "Bookings by hour of day",
+      "peakDays": "Peak days (last 90 days)",
+      "peakDaysSubtitle": "Bookings by day of week",
+      "day": {
+        "sun": "Sun",
+        "mon": "Mon",
+        "tue": "Tue",
+        "wed": "Wed",
+        "thu": "Thu",
+        "fri": "Fri",
+        "sat": "Sat"
+      }
     },
     "customers": {
       "title": "Customers",

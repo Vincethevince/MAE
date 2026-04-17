@@ -400,7 +400,20 @@
       "noData": "Noch keine Daten für diesen Monat",
       "exportCsv": "Termine exportieren (CSV)",
       "exportCsvLoading": "Wird exportiert…",
-      "revenueTrend": "Umsatzentwicklung (6 Monate)"
+      "revenueTrend": "Umsatzentwicklung (6 Monate)",
+      "peakHours": "Stoßzeiten (letzte 90 Tage)",
+      "peakHoursSubtitle": "Buchungen nach Tageszeit",
+      "peakDays": "Stoßtage (letzte 90 Tage)",
+      "peakDaysSubtitle": "Buchungen nach Wochentag",
+      "day": {
+        "sun": "So",
+        "mon": "Mo",
+        "tue": "Di",
+        "wed": "Mi",
+        "thu": "Do",
+        "fri": "Fr",
+        "sat": "Sa"
+      }
     },
     "customers": {
       "title": "Kunden",

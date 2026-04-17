@@ -4,10 +4,13 @@ import { getTranslations } from "next-intl/server";
 import { createClient } from "@/lib/supabase/server";
 import { ExportAppointmentsButton } from "@/components/features/ExportAppointmentsButton";
 import { RevenueBarChart } from "@/components/features/RevenueBarChart";
+import { PeakHoursChart } from "@/components/features/PeakHoursChart";
+import { PeakDaysChart } from "@/components/features/PeakDaysChart";
 import {
   getCurrentProvider,
   getProviderMonthStats,
   getProviderRevenueHistory,
+  getProviderPeakStats,
 } from "@/lib/supabase/queries";
 import type { ProviderMonthStats } from "@/lib/supabase/queries";
 import {
@@ -62,9 +65,10 @@ export default async function AnalyticsPage({ params }: AnalyticsPageProps) {
     redirect(`/${locale}/dashboard/onboarding`);
   }
 
-  const [stats, revenueHistory, t, tStatus] = await Promise.all([
+  const [stats, revenueHistory, peakStats, t, tStatus] = await Promise.all([
     getProviderMonthStats(supabase, provider.id),
     getProviderRevenueHistory(supabase, provider.id, 6),
+    getProviderPeakStats(supabase, provider.id),
     getTranslations("dashboard.analytics"),
     getTranslations("appointments"),
   ]);
@@ -162,6 +166,43 @@ export default async function AnalyticsPage({ params }: AnalyticsPageProps) {
           <RevenueBarChart
             data={revenueHistory}
             locale={locale}
+            noDataLabel={t("noData")}
+          />
+        </CardContent>
+      </Card>
+
+      {/* Peak hours */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-base">{t("peakHours")}</CardTitle>
+          <p className="text-sm text-muted-foreground">{t("peakHoursSubtitle")}</p>
+        </CardHeader>
+        <CardContent>
+          <PeakHoursChart
+            data={peakStats.peakHours}
+            noDataLabel={t("noData")}
+          />
+        </CardContent>
+      </Card>
+
+      {/* Peak days */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-base">{t("peakDays")}</CardTitle>
+          <p className="text-sm text-muted-foreground">{t("peakDaysSubtitle")}</p>
+        </CardHeader>
+        <CardContent>
+          <PeakDaysChart
+            data={peakStats.peakDays}
+            dayLabels={[
+              t("day.sun"),
+              t("day.mon"),
+              t("day.tue"),
+              t("day.wed"),
+              t("day.thu"),
+              t("day.fri"),
+              t("day.sat"),
+            ]}
             noDataLabel={t("noData")}
           />
         </CardContent>
