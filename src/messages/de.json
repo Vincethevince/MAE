@@ -330,6 +330,15 @@
         "providerNotFound": "Anbieter nicht gefunden",
         "slugInvalid": "Ungültiger Profillink. Nur Kleinbuchstaben, Zahlen und Bindestriche (3–50 Zeichen).",
         "slugTaken": "Dieser Profillink ist bereits vergeben."
+      },
+      "notifications": {
+        "title": "E-Mail-Benachrichtigungen",
+        "description": "Verwalte deine E-Mail-Benachrichtigungen",
+        "weeklySummaryLabel": "Wöchentliche Zusammenfassung jeden Montag erhalten",
+        "weeklySummaryDescription": "Erhalte jeden Montag eine Übersicht der Buchungen und des Umsatzes der letzten Woche.",
+        "saveButton": "Speichern",
+        "savedFeedback": "Einstellungen gespeichert",
+        "saveFailed": "Speichern fehlgeschlagen"
       }
     },
     "services": {

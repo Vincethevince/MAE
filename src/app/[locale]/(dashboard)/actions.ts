@@ -1119,6 +1119,48 @@ export async function updateProviderSlug(
   return { success: true };
 }
 
+export async function updateWeeklySummaryOptIn(
+  formData: FormData
+): Promise<{ error: string } | { success: true }> {
+  const optIn = formData.get("weekly_summary_opt_in") === "true";
+
+  const supabase = await createClient();
+  const {
+    data: { user },
+    error: authError,
+  } = await supabase.auth.getUser();
+
+  if (authError || !user) {
+    return { error: "unauthorized" };
+  }
+
+  const db = await queryDb(supabase);
+
+  const { data: providerData } = await db
+    .from("providers")
+    .select("id")
+    .eq("profile_id", user.id)
+    .single();
+
+  const provider = providerData as { id: string } | null;
+  if (!provider) {
+    return { error: "providerNotFound" };
+  }
+
+  const { error: updateError } = await db
+    .from("providers")
+    .update({ weekly_summary_opt_in: optIn })
+    .eq("id", provider.id)
+    .eq("profile_id", user.id);
+
+  if (updateError) {
+    return { error: "saveFailed" };
+  }
+
+  revalidatePath("/dashboard/settings");
+  return { success: true };
+}
+
 export async function saveReviewReply(formData: FormData): Promise<void> {
   "use server";
   const reviewId = formData.get("reviewId");

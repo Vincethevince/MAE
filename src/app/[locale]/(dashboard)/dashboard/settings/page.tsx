@@ -60,6 +60,7 @@ export default async function SettingsPage({ params }: SettingsPageProps) {
           description: provider.description,
           website: provider.website,
           slug: provider.slug,
+          weeklySummaryOptIn: (provider as unknown as { weekly_summary_opt_in: boolean }).weekly_summary_opt_in ?? true,
         }}
       />
     </div>

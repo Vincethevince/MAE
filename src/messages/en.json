@@ -330,6 +330,15 @@
         "providerNotFound": "Provider not found",
         "slugInvalid": "Invalid profile link. Use only lowercase letters, numbers and hyphens (3–50 characters).",
         "slugTaken": "This profile link is already taken."
+      },
+      "notifications": {
+        "title": "Email Notifications",
+        "description": "Manage your email notification preferences",
+        "weeklySummaryLabel": "Receive weekly summary every Monday",
+        "weeklySummaryDescription": "Get a Monday overview of last week's bookings and revenue.",
+        "saveButton": "Save",
+        "savedFeedback": "Settings saved",
+        "saveFailed": "Failed to save settings"
       }
     },
     "services": {

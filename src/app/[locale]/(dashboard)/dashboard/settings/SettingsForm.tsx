@@ -3,7 +3,7 @@
 import { useTransition, useState } from "react";
 import { useTranslations } from "next-intl";
 
-import { createOrUpdateProvider, updateProviderSlug } from "@/app/[locale]/(dashboard)/actions";
+import { createOrUpdateProvider, updateProviderSlug, updateWeeklySummaryOptIn } from "@/app/[locale]/(dashboard)/actions";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -23,6 +23,7 @@ interface ProviderData {
   description: string | null;
   website: string | null;
   slug: string | null;
+  weeklySummaryOptIn: boolean;
 }
 
 interface SettingsFormProps {
@@ -40,6 +41,11 @@ export function SettingsForm({ provider }: SettingsFormProps) {
   const [slugError, setSlugError] = useState<string | null>(null);
   const [slugSuccess, setSlugSuccess] = useState(false);
   const [slugValue, setSlugValue] = useState(provider.slug ?? "");
+
+  const [isNotifPending, startNotifTransition] = useTransition();
+  const [notifError, setNotifError] = useState<string | null>(null);
+  const [notifSuccess, setNotifSuccess] = useState(false);
+  const [weeklySummaryOptIn, setWeeklySummaryOptIn] = useState(provider.weeklySummaryOptIn);
 
   const handleSubmit = (formData: FormData) => {
     // Pass category to satisfy schema validation; the server action ignores it
@@ -68,6 +74,21 @@ export function SettingsForm({ provider }: SettingsFormProps) {
         setSlugError(t(`errors.${result.error}`));
       } else {
         setSlugSuccess(true);
+      }
+    });
+  };
+
+  const handleNotifSubmit = (formData: FormData) => {
+    setNotifError(null);
+    setNotifSuccess(false);
+    formData.set("weekly_summary_opt_in", String(weeklySummaryOptIn));
+
+    startNotifTransition(async () => {
+      const result = await updateWeeklySummaryOptIn(formData);
+      if ("error" in result) {
+        setNotifError(t(`notifications.saveFailed`));
+      } else {
+        setNotifSuccess(true);
       }
     });
   };
@@ -227,6 +248,45 @@ export function SettingsForm({ provider }: SettingsFormProps) {
 
             <Button type="submit" disabled={isSlugPending}>
               {isSlugPending ? tCommon("loading") : tCommon("save")}
+            </Button>
+          </form>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>{t("notifications.title")}</CardTitle>
+          <CardDescription>{t("notifications.description")}</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <form action={handleNotifSubmit} className="space-y-4">
+            {notifError && (
+              <p className="text-sm text-destructive">{notifError}</p>
+            )}
+            {notifSuccess && (
+              <p className="text-sm text-green-600">{t("notifications.savedFeedback")}</p>
+            )}
+
+            <div className="flex items-start gap-3">
+              <input
+                type="checkbox"
+                id="weeklySummary"
+                checked={weeklySummaryOptIn}
+                onChange={(e) => setWeeklySummaryOptIn(e.target.checked)}
+                className="mt-0.5 h-4 w-4 rounded border-input accent-foreground cursor-pointer"
+              />
+              <div className="space-y-0.5">
+                <Label htmlFor="weeklySummary" className="cursor-pointer">
+                  {t("notifications.weeklySummaryLabel")}
+                </Label>
+                <p className="text-xs text-muted-foreground">
+                  {t("notifications.weeklySummaryDescription")}
+                </p>
+              </div>
+            </div>
+
+            <Button type="submit" disabled={isNotifPending}>
+              {isNotifPending ? tCommon("loading") : t("notifications.saveButton")}
             </Button>
           </form>
         </CardContent>

@@ -802,3 +802,104 @@ export async function sendProviderWelcome(
 
   await sendEmail({ to, subject, html });
 }
+
+// ─── Provider weekly summary ──────────────────────────────────────────────────
+
+function formatEur(cents: number): string {
+  return (cents / 100).toLocaleString("de-DE", {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  });
+}
+
+export async function sendProviderWeeklySummary(
+  to: string,
+  details: {
+    businessName: string;
+    weekStart: Date;
+    weekEnd: Date;
+    bookingCount: number;
+    completedCount: number;
+    revenueCents: number;
+    reviewCount: number;
+    averageRating: number | null;
+    noShowCount: number;
+    topServiceName: string | null;
+    settingsUrl: string;
+    dashboardUrl: string;
+  }
+): Promise<void> {
+  const formatDay = (d: Date): string =>
+    d.toLocaleDateString("de-DE", {
+      day: "numeric",
+      month: "long",
+      timeZone: "UTC",
+    });
+
+  const startLabel = formatDay(details.weekStart);
+  const endLabel = formatDay(details.weekEnd);
+  const dateRange = `${startLabel} – ${endLabel}`;
+
+  const subject = sanitizeSubject(`Deine MAE-Wochenübersicht: ${dateRange}`);
+  const safeName = escapeHtml(details.businessName);
+
+  const statsRows = `
+    <tr>
+      <td style="padding:6px 0;font-size:13px;color:#71717a;width:180px;vertical-align:top;">Buchungen</td>
+      <td style="padding:6px 0;font-size:13px;font-weight:600;color:#18181b;">${details.bookingCount}</td>
+    </tr>
+    <tr>
+      <td style="padding:6px 0;font-size:13px;color:#71717a;vertical-align:top;">Abgeschlossen</td>
+      <td style="padding:6px 0;font-size:13px;font-weight:600;color:#18181b;">${details.completedCount}</td>
+    </tr>
+    <tr>
+      <td style="padding:6px 0;font-size:13px;color:#71717a;vertical-align:top;">Umsatz</td>
+      <td style="padding:6px 0;font-size:13px;font-weight:600;color:#18181b;">${formatEur(details.revenueCents)} €</td>
+    </tr>
+    ${
+      details.reviewCount > 0
+        ? `<tr>
+      <td style="padding:6px 0;font-size:13px;color:#71717a;vertical-align:top;">Neue Bewertungen</td>
+      <td style="padding:6px 0;font-size:13px;font-weight:600;color:#18181b;">${details.reviewCount}${details.averageRating !== null ? ` (Ø ${details.averageRating.toFixed(1).replace(".", ",")} Sterne)` : ""}</td>
+    </tr>`
+        : ""
+    }
+    ${
+      details.noShowCount > 0
+        ? `<tr>
+      <td style="padding:6px 0;font-size:13px;color:#71717a;vertical-align:top;">Nicht erschienen</td>
+      <td style="padding:6px 0;font-size:13px;font-weight:600;color:#18181b;">${details.noShowCount}</td>
+    </tr>`
+        : ""
+    }
+    ${
+      details.topServiceName !== null
+        ? `<tr>
+      <td style="padding:6px 0;font-size:13px;color:#71717a;vertical-align:top;">Top-Dienstleistung</td>
+      <td style="padding:6px 0;font-size:13px;font-weight:600;color:#18181b;">${escapeHtml(details.topServiceName)}</td>
+    </tr>`
+        : ""
+    }
+  `;
+
+  const html = baseTemplate(`
+    <h2 style="margin:0 0 8px;font-size:20px;font-weight:700;color:#18181b;">Deine Wochenübersicht</h2>
+    <p style="margin:0 0 20px;font-size:14px;color:#3f3f46;">
+      Hallo ${safeName}, hier ist deine Wochenübersicht für den ${escapeHtml(dateRange)}.
+    </p>
+    <table style="width:100%;background:#f9fafb;border-radius:6px;border:1px solid #e4e4e7;border-collapse:collapse;margin:0 0 24px;">
+      <tr><td style="padding:16px 20px;">
+        <table style="width:100%;border-collapse:collapse;">
+          ${statsRows}
+        </table>
+      </td></tr>
+    </table>
+    ${primaryButton("Zum Dashboard", details.dashboardUrl)}
+    <p style="margin:24px 0 0;font-size:12px;color:#71717a;">
+      Du erhältst diese E-Mail, weil du in deinen Einstellungen die Wochenübersicht aktiviert hast.
+      <a href="${escapeHtml(details.settingsUrl)}" style="color:#71717a;">Hier abbestellen</a>
+    </p>
+  `);
+
+  await sendEmail({ to, subject, html });
+}
